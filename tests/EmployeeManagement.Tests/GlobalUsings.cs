@@ -1,0 +1,9 @@
+﻿global using Xunit;
+global using FluentAssertions;
+global using Moq;
+global using Bogus;
+global using EmployeeManagement.Domain.Entities;
+global using EmployeeManagement.Domain.Enums;
+global using EmployeeManagement.Domain.Common;
+global using EmployeeManagement.Domain.Interfaces;
+global using EmployeeManagement.Application.Interfaces;
