@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using EmployeeManagement.Infrastructure.Persistence;
 using EmployeeManagement.Infrastructure.Identity;
+using Xunit;
 
 namespace EmployeeManagement.Tests.Integration;
 

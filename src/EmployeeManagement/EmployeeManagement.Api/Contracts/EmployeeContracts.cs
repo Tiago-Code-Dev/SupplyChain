@@ -25,4 +25,5 @@ public sealed record UpdateEmployeeRequest(
     string Email,
     DateTime BirthDate,
     Guid? ManagerId,
-    List<string> PhoneNumbers);
+    List<string> PhoneNumbers,
+    Role? Role = null);

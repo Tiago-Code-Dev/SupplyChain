@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using Asp.Versioning;
 using EmployeeManagement.Api.Contracts;
 using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
 using EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
@@ -17,7 +17,9 @@ namespace EmployeeManagement.Api.Controllers;
 /// <summary>
 /// Controller para gerenciamento de funcionários
 /// </summary>
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/[controller]")] // Mantém rota legada para compatibilidade
+[ApiVersion("1.0")]
 [Authorize]
 [Tags("Employees")]
 public class EmployeesController : MainController
@@ -172,8 +174,9 @@ public class EmployeesController : MainController
     /// - Data de nascimento (deve ter 18+ anos)
     /// - Telefones
     /// - Gerente
+    /// - Role (respeitando hierarquia)
     /// 
-    /// **Nota:** Documento e Role não podem ser alterados por este endpoint.
+    /// **Nota:** Documento não pode ser alterado.
     /// </remarks>
     /// <param name="id">ID único do funcionário (GUID)</param>
     /// <param name="request">Dados atualizados do funcionário</param>
@@ -182,12 +185,14 @@ public class EmployeesController : MainController
     /// <response code="200">Funcionário atualizado com sucesso</response>
     /// <response code="400">Dados inválidos</response>
     /// <response code="401">Usuário não autenticado</response>
+    /// <response code="403">Sem permissão para atualizar funcionário com esta role</response>
     /// <response code="404">Funcionário não encontrado</response>
     /// <response code="409">Email já utilizado por outro funcionário</response>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(typeof(EmployeeResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Update(
@@ -202,7 +207,9 @@ public class EmployeesController : MainController
             request.Email,
             request.BirthDate,
             request.ManagerId,
-            request.PhoneNumbers);
+            request.PhoneNumbers,
+            request.Role,
+            GetCurrentUserRole<Role>());
 
         var result = await Sender.Send(command, cancellationToken);
 

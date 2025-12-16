@@ -46,6 +46,8 @@ public static class ValidationMessages
     public const string EmailAlreadyExists = "Email já cadastrado";
     public const string DocumentAlreadyExists = "Documento já cadastrado";
     public const string CannotCreateHigherRole = "Você não pode criar um funcionário com permissão igual ou superior à sua";
+    public const string CannotUpdateToHigherRole = "Você não tem permissão para alterar usuários para nível de permissão superior";
+    public const string CannotUpdateHigherRoleEmployee = "Você não tem permissão para alterar a role de funcionários com permissão igual ou superior à sua";
     public const string CannotDeleteWithSubordinates = "Não é possível excluir funcionário que possui subordinados";
     public const string NoPermissionToDelete = "Você não tem permissão para excluir funcionários";
     

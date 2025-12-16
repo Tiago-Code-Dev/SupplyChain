@@ -46,6 +46,30 @@ public sealed class UpdateEmployeeCommandHandler
         // Guardar email antigo para invalidar cache depois
         var oldEmail = employee.Email;
 
+        // Validação de atualização de Role - hierarquia
+        if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
+        {
+            // Usuário não pode promover para role igual ou superior à sua
+            if (request.CurrentUserRole <= request.NewRole.Value)
+            {
+                _logger.LogWarning(
+                    "User with role {CurrentRole} tried to update employee {Id} to role {TargetRole}",
+                    request.CurrentUserRole, request.Id, request.NewRole.Value);
+                return Result<EmployeeResponse>.Failure(
+                    Error.Forbidden(ValidationMessages.CannotUpdateToHigherRole));
+            }
+
+            // Usuário não pode alterar role de funcionário com role igual ou superior
+            if (request.CurrentUserRole <= employee.Role)
+            {
+                _logger.LogWarning(
+                    "User with role {CurrentRole} tried to update role of employee {Id} with role {EmployeeRole}",
+                    request.CurrentUserRole, request.Id, employee.Role);
+                return Result<EmployeeResponse>.Failure(
+                    Error.Forbidden(ValidationMessages.CannotUpdateHigherRoleEmployee));
+            }
+        }
+
         // Verificar se email está sendo alterado e é único (excluindo o próprio funcionário)
         if (!employee.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase))
         {
@@ -88,6 +112,20 @@ public sealed class UpdateEmployeeCommandHandler
             return Result<EmployeeResponse>.Failure(updateResult.Error);
         }
 
+        // Atualizar Role se fornecido
+        if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
+        {
+            var roleUpdateResult = employee.UpdateRole(request.NewRole.Value);
+            if (roleUpdateResult.IsFailure)
+            {
+                return Result<EmployeeResponse>.Failure(roleUpdateResult.Error);
+            }
+            
+            _logger.LogInformation(
+                "Employee {Id} role updated from {OldRole} to {NewRole}",
+                request.Id, employee.Role, request.NewRole.Value);
+        }
+
         // Atualizar telefones
         employee.ClearPhones();
         foreach (var phone in request.PhoneNumbers)
@@ -98,20 +136,16 @@ public sealed class UpdateEmployeeCommandHandler
         await _repository.UpdateAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Invalidar cache do funcionário específico
+        // Invalidar cache
         await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
-        
-        // Invalidar cache de email antigo se foi alterado
-        if (!oldEmail.Equals(request.Email, StringComparison.OrdinalIgnoreCase))
+        if (!oldEmail.Equals(employee.Email, StringComparison.OrdinalIgnoreCase))
         {
             await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(oldEmail), cancellationToken);
         }
-        await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(request.Email), cancellationToken);
-        
-        // Invalidar cache de listagem
+        await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
 
-        _logger.LogInformation("Employee updated successfully: {Id}", request.Id);
+        _logger.LogInformation("Employee updated successfully: {Id}", employee.Id);
 
         return Result<EmployeeResponse>.Success(EmployeeResponse.FromEntity(employee));
     }

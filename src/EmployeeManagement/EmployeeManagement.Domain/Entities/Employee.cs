@@ -72,6 +72,8 @@ public class Employee : Entity
 
     public bool CanCreateEmployeeWithRole(Role targetRole) => Role > targetRole;
 
+    public bool CanUpdateEmployeeToRole(Role targetRole) => Role > targetRole;
+
     public Result Update(
         string firstName,
         string lastName,
@@ -100,6 +102,21 @@ public class Employee : Entity
 
         // Raise domain event
         RaiseDomainEvent(new EmployeeUpdatedEvent(Id, Email));
+
+        return Result.Success();
+    }
+
+    public Result UpdateRole(Role newRole)
+    {
+        if (Role == newRole)
+            return Result.Success();
+
+        var oldRole = Role;
+        Role = newRole;
+        SetUpdatedAt();
+
+        // Raise domain event
+        RaiseDomainEvent(new EmployeeRoleChangedEvent(Id, oldRole, newRole));
 
         return Result.Success();
     }

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Asp.Versioning;
 using EmployeeManagement.Api.Configurations;
 using EmployeeManagement.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -10,8 +11,10 @@ namespace EmployeeManagement.Api.Controllers;
 /// <summary>
 /// Controller para autenticação usando Identity com suporte a Refresh Token
 /// </summary>
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/[controller]")] // Mantém rota legada para compatibilidade
 [ApiController]
+[ApiVersion("1.0")]
 [Tags("Auth")]
 public class AuthController : ControllerBase
 {

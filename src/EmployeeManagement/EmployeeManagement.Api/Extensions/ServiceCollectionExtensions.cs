@@ -16,11 +16,12 @@ public static class ServiceCollectionExtensions
 
         // API Configurations
         services.AddControllers();
+        services.AddApiVersioningConfiguration(); // Novo!
         services.AddSwaggerConfiguration();
         services.AddCorsConfiguration(configuration);
         services.AddCompressionConfiguration();
         services.AddRateLimitingConfiguration(configuration);
-        services.AddHealthCheckConfiguration(); // Sem parâmetro
+        services.AddHealthCheckConfiguration();
 
         return services;
     }

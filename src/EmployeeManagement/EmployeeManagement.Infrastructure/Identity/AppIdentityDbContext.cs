@@ -22,46 +22,46 @@ public class AppIdentityDbContext : IdentityDbContext<ApplicationUser, Applicati
         // Customizar nomes das tabelas
         builder.Entity<ApplicationUser>(entity =>
         {
-            entity.ToTable("Users", "identity");
+            entity.ToTable("Users", "auth");
             entity.Property(e => e.FirstName).HasMaxLength(100).IsRequired();
             entity.Property(e => e.LastName).HasMaxLength(100).IsRequired();
         });
 
         builder.Entity<ApplicationRole>(entity =>
         {
-            entity.ToTable("Roles", "identity");
+            entity.ToTable("Roles", "auth");
             entity.Property(e => e.Description).HasMaxLength(256);
         });
 
         builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserRole<Guid>>(entity =>
         {
-            entity.ToTable("UserRoles", "identity");
+            entity.ToTable("UserRoles", "auth");
         });
 
         builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserClaim<Guid>>(entity =>
         {
-            entity.ToTable("UserClaims", "identity");
+            entity.ToTable("UserClaims", "auth");
         });
 
         builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserLogin<Guid>>(entity =>
         {
-            entity.ToTable("UserLogins", "identity");
+            entity.ToTable("UserLogins", "auth");
         });
 
         builder.Entity<Microsoft.AspNetCore.Identity.IdentityRoleClaim<Guid>>(entity =>
         {
-            entity.ToTable("RoleClaims", "identity");
+            entity.ToTable("RoleClaims", "auth");
         });
 
         builder.Entity<Microsoft.AspNetCore.Identity.IdentityUserToken<Guid>>(entity =>
         {
-            entity.ToTable("UserTokens", "identity");
+            entity.ToTable("UserTokens", "auth");
         });
 
         // Refresh Tokens
         builder.Entity<RefreshToken>(entity =>
         {
-            entity.ToTable("RefreshTokens", "identity");
+            entity.ToTable("RefreshTokens", "auth");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Token).HasMaxLength(256).IsRequired();
             entity.HasIndex(e => e.Token).IsUnique();

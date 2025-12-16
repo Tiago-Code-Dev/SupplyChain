@@ -26,10 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EmployeeManagement.Api\EmployeeManagement.Api.csproj" />
-    <ProjectReference Include="..\EmployeeManagement.Application\EmployeeManagement.Application.csproj" />
-    <ProjectReference Include="..\EmployeeManagement.Domain\EmployeeManagement.Domain.csproj" />
-    <ProjectReference Include="..\EmployeeManagement.Infrastructure\EmployeeManagement.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\EmployeeManagement\EmployeeManagement.Api\EmployeeManagement.Api.csproj" />
+    <ProjectReference Include="..\..\src\EmployeeManagement\EmployeeManagement.Application\EmployeeManagement.Application.csproj" />
+    <ProjectReference Include="..\..\src\EmployeeManagement\EmployeeManagement.Domain\EmployeeManagement.Domain.csproj" />
+    <ProjectReference Include="..\..\src\EmployeeManagement\EmployeeManagement.Infrastructure\EmployeeManagement.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

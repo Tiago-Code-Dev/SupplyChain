@@ -28,17 +28,8 @@ public class IdentitySeeder
 
     public async Task SeedAsync()
     {
-        try
-        {
-            // Aplicar migrações
-            await _context.Database.MigrateAsync();
-        }
-        catch
-        {
-            // Se for InMemory, apenas garante criação
-            await _context.Database.EnsureCreatedAsync();
-        }
-
+        // As tabelas já foram criadas pelo Program.cs
+        // Apenas fazer seed dos dados
         await SeedRolesAsync();
         await SeedAdminUserAsync();
     }
@@ -55,10 +46,26 @@ public class IdentitySeeder
 
         foreach (var role in roles)
         {
-            if (!await _roleManager.RoleExistsAsync(role.Name!))
+            try
             {
-                await _roleManager.CreateAsync(role);
-                _logger.LogInformation("Role {RoleName} created", role.Name);
+                if (!await _roleManager.RoleExistsAsync(role.Name!))
+                {
+                    var result = await _roleManager.CreateAsync(role);
+                    if (result.Succeeded)
+                    {
+                        _logger.LogInformation("Role {RoleName} created", role.Name);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to create role {RoleName}: {Errors}", 
+                            role.Name, string.Join(", ", result.Errors.Select(e => e.Description)));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating role {RoleName}", role.Name);
+                throw;
             }
         }
     }
@@ -68,39 +75,46 @@ public class IdentitySeeder
         const string adminEmail = "admin@empresa.com";
         const string adminPassword = "Admin@123";
 
-        var existingAdmin = await _userManager.FindByEmailAsync(adminEmail);
-        if (existingAdmin != null)
+        try
         {
-            _logger.LogInformation("Admin user already exists");
-            return;
+            var existingAdmin = await _userManager.FindByEmailAsync(adminEmail);
+            if (existingAdmin != null)
+            {
+                _logger.LogInformation("Admin user already exists");
+                return;
+            }
+
+            var admin = new ApplicationUser
+            {
+                Email = adminEmail,
+                UserName = adminEmail,
+                FirstName = "Admin",
+                LastName = "System",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+
+            var result = await _userManager.CreateAsync(admin, adminPassword);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRolesAsync(admin, new[] 
+                { 
+                    ApplicationRoles.Admin, 
+                    ApplicationRoles.Director 
+                });
+
+                _logger.LogInformation("Admin user created: {Email}", adminEmail);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to create admin user: {Errors}", 
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
         }
-
-        var admin = new ApplicationUser
+        catch (Exception ex)
         {
-            Email = adminEmail,
-            UserName = adminEmail,
-            FirstName = "Admin",
-            LastName = "System",
-            EmailConfirmed = true,
-            IsActive = true
-        };
-
-        var result = await _userManager.CreateAsync(admin, adminPassword);
-        if (result.Succeeded)
-        {
-            // Adicionar todas as roles ao admin
-            await _userManager.AddToRolesAsync(admin, new[] 
-            { 
-                ApplicationRoles.Admin, 
-                ApplicationRoles.Director 
-            });
-
-            _logger.LogInformation("Admin user created: {Email}", adminEmail);
-        }
-        else
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError("Failed to create admin user: {Errors}", errors);
+            _logger.LogError(ex, "Error creating admin user");
+            throw;
         }
     }
 }

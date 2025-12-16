@@ -4,6 +4,7 @@ EXPOSE 8080
 EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["EmployeeManagement/EmployeeManagement.Api/EmployeeManagement.Api.csproj", "EmployeeManagement/EmployeeManagement.Api/"]
 COPY ["EmployeeManagement/EmployeeManagement.Application/EmployeeManagement.Application.csproj", "EmployeeManagement/EmployeeManagement.Application/"]
@@ -14,10 +15,11 @@ COPY ["Shared/Shared.CrossCutting/Shared.CrossCutting.csproj", "Shared/Shared.Cr
 RUN dotnet restore "EmployeeManagement/EmployeeManagement.Api/EmployeeManagement.Api.csproj"
 COPY . .
 WORKDIR "/src/EmployeeManagement/EmployeeManagement.Api"
-RUN dotnet build "EmployeeManagement.Api.csproj" -c Release -o /app/build
+RUN dotnet build "EmployeeManagement.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "EmployeeManagement.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "EmployeeManagement.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

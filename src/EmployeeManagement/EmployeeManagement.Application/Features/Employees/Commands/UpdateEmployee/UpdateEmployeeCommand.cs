@@ -1,5 +1,6 @@
 using EmployeeManagement.Application.Common.Interfaces;
 using EmployeeManagement.Application.Features.Employees.Common;
+using EmployeeManagement.Domain.Enums;
 
 namespace EmployeeManagement.Application.Features.Employees.Commands.UpdateEmployee;
 
@@ -10,4 +11,6 @@ public sealed record UpdateEmployeeCommand(
     string Email,
     DateTime BirthDate,
     Guid? ManagerId,
-    List<string> PhoneNumbers) : ICommand<EmployeeResponse>;
+    List<string> PhoneNumbers,
+    Role? NewRole,
+    Role CurrentUserRole) : ICommand<EmployeeResponse>;
