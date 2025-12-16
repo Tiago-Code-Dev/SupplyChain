@@ -1,78 +1,78 @@
 # language: pt-BR
-Funcionalidade: Exclus„o de Funcion·rio
-  Como um usu·rio autorizado do sistema
-  Eu quero excluir funcion·rios
+Funcionalidade: Exclus√£o de Funcion√°rio
+  Como um usu√°rio autorizado do sistema
+  Eu quero excluir funcion√°rios
   Para remover acessos de pessoas desligadas
 
   @funcionario @excluir @sucesso
-  Cen·rio: Excluir funcion·rio com sucesso
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido para exclus„o
-    Quando o usu·rio exclui o funcion·rio atravÈs do endpoint DELETE /api/employees/{id}
-    Ent„o o sistema deve retornar status 204
-    E o funcion·rio deve ser marcado como excluÌdo (soft delete)
-    E a data de exclus„o deve ser registrada
+  Cen√°rio: Excluir funcion√°rio com sucesso
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido para exclus√£o
+    Quando o usu√°rio exclui o funcion√°rio atrav√©s do endpoint DELETE /api/employees/{id}
+    Ent√£o o sistema deve retornar status 204
+    E o funcion√°rio deve ser marcado como exclu√≠do (soft delete)
+    E a data de exclus√£o deve ser registrada
 
   @funcionario @excluir @falha
-  Cen·rio: Excluir funcion·rio inexistente
-    Dado que o usu·rio est· autenticado como "Director"
-    E que n„o existe funcion·rio com ID "99999999-9999-9999-9999-999999999999"
-    Quando o usu·rio tenta excluir o funcion·rio inexistente
-    Ent„o o sistema deve retornar status 404
-    E o sistema deve retornar mensagem "Funcion·rio n„o encontrado"
+  Cen√°rio: Excluir funcion√°rio inexistente
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que n√£o existe funcion√°rio com ID "99999999-9999-9999-9999-999999999999"
+    Quando o usu√°rio tenta excluir o funcion√°rio inexistente
+    Ent√£o o sistema deve retornar status 404
+    E o sistema deve retornar mensagem "Funcion√°rio n√£o encontrado"
 
   @funcionario @excluir @autenticacao
-  Cen·rio: Excluir funcion·rio sem autenticaÁ„o
-    Dado que o usu·rio n„o est· autenticado
-    E que existe um funcion·rio cadastrado com ID conhecido para exclus„o
-    Quando o usu·rio tenta excluir o funcion·rio sem autenticaÁ„o
-    Ent„o o sistema deve retornar status 401
-    E o sistema deve retornar mensagem "N„o autorizado"
-    E o funcion·rio n„o deve ser excluÌdo do banco de dados
+  Cen√°rio: Excluir funcion√°rio sem autentica√ß√£o
+    Dado que o usu√°rio n√£o est√° autenticado
+    E que existe um funcion√°rio cadastrado com ID conhecido para exclus√£o
+    Quando o usu√°rio tenta excluir o funcion√°rio sem autentica√ß√£o
+    Ent√£o o sistema deve retornar status 401
+    E o sistema deve retornar mensagem "N√£o autorizado"
+    E o funcion√°rio n√£o deve ser exclu√≠do do banco de dados
 
   @funcionario @excluir @autorizacao @hierarquia
-  Cen·rio: Funcion·rio sem permiss„o tenta excluir outro funcion·rio
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existe um funcion·rio cadastrado com ID conhecido para exclus„o
-    Quando o usu·rio tenta excluir o funcion·rio
-    Ent„o o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "VocÍ n„o tem permiss„o para excluir funcion·rios"
-    E o funcion·rio n„o deve ser excluÌdo do banco de dados
+  Cen√°rio: Funcion√°rio sem permiss√£o tenta excluir outro funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existe um funcion√°rio cadastrado com ID conhecido para exclus√£o
+    Quando o usu√°rio tenta excluir o funcion√°rio
+    Ent√£o o sistema deve retornar status 403
+    E o sistema deve retornar mensagem "Voc√™ n√£o tem permiss√£o para excluir funcion√°rios"
+    E o funcion√°rio n√£o deve ser exclu√≠do do banco de dados
 
   @funcionario @excluir @negocio
-  Cen·rio: Excluir funcion·rio que È gestor de outros
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido que È gestor
-    E que existem funcion·rios subordinados a este gestor
-    Quando o usu·rio tenta excluir o funcion·rio gestor
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "N„o È possÌvel excluir funcion·rio que possui subordinados"
-    E o funcion·rio n„o deve ser excluÌdo do banco de dados
+  Cen√°rio: Excluir funcion√°rio que √© gestor de outros
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido que √© gestor
+    E que existem funcion√°rios subordinados a este gestor
+    Quando o usu√°rio tenta excluir o funcion√°rio gestor
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "N√£o √© poss√≠vel excluir funcion√°rio que possui subordinados"
+    E o funcion√°rio n√£o deve ser exclu√≠do do banco de dados
 
   @funcionario @excluir @cache
-  Cen·rio: Exclus„o deve invalidar cache
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido para exclus„o
-    E que os dados do funcion·rio est„o em cache
-    Quando o usu·rio exclui o funcion·rio
-    Ent„o o sistema deve retornar status 204
-    E o cache do funcion·rio deve ser invalidado
-    E o cache da lista de funcion·rios deve ser invalidado
+  Cen√°rio: Exclus√£o deve invalidar cache
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido para exclus√£o
+    E que os dados do funcion√°rio est√£o em cache
+    Quando o usu√°rio exclui o funcion√°rio
+    Ent√£o o sistema deve retornar status 204
+    E o cache do funcion√°rio deve ser invalidado
+    E o cache da lista de funcion√°rios deve ser invalidado
 
   @funcionario @excluir @softdelete
-  Cen·rio: Funcion·rio excluÌdo n„o aparece em listagens
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido para exclus„o
-    Quando o usu·rio exclui o funcion·rio
-    E o usu·rio solicita a listagem de funcion·rios
-    Ent„o o funcion·rio excluÌdo n„o deve aparecer na listagem
+  Cen√°rio: Funcion√°rio exclu√≠do n√£o aparece em listagens
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido para exclus√£o
+    Quando o usu√°rio exclui o funcion√°rio
+    E o usu√°rio solicita a listagem de funcion√°rios
+    Ent√£o o funcion√°rio exclu√≠do n√£o deve aparecer na listagem
 
   @funcionario @excluir @softdelete
-  Cen·rio: Soft delete preserva dados no banco
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido para exclus„o
-    Quando o usu·rio exclui o funcion·rio
-    Ent„o o sistema deve retornar status 204
-    E o registro do funcion·rio deve existir no banco de dados
+  Cen√°rio: Soft delete preserva dados no banco
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido para exclus√£o
+    Quando o usu√°rio exclui o funcion√°rio
+    Ent√£o o sistema deve retornar status 204
+    E o registro do funcion√°rio deve existir no banco de dados
     E o campo IsDeleted deve ser true
     E o campo DeletedAt deve estar preenchido

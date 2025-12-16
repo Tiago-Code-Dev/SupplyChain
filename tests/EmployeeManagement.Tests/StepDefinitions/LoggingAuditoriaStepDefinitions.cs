@@ -1,15 +1,14 @@
-﻿using TechTalk.SpecFlow;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
 using EmployeeManagement.Application.Features.Employees.Commands.UpdateEmployee;
 using EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
 using EmployeeManagement.Application.Features.Auth.Commands.Login;
 using EmployeeManagement.Application.Features.Auth.Commands.ChangePassword;
-using EmployeeManagement.Tests.Helpers;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Logging e Auditoria")]
 public class LoggingAuditoriaStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
@@ -215,8 +214,8 @@ public class LoggingAuditoriaStepDefinitions
         _scenarioContext.Set(result, "LoginResult");
     }
 
-    [When(@"o funcionário altera sua senha com sucesso")]
-    public async Task QuandoOFuncionarioAlteraSuaSenhaComSucesso()
+    [When(@"o usuário altera a senha com sucesso")]
+    public async Task QuandoOUsuarioAlteraASenhaComSucesso()
     {
         _passwordHasherMock
             .Setup(x => x.Hash(It.IsAny<string>()))
@@ -425,7 +424,7 @@ public class LoggingAuditoriaStepDefinitions
 
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Returns((Task<Employee>)Task.CompletedTask);
+            .ReturnsAsync((Employee e, CancellationToken _) => e);
 
         _passwordHasherMock
             .Setup(x => x.Hash(It.IsAny<string>()))

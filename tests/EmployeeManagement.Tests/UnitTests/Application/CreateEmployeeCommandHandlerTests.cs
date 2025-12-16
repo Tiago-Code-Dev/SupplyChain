@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
+﻿using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
+using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Tests.Helpers;
+using Microsoft.Extensions.Logging;
 
 namespace EmployeeManagement.Tests.UnitTests.Application;
 
@@ -79,7 +80,7 @@ public class CreateEmployeeCommandHandlerTests
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
             .Callback<Employee, CancellationToken>((e, _) => capturedEmployee = e)
-            .Returns((Task<Employee>)Task.CompletedTask);
+            .Returns((Employee e, CancellationToken _) => Task.FromResult(e));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -315,7 +316,7 @@ public class CreateEmployeeCommandHandlerTests
 
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Returns((Task<Employee>)Task.CompletedTask);
+            .Returns((Employee e, CancellationToken _) => Task.FromResult(e));
     }
 
     #endregion

@@ -1,15 +1,12 @@
-﻿using TechTalk.SpecFlow;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
 using EmployeeManagement.Application.Features.Employees.Commands.UpdateEmployee;
 using EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
-using EmployeeManagement.Application.Features.Employees.Common;
-using EmployeeManagement.Tests.Helpers;
-using EmployeeManagement.Tests.Fixtures;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Hierarquia de Permissões")]
 public class HierarquiaPermissoesStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
@@ -143,11 +140,11 @@ public class HierarquiaPermissoesStepDefinitions
     {
         if (_createResult != null && _createResult.IsSuccess)
         {
-            _createResult.Value.Role.Should().Be(permissao);
+            _createResult.Value.Role.ToString().Should().Be(permissao);
         }
         else if (_updateResult != null && _updateResult.IsSuccess)
         {
-            _updateResult.Value.Role.Should().Be(permissao);
+            _updateResult.Value.Role.ToString().Should().Be(permissao);
         }
     }
 
@@ -292,6 +289,6 @@ public class HierarquiaPermissoesStepDefinitions
 
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Returns((Task<Employee>)Task.CompletedTask);
+            .ReturnsAsync((Employee e, CancellationToken _) => e);
     }
 }

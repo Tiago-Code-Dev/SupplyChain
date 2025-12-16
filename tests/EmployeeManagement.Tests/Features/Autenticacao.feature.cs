@@ -103,23 +103,23 @@ namespace EmployeeManagement.Tests.Features
             else
             {
                 this.ScenarioStart();
-                TechTalk.SpecFlow.Table table1 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table8 = new TechTalk.SpecFlow.Table(new string[] {
                             "Email",
                             "Senha"});
-                table1.AddRow(new string[] {
+                table8.AddRow(new string[] {
                             "joao@supply.com",
                             "Senha@123456"});
 #line 9
-    testRunner.Given("que existe um funcionário cadastrado no sistema com:", ((string)(null)), table1, "Dado ");
+    testRunner.Given("que existe um funcionário cadastrado no sistema com:", ((string)(null)), table8, "Dado ");
 #line hidden
-                TechTalk.SpecFlow.Table table2 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table9 = new TechTalk.SpecFlow.Table(new string[] {
                             "Email",
                             "Senha"});
-                table2.AddRow(new string[] {
+                table9.AddRow(new string[] {
                             "joao@supply.com",
                             "Senha@123456"});
 #line 12
-    testRunner.When("o usuário realiza login com:", ((string)(null)), table2, "Quando ");
+    testRunner.When("o usuário realiza login com:", ((string)(null)), table9, "Quando ");
 #line hidden
 #line 15
     testRunner.Then("o sistema deve retornar status 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
@@ -162,14 +162,14 @@ namespace EmployeeManagement.Tests.Features
 #line 22
     testRunner.Given("que não existe um funcionário cadastrado com email \"inexistente@supply.com\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
-                TechTalk.SpecFlow.Table table3 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table10 = new TechTalk.SpecFlow.Table(new string[] {
                             "Email",
                             "Senha"});
-                table3.AddRow(new string[] {
+                table10.AddRow(new string[] {
                             "inexistente@supply.com",
                             "Senha@123456"});
 #line 23
-    testRunner.When("o usuário realiza login com:", ((string)(null)), table3, "Quando ");
+    testRunner.When("o usuário realiza login com:", ((string)(null)), table10, "Quando ");
 #line hidden
 #line 26
     testRunner.Then("o sistema deve retornar status 401", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
@@ -206,23 +206,23 @@ namespace EmployeeManagement.Tests.Features
             else
             {
                 this.ScenarioStart();
-                TechTalk.SpecFlow.Table table4 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table11 = new TechTalk.SpecFlow.Table(new string[] {
                             "Email",
                             "Senha"});
-                table4.AddRow(new string[] {
+                table11.AddRow(new string[] {
                             "joao@supply.com",
                             "Senha@123456"});
 #line 32
-    testRunner.Given("que existe um funcionário cadastrado no sistema com:", ((string)(null)), table4, "Dado ");
+    testRunner.Given("que existe um funcionário cadastrado no sistema com:", ((string)(null)), table11, "Dado ");
 #line hidden
-                TechTalk.SpecFlow.Table table5 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table12 = new TechTalk.SpecFlow.Table(new string[] {
                             "Email",
                             "Senha"});
-                table5.AddRow(new string[] {
+                table12.AddRow(new string[] {
                             "joao@supply.com",
                             "SenhaErrada"});
 #line 35
-    testRunner.When("o usuário realiza login com:", ((string)(null)), table5, "Quando ");
+    testRunner.When("o usuário realiza login com:", ((string)(null)), table12, "Quando ");
 #line hidden
 #line 38
     testRunner.Then("o sistema deve retornar status 401", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
@@ -335,14 +335,14 @@ namespace EmployeeManagement.Tests.Features
             else
             {
                 this.ScenarioStart();
-                TechTalk.SpecFlow.Table table6 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table13 = new TechTalk.SpecFlow.Table(new string[] {
                             "Email",
                             "Senha"});
-                table6.AddRow(new string[] {
+                table13.AddRow(new string[] {
                             "joao@supply.com",
                             "Senha@123456"});
 #line 58
-    testRunner.Given("que existe um funcionário cadastrado no sistema com:", ((string)(null)), table6, "Dado ");
+    testRunner.Given("que existe um funcionário cadastrado no sistema com:", ((string)(null)), table13, "Dado ");
 #line hidden
 #line 61
     testRunner.When("o usuário realiza login com email \"joao@supply.com\" e senha \"SenhaErrada\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");

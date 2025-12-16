@@ -1,4 +1,6 @@
-﻿namespace EmployeeManagement.Tests.Helpers;
+﻿using Bogus;
+
+namespace EmployeeManagement.Tests.Helpers;
 
 /// <summary>
 /// Helper para criação de dados de teste

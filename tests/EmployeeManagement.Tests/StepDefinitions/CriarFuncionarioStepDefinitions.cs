@@ -1,14 +1,10 @@
-﻿using TechTalk.SpecFlow;
-using TechTalk.SpecFlow.Assist;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
-using EmployeeManagement.Application.Features.Employees.Common;
-using EmployeeManagement.Tests.Helpers;
-using EmployeeManagement.Tests.Fixtures;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Criação de Funcionário")]
 public class CriarFuncionarioStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
@@ -336,7 +332,7 @@ public class CriarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
             .Callback<Employee, CancellationToken>((e, _) => _capturedEmployee = e)
-            .Returns((Task<Employee>)Task.CompletedTask);
+            .Returns((Employee e, CancellationToken _) => Task.FromResult(e));
 
         var handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,

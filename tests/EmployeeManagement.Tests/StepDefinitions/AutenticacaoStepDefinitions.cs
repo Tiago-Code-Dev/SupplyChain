@@ -1,12 +1,10 @@
-﻿using TechTalk.SpecFlow;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Auth.Commands.Login;
-using EmployeeManagement.Application.Features.Auth.Common;
-using EmployeeManagement.Tests.Helpers;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Autenticação e Autorização")]
 public class AutenticacaoStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;

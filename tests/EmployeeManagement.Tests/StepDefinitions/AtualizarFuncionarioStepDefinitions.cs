@@ -1,14 +1,10 @@
-﻿using TechTalk.SpecFlow;
-using TechTalk.SpecFlow.Assist;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.UpdateEmployee;
-using EmployeeManagement.Application.Features.Employees.Common;
-using EmployeeManagement.Tests.Helpers;
-using EmployeeManagement.Tests.Fixtures;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Atualização de Funcionário")]
 public class AtualizarFuncionarioStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
@@ -35,6 +31,19 @@ public class AtualizarFuncionarioStepDefinitions
             .Setup(x => x.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Callback(() => _cacheInvalidated = true)
             .Returns(Task.CompletedTask);
+    }
+
+    [Given(@"que o usuário está autenticado como ""(.*)""")]
+    public void DadoQueOUsuarioEstaAutenticadoComo(string role)
+    {
+        _scenarioContext.Set(true, "IsAuthenticated");
+        _scenarioContext.Set(role, "UserRole");
+    }
+
+    [Given(@"que o usuário não está autenticado")]
+    public void DadoQueOUsuarioNaoEstaAutenticado()
+    {
+        _scenarioContext.Set(false, "IsAuthenticated");
     }
 
     [Given(@"que existe um funcionário cadastrado com ID conhecido e nome ""(.*)""")]
@@ -205,21 +214,6 @@ public class AtualizarFuncionarioStepDefinitions
         _result = Result<EmployeeResponse>.Failure(
             Error.Conflict("Document", "Documento já cadastrado para outro funcionário"));
         _scenarioContext.Set(_httpStatus, "HttpStatus");
-    }
-
-    [When(@"o usuário tenta atualizar o funcionário para email ""(.*)""")]
-    public async Task QuandoOUsuarioTentaAtualizarOFuncionarioParaEmail(string email)
-    {
-        var command = new UpdateEmployeeCommand(
-            _existingEmployee!.Id,
-            _existingEmployee.FirstName,
-            _existingEmployee.LastName,
-            email,
-            _existingEmployee.BirthDate,
-            null,
-            new List<string> { "11999999999" });
-
-        await ExecutarAtualizacao(command);
     }
 
     [When(@"o usuário atualiza o funcionário mantendo o documento ""(.*)"" e alterando outros campos")]

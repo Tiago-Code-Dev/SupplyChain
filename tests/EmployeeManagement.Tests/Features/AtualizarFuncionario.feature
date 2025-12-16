@@ -1,126 +1,126 @@
 # language: pt-BR
-Funcionalidade: AtualizaÁ„o de Funcion·rio
-  Como um usu·rio autorizado do sistema
-  Eu quero atualizar os dados de funcion·rios
-  Para manter as informaÁıes atualizadas
+Funcionalidade: Atualiza√ß√£o de Funcion√°rio
+  Como um usu√°rio autorizado do sistema
+  Eu quero atualizar os dados de funcion√°rios
+  Para manter as informa√ß√µes atualizadas
 
   @funcionario @atualizar @sucesso
-  Cen·rio: Atualizar funcion·rio com dados v·lidos
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido e nome "Jo„o Silva"
-    Quando o usu·rio atualiza o funcion·rio com:
+  Cen√°rio: Atualizar funcion√°rio com dados v√°lidos
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido e nome "Jo√£o Silva"
+    Quando o usu√°rio atualiza o funcion√°rio com:
       | Nome | Sobrenome | Email                    | Telefones               |
-      | Jo„o | Oliveira  | joao.oliveira@supply.com | 11999999999,11888888888 |
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar os dados atualizados do funcion·rio
-    E o funcion·rio no banco de dados deve ter os novos dados salvos
+      | Jo√£o | Oliveira  | joao.oliveira@supply.com | 11999999999,11888888888 |
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar os dados atualizados do funcion√°rio
+    E o funcion√°rio no banco de dados deve ter os novos dados salvos
 
   @funcionario @atualizar @falha
-  Cen·rio: Atualizar funcion·rio inexistente
-    Dado que o usu·rio est· autenticado como "Director"
-    E que n„o existe funcion·rio com ID "99999999-9999-9999-9999-999999999999"
-    Quando o usu·rio tenta atualizar o funcion·rio inexistente com dados v·lidos
-    Ent„o o sistema deve retornar status 404
-    E o sistema deve retornar mensagem "Funcion·rio n„o encontrado"
+  Cen√°rio: Atualizar funcion√°rio inexistente
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que n√£o existe funcion√°rio com ID "99999999-9999-9999-9999-999999999999"
+    Quando o usu√°rio tenta atualizar o funcion√°rio inexistente com dados v√°lidos
+    Ent√£o o sistema deve retornar status 404
+    E o sistema deve retornar mensagem "Employee not found"
 
   @funcionario @atualizar @autenticacao
-  Cen·rio: Atualizar funcion·rio sem autenticaÁ„o
-    Dado que o usu·rio n„o est· autenticado
-    E que existe um funcion·rio cadastrado com ID conhecido
-    Quando o usu·rio tenta atualizar o funcion·rio com dados v·lidos sem autenticaÁ„o
-    Ent„o o sistema deve retornar status 401
-    E o sistema deve retornar mensagem "N„o autorizado"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio sem autentica√ß√£o
+    Dado que o usu√°rio n√£o est√° autenticado
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    Quando o usu√°rio tenta atualizar o funcion√°rio com dados v√°lidos sem autentica√ß√£o
+    Ent√£o o sistema deve retornar status 401
+    E o sistema deve retornar mensagem "N√£o autorizado"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @conflito
-  Cen·rio: Atualizar funcion·rio com documento duplicado de outro funcion·rio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio com ID conhecido e documento "11111111111"
-    E que existe outro funcion·rio com documento "22222222222"
-    Quando o usu·rio tenta atualizar o funcion·rio para documento "22222222222"
-    Ent„o o sistema deve retornar status 409
-    E o sistema deve retornar mensagem "Documento j· cadastrado para outro funcion·rio"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio com documento duplicado de outro funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio com ID conhecido e documento "11111111111"
+    E que existe outro funcion√°rio com documento "22222222222"
+    Quando o usu√°rio tenta atualizar o funcion√°rio para documento "22222222222"
+    Ent√£o o sistema deve retornar status 409
+    E o sistema deve retornar mensagem "Documento j√° cadastrado para outro funcion√°rio"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @sucesso
-  Cen·rio: Atualizar funcion·rio mantendo seu prÛprio documento
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido e documento "11111111111"
-    Quando o usu·rio atualiza o funcion·rio mantendo o documento "11111111111" e alterando outros campos
-    Ent„o o sistema deve retornar status 200
-    E o funcion·rio deve ser atualizado com sucesso
+  Cen√°rio: Atualizar funcion√°rio mantendo seu pr√≥prio documento
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido e documento "11111111111"
+    Quando o usu√°rio atualiza o funcion√°rio mantendo o documento "11111111111" e alterando outros campos
+    Ent√£o o sistema deve retornar status 200
+    E o funcion√°rio deve ser atualizado com sucesso
     E o documento deve permanecer "11111111111"
 
   @funcionario @atualizar @conflito
-  Cen·rio: Atualizar funcion·rio com email duplicado de outro funcion·rio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio com ID conhecido e email "joao@supply.com"
-    E que existe outro funcion·rio com email "maria@supply.com"
-    Quando o usu·rio tenta atualizar o funcion·rio para email "maria@supply.com"
-    Ent„o o sistema deve retornar status 409
-    E o sistema deve retornar mensagem "Email j· cadastrado"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio com email duplicado de outro funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio com ID conhecido e email "joao@supply.com"
+    E que existe outro funcion√°rio com email "maria@supply.com"
+    Quando o usu√°rio tenta atualizar o funcion√°rio para email "maria@supply.com"
+    Ent√£o o sistema deve retornar status 409
+    E o sistema deve retornar mensagem "Email already exists"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao @negocio
-  Cen·rio: Atualizar funcion·rio para menor de idade
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido e data de nascimento "1990-01-15"
-    Quando o usu·rio tenta atualizar o funcion·rio com data de nascimento "2010-06-15"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Funcion·rio deve ser maior de idade"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio para menor de idade
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido e data de nascimento "1990-01-15"
+    Quando o usu√°rio tenta atualizar o funcion√°rio com data de nascimento "2010-06-15"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Employee must be at least 18 years old"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao
-  Cen·rio: Atualizar funcion·rio removendo todos os telefones
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido e telefones "11999999999,11888888888"
-    Quando o usu·rio tenta atualizar o funcion·rio removendo todos os telefones
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Funcion·rio deve possuir pelo menos um telefone"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio removendo todos os telefones
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido e telefones "11999999999,11888888888"
+    Quando o usu√°rio tenta atualizar o funcion√°rio removendo todos os telefones
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Funcion√°rio deve possuir pelo menos um telefone"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao
-  Cen·rio: Atualizar funcion·rio com gestor inexistente
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    E que n„o existe gestor com ID "99999999-9999-9999-9999-999999999999"
-    Quando o usu·rio tenta atualizar o funcion·rio com gestor inexistente
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Gestor n„o encontrado"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio com gestor inexistente
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    E que n√£o existe gestor com ID "99999999-9999-9999-9999-999999999999"
+    Quando o usu√°rio tenta atualizar o funcion√°rio com gestor inexistente
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Gestor n√£o encontrado"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao @negocio
-  Cen·rio: Atualizar funcion·rio para ser seu prÛprio gestor
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    Quando o usu·rio tenta atualizar o funcion·rio para ser seu prÛprio gestor
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Funcion·rio n„o pode ser gestor de si mesmo"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio para ser seu pr√≥prio gestor
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    Quando o usu√°rio tenta atualizar o funcion√°rio para ser seu pr√≥prio gestor
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Employee cannot be their own manager"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao
-  Cen·rio: Atualizar funcion·rio com email inv·lido
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    Quando o usu·rio tenta atualizar o funcion·rio com email "email-invalido"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de email inv·lido
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio com email inv√°lido
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    Quando o usu√°rio tenta atualizar o funcion√°rio com email "email-invalido"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de email inv√°lido
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao
-  Cen·rio: Atualizar funcion·rio com nome vazio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    Quando o usu·rio tenta atualizar o funcion·rio com nome vazio
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que nome È obrigatÛrio
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Atualizar funcion√°rio com nome vazio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    Quando o usu√°rio tenta atualizar o funcion√°rio com nome vazio
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem de erro indicando que nome √© obrigat√≥rio
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @funcionario @atualizar @cache
-  Cen·rio: AtualizaÁ„o deve invalidar cache do funcion·rio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    E que os dados do funcion·rio est„o em cache
-    Quando o usu·rio atualiza o funcion·rio com dados v·lidos
-    Ent„o o sistema deve retornar status 200
-    E o cache do funcion·rio deve ser invalidado
+  Cen√°rio: Atualiza√ß√£o deve invalidar cache do funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    E que os dados do funcion√°rio est√£o em cache
+    Quando o usu√°rio atualiza o funcion√°rio com dados v√°lidos
+    Ent√£o o sistema deve retornar status 200
+    E o cache do funcion√°rio deve ser invalidado

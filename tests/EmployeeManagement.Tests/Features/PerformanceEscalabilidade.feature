@@ -1,98 +1,98 @@
 # language: pt-BR
 Funcionalidade: Performance e Escalabilidade
-  Como um sistema de produÁ„o
+  Como um sistema de produ√ß√£o
   Eu quero garantir tempos de resposta adequados
-  Para proporcionar boa experiÍncia ao usu·rio
+  Para proporcionar boa experi√™ncia ao usu√°rio
 
   @performance @listagem
-  Cen·rio: Listar funcion·rios com grande volume de dados
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 1000 funcion·rios cadastrados no sistema
-    Quando o usu·rio solicita a listagem de funcion·rios com paginaÁ„o de 10 por p·gina
-    Ent„o o sistema deve retornar status 200
+  Cen√°rio: Listar funcion√°rios com grande volume de dados
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 1000 funcion√°rios cadastrados no sistema
+    Quando o usu√°rio solicita a listagem de funcion√°rios com pagina√ß√£o de 10 por p√°gina
+    Ent√£o o sistema deve retornar status 200
     E o tempo de resposta deve ser menor que 500ms
-    E o sistema deve retornar apenas 10 funcion·rios
-    E a resposta deve incluir informaÁıes de paginaÁ„o
+    E o sistema deve retornar apenas 10 funcion√°rios
+    E a resposta deve incluir informa√ß√µes de pagina√ß√£o
 
   @performance @busca
-  Cen·rio: Buscar funcion·rio por ID com resposta r·pida
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    Quando o usu·rio solicita os dados do funcion·rio por ID
-    Ent„o o sistema deve retornar status 200
+  Cen√°rio: Buscar funcion√°rio por ID com resposta r√°pida
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    Quando o usu√°rio solicita os dados do funcion√°rio por ID
+    Ent√£o o sistema deve retornar status 200
     E o tempo de resposta deve ser menor que 200ms
 
   @performance @cache
-  Cen·rio: Busca por ID deve usar cache para melhorar performance
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    E que os dados est„o em cache
-    Quando o usu·rio solicita os dados do funcion·rio por ID
-    Ent„o o tempo de resposta deve ser menor que 50ms
+  Cen√°rio: Busca por ID deve usar cache para melhorar performance
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    E que os dados est√£o em cache
+    Quando o usu√°rio solicita os dados do funcion√°rio por ID
+    Ent√£o o tempo de resposta deve ser menor que 50ms
     E os dados devem vir do cache
-    E o banco de dados n„o deve ser consultado
+    E o banco de dados n√£o deve ser consultado
 
   @performance @filtro
-  Cen·rio: Filtrar funcion·rios por nome com performance adequada
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 1000 funcion·rios cadastrados no sistema
-    Quando o usu·rio filtra funcion·rios pelo nome "Jo„o"
-    Ent„o o sistema deve retornar status 200
+  Cen√°rio: Filtrar funcion√°rios por nome com performance adequada
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 1000 funcion√°rios cadastrados no sistema
+    Quando o usu√°rio filtra funcion√°rios pelo nome "Jo√£o"
+    Ent√£o o sistema deve retornar status 200
     E o tempo de resposta deve ser menor que 300ms
 
   @performance @criacao
-  Cen·rio: Criar funcion·rio com tempo de resposta adequado
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com dados v·lidos
-    Ent„o o sistema deve retornar status 201
+  Cen√°rio: Criar funcion√°rio com tempo de resposta adequado
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com dados v√°lidos
+    Ent√£o o sistema deve retornar status 201
     E o tempo de resposta deve ser menor que 500ms
     E o hash da senha deve ser gerado de forma segura
 
   @performance @atualizacao
-  Cen·rio: Atualizar funcion·rio com tempo de resposta adequado
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    Quando o usu·rio atualiza o funcion·rio com dados v·lidos
-    Ent„o o sistema deve retornar status 200
+  Cen√°rio: Atualizar funcion√°rio com tempo de resposta adequado
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    Quando o usu√°rio atualiza o funcion√°rio com dados v√°lidos
+    Ent√£o o sistema deve retornar status 200
     E o tempo de resposta deve ser menor que 300ms
 
   @performance @exclusao
-  Cen·rio: Excluir funcion·rio com tempo de resposta adequado
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado para exclus„o
-    Quando o usu·rio exclui o funcion·rio
-    Ent„o o sistema deve retornar status 204
+  Cen√°rio: Excluir funcion√°rio com tempo de resposta adequado
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado para exclus√£o
+    Quando o usu√°rio exclui o funcion√°rio
+    Ent√£o o sistema deve retornar status 204
     E o tempo de resposta deve ser menor que 200ms
 
   @performance @login
-  Cen·rio: Login deve ter tempo de resposta adequado
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "Senha@123"
-    Quando o usu·rio realiza login com credenciais v·lidas
-    Ent„o o sistema deve retornar status 200
+  Cen√°rio: Login deve ter tempo de resposta adequado
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "Senha@123"
+    Quando o usu√°rio realiza login com credenciais v√°lidas
+    Ent√£o o sistema deve retornar status 200
     E o tempo de resposta deve ser menor que 500ms
-    E a verificaÁ„o de senha deve usar algoritmo seguro
+    E a verifica√ß√£o de senha deve usar algoritmo seguro
 
   @escalabilidade @concorrencia
-  Cen·rio: Sistema deve suportar m˙ltiplas requisiÁıes simult‚neas
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 100 funcion·rios cadastrados no sistema
-    Quando 50 usu·rios fazem requisiÁıes simult‚neas de listagem
-    Ent„o todas as requisiÁıes devem retornar status 200
-    E nenhuma requisiÁ„o deve exceder 2 segundos
+  Cen√°rio: Sistema deve suportar m√∫ltiplas requisi√ß√µes simult√¢neas
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 100 funcion√°rios cadastrados no sistema
+    Quando 50 usu√°rios fazem requisi√ß√µes simult√¢neas de listagem
+    Ent√£o todas as requisi√ß√µes devem retornar status 200
+    E nenhuma requisi√ß√£o deve exceder 2 segundos
 
   @escalabilidade @memoria
-  Cen·rio: Listagem paginada deve ter uso eficiente de memÛria
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 10000 funcion·rios cadastrados no sistema
-    Quando o usu·rio solicita a listagem com paginaÁ„o de 20 por p·gina
-    Ent„o o sistema deve carregar apenas os 20 registros solicitados
-    E o uso de memÛria deve permanecer est·vel
+  Cen√°rio: Listagem paginada deve ter uso eficiente de mem√≥ria
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 10000 funcion√°rios cadastrados no sistema
+    Quando o usu√°rio solicita a listagem com pagina√ß√£o de 20 por p√°gina
+    Ent√£o o sistema deve carregar apenas os 20 registros solicitados
+    E o uso de mem√≥ria deve permanecer est√°vel
 
   @performance @indice
-  Cen·rio: Busca por email deve usar Ìndice do banco de dados
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 5000 funcion·rios cadastrados no sistema
-    Quando o usu·rio busca funcion·rio por email "joao@supply.com"
-    Ent„o o sistema deve retornar status 200
+  Cen√°rio: Busca por email deve usar √≠ndice do banco de dados
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 5000 funcion√°rios cadastrados no sistema
+    Quando o usu√°rio busca funcion√°rio por email "joao@supply.com"
+    Ent√£o o sistema deve retornar status 200
     E o tempo de resposta deve ser menor que 100ms
-    E a busca deve utilizar Ìndice no campo email
+    E a busca deve utilizar √≠ndice no campo email

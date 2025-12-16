@@ -1,13 +1,10 @@
-﻿using TechTalk.SpecFlow;
-using TechTalk.SpecFlow.Assist;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Auth.Commands.ChangePassword;
-using EmployeeManagement.Tests.Helpers;
-using EmployeeManagement.Tests.Fixtures;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Alteração de Senha")]
 public class AlterarSenhaStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
@@ -32,7 +29,7 @@ public class AlterarSenhaStepDefinitions
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<ChangePasswordCommandHandler>();
     }
 
-    [Given(@"que existe um funcionario cadastrado com email ""(.*)"" e senha ""(.*)""")]
+    [Given(@"que existe um funcionário cadastrado com email ""(.*)"" e senha ""(.*)""")]
     public void DadoQueExisteUmFuncionarioCadastradoComEmailESenha(string email, string senha)
     {
         _currentPassword = senha;
@@ -70,7 +67,7 @@ public class AlterarSenhaStepDefinitions
         _scenarioContext.Set(_employee.Id, "EmployeeId");
     }
 
-    [Given(@"que existe um funcionario cadastrado com email ""(.*)""")]
+    [Given(@"que existe um funcionário cadastrado com email ""(.*)""")]
     public void DadoQueExisteUmFuncionarioCadastradoComEmail(string email)
     {
         _employee = TestHelper.CreateValidEmployee(email: email);
@@ -96,7 +93,7 @@ public class AlterarSenhaStepDefinitions
         _scenarioContext.Set(true, "HasActiveSessions");
     }
 
-    [Given(@"que nao existe funcionario com ID ""(.*)""")]
+    [Given(@"que não existe funcionário com ID ""(.*)""")]
     public void DadoQueNaoExisteFuncionarioComId(string id)
     {
         var guid = Guid.Parse(id);
@@ -106,7 +103,7 @@ public class AlterarSenhaStepDefinitions
         _scenarioContext.Set(guid, "NonExistentId");
     }
 
-    [When(@"o funcionario solicita alteracao de senha informando:")]
+    [When(@"o funcionário solicita alteração de senha informando:")]
     public async Task QuandoOFuncionarioSolicitaAlteracaoDeSenhaInformando(Table table)
     {
         var data = table.Rows[0];
@@ -145,7 +142,7 @@ public class AlterarSenhaStepDefinitions
         }
     }
 
-    [When(@"e solicitada alteracao de senha do funcionario inexistente")]
+    [When(@"é solicitada alteração de senha do funcionário inexistente")]
     public async Task QuandoESolicitadaAlteracaoDeSenhaDoFuncionarioInexistente()
     {
         var nonExistentId = _scenarioContext.Get<Guid>("NonExistentId");
@@ -163,15 +160,15 @@ public class AlterarSenhaStepDefinitions
         _scenarioContext.Set(_httpStatus, "HttpStatus");
     }
 
-    [When(@"o usuario tenta alterar a senha sem autenticacao")]
+    [When(@"o usuário tenta alterar a senha sem autenticação")]
     public void QuandoOUsuarioTentaAlterarASenhaSemAutenticacao()
     {
         _httpStatus = 401;
         _scenarioContext.Set(_httpStatus, "HttpStatus");
-        _scenarioContext.Set("Nao autorizado", "ErrorMessage");
+        _scenarioContext.Set("Não autorizado", "ErrorMessage");
     }
 
-    [When(@"o funcionario altera sua senha com sucesso")]
+    [When(@"o funcionário altera sua senha com sucesso")]
     public async Task QuandoOFuncionarioAlteraSuaSenhaComSucesso()
     {
         var command = new ChangePasswordCommand(_employee!.Id, _currentPassword, "NovaSenha@456");
@@ -218,14 +215,14 @@ public class AlterarSenhaStepDefinitions
         }
     }
 
-    [Then(@"a senha nao deve ser alterada")]
+    [Then(@"a senha não deve ser alterada")]
     public void EntaoASenhaNaoDeveSerAlterada()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando que a senha nao atende aos criterios de seguranca")]
+    [Then(@"o sistema deve retornar mensagem indicando que a senha não atende aos critérios de segurança")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoQueSenhaNaoAtendeAosCriterios()
     {
         _result.Should().NotBeNull();
@@ -238,13 +235,13 @@ public class AlterarSenhaStepDefinitions
         _passwordChangedEventRaised.Should().BeTrue();
     }
 
-    [Then(@"todas as sessoes anteriores devem ser invalidadas")]
+    [Then(@"todas as sessões anteriores devem ser invalidadas")]
     public void EntaoTodasAsSessoesAnterioresDevemSerInvalidadas()
     {
         _result!.IsSuccess.Should().BeTrue();
     }
 
-    [Then(@"apenas a sessao atual deve permanecer valida")]
+    [Then(@"apenas a sessão atual deve permanecer válida")]
     public void EntaoApenasASessaoAtualDevePermancerValida()
     {
         _result!.IsSuccess.Should().BeTrue();

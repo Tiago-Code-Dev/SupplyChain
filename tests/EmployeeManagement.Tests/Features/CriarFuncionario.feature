@@ -1,162 +1,162 @@
 # language: pt-BR
-Funcionalidade: CriaÁ„o de Funcion·rio
-  Como um usu·rio autorizado do sistema
-  Eu quero cadastrar novos funcion·rios
+Funcionalidade: Cria√ß√£o de Funcion√°rio
+  Como um usu√°rio autorizado do sistema
+  Eu quero cadastrar novos funcion√°rios
   Para que eles possam acessar o sistema
 
   @funcionario @criar @sucesso
-  Cen·rio: Criar funcion·rio com dados v·lidos
-    Dado que o usu·rio est· autenticado como "Director"
-    E que n„o existe funcion·rio com documento "12345678900"
-    E que existe um gestor cadastrado com ID v·lido
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com dados v√°lidos
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que n√£o existe funcion√°rio com documento "12345678900"
+    E que existe um gestor cadastrado com ID v√°lido
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome  | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | Jo„o  | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 201
-    E o sistema deve retornar os dados do funcion·rio criado
-    E o funcion·rio deve ter um ID ˙nico gerado
-    E a senha do funcion·rio deve estar hasheada no banco de dados
+      | Jo√£o  | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 201
+    E o sistema deve retornar os dados do funcion√°rio criado
+    E o funcion√°rio deve ter um ID √∫nico gerado
+    E a senha do funcion√°rio deve estar hasheada no banco de dados
 
   @funcionario @criar @sucesso
-  Cen·rio: Criar funcion·rio com apenas um telefone
-    Dado que o usu·rio est· autenticado como "Director"
-    E que n„o existe funcion·rio com documento "12345678900"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com apenas um telefone
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que n√£o existe funcion√°rio com documento "12345678900"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | Jo„o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 201
-    E o funcion·rio deve ser criado com sucesso
-    E o funcion·rio deve ter exatamente 1 telefone cadastrado
+      | Jo√£o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 201
+    E o funcion√°rio deve ser criado com sucesso
+    E o funcion√°rio deve ter exatamente 1 telefone cadastrado
 
   @funcionario @criar @sucesso
-  Cen·rio: Criar funcion·rio com m˙ltiplos telefones
-    Dado que o usu·rio est· autenticado como "Director"
-    E que n„o existe funcion·rio com documento "12345678900"
-    Quando o usu·rio cria um novo funcion·rio com telefones:
+  Cen√°rio: Criar funcion√°rio com m√∫ltiplos telefones
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que n√£o existe funcion√°rio com documento "12345678900"
+    Quando o usu√°rio cria um novo funcion√°rio com telefones:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Permissao | Senha        |
-      | Jo„o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | Employee  | Senha@123456 |
-    E os telefones s„o "11999999999,11888888888,11777777777"
-    Ent„o o sistema deve retornar status 201
-    E o funcion·rio deve ser criado com sucesso
-    E o funcion·rio deve ter 3 telefones cadastrados
+      | Jo√£o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | Employee  | Senha@123456 |
+    E os telefones s√£o "11999999999,11888888888,11777777777"
+    Ent√£o o sistema deve retornar status 201
+    E o funcion√°rio deve ser criado com sucesso
+    E o funcion√°rio deve ter 3 telefones cadastrados
 
   @funcionario @criar @autenticacao
-  Cen·rio: Criar funcion·rio sem autenticaÁ„o
-    Dado que o usu·rio n„o est· autenticado
-    Quando o usu·rio tenta criar um novo funcion·rio com dados v·lidos
-    Ent„o o sistema deve retornar status 401
-    E o sistema deve retornar mensagem "N„o autorizado"
-    E o funcion·rio n„o deve ser criado no banco de dados
+  Cen√°rio: Criar funcion√°rio sem autentica√ß√£o
+    Dado que o usu√°rio n√£o est√° autenticado
+    Quando o usu√°rio tenta criar um novo funcion√°rio com dados v√°lidos
+    Ent√£o o sistema deve retornar status 401
+    E o sistema deve retornar mensagem "N√£o autorizado"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio com nome vazio
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com nome vazio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       |      | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que nome È obrigatÛrio
-    E o funcion·rio n„o deve ser criado no banco de dados
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem de erro indicando que nome √© obrigat√≥rio
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio com sobrenome vazio
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com sobrenome vazio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | Jo„o |           | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que sobrenome È obrigatÛrio
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Jo√£o |           | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem de erro indicando que sobrenome √© obrigat√≥rio
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio com email inv·lido
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com email inv√°lido
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome | Sobrenome | Email          | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | Jo„o | Silva     | email-invalido | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que email È inv·lido
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Jo√£o | Silva     | email-invalido | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem de erro indicando que email √© inv√°lido
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio com email vazio
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com email vazio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome | Sobrenome | Email | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | Jo„o | Silva     |       | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que email È obrigatÛrio
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Jo√£o | Silva     |       | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem de erro indicando que email √© obrigat√≥rio
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @conflito
-  Cen·rio: Criar funcion·rio com documento duplicado
-    Dado que o usu·rio est· autenticado como "Director"
-    E que j· existe um funcion·rio cadastrado com documento "12345678900"
-    Quando o usu·rio tenta criar um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com documento duplicado
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que j√° existe um funcion√°rio cadastrado com documento "12345678900"
+    Quando o usu√°rio tenta criar um novo funcion√°rio com:
       | Nome  | Sobrenome | Email            | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | Maria | Santos    | maria@supply.com | 12345678900 | 1992-05-20     | 11777777777 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 409
-    E o sistema deve retornar mensagem "Documento j· cadastrado"
-    E o funcion·rio n„o deve ser criado no banco de dados
+    Ent√£o o sistema deve retornar status 409
+    E o sistema deve retornar mensagem "Document number already exists"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio com documento vazio
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com documento vazio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome | Sobrenome | Email           | Documento | DataNascimento | Telefones   | Permissao | Senha        |
-      | Jo„o | Silva     | joao@supply.com |           | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que documento È obrigatÛrio
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Jo√£o | Silva     | joao@supply.com |           | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem de erro indicando que documento √© obrigat√≥rio
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao @negocio
-  Cen·rio: Criar funcion·rio menor de idade
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio menor de idade
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome  | Sobrenome | Email            | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | Pedro | Costa     | pedro@supply.com | 98765432100 | 2010-06-15     | 11666666666 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Funcion·rio deve ser maior de idade"
-    E o funcion·rio n„o deve ser criado no banco de dados
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Employee must be at least 18 years old"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio sem telefone
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio sem telefones:
+  Cen√°rio: Criar funcion√°rio sem telefone
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio sem telefones:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Permissao | Senha        |
-      | Jo„o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Funcion·rio deve possuir pelo menos um telefone"
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Jo√£o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Funcion√°rio deve possuir pelo menos um telefone"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @conflito
-  Cen·rio: Criar funcion·rio com email duplicado
-    Dado que o usu·rio est· autenticado como "Director"
-    E que j· existe um funcion·rio cadastrado com email "joao@supply.com"
-    Quando o usu·rio tenta criar um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com email duplicado
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que j√° existe um funcion√°rio cadastrado com email "joao@supply.com"
+    Quando o usu√°rio tenta criar um novo funcion√°rio com:
       | Nome  | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | Outro | Jo„o      | joao@supply.com | 98765432100 | 1992-05-20     | 11777777777 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 409
-    E o sistema deve retornar mensagem "Email j· cadastrado"
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Outro | Jo√£o      | joao@supply.com | 98765432100 | 1992-05-20     | 11777777777 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 409
+    E o sistema deve retornar mensagem "Email already exists"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio com gestor inexistente
-    Dado que o usu·rio est· autenticado como "Director"
-    E que n„o existe gestor com ID "99999999-9999-9999-9999-999999999999"
-    Quando o usu·rio tenta criar um novo funcion·rio com gestor inexistente:
+  Cen√°rio: Criar funcion√°rio com gestor inexistente
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que n√£o existe gestor com ID "99999999-9999-9999-9999-999999999999"
+    Quando o usu√°rio tenta criar um novo funcion√°rio com gestor inexistente:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | Jo„o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Gestor n„o encontrado"
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Jo√£o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Gestor n√£o encontrado"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cen·rio: Criar funcion·rio com senha fraca
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com:
+  Cen√°rio: Criar funcion√°rio com senha fraca
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha |
-      | Jo„o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | 123   |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando que a senha n„o atende aos critÈrios de seguranÁa
-    E o funcion·rio n„o deve ser criado no banco de dados
+      | Jo√£o | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | 123   |
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando que a senha n√£o atende aos crit√©rios de seguran√ßa
+    E o funcion√°rio n√£o deve ser criado no banco de dados

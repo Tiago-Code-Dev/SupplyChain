@@ -1,122 +1,122 @@
 # language: pt-BR
-Funcionalidade: Listagem de Funcion·rios
-  Como um usu·rio autenticado do sistema
-  Eu quero listar e buscar funcion·rios
-  Para visualizar as informaÁıes cadastradas
+Funcionalidade: Listagem de Funcion√°rios
+  Como um usu√°rio autenticado do sistema
+  Eu quero listar e buscar funcion√°rios
+  Para visualizar as informa√ß√µes cadastradas
 
   @funcionario @listar @sucesso
-  Cen·rio: Listar todos os funcion·rios
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 5 funcion·rios cadastrados no sistema
-    Quando o usu·rio solicita a listagem de funcion·rios atravÈs do endpoint GET /api/employees
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar uma lista com 5 funcion·rios
-    E cada funcion·rio na lista deve conter: ID, Nome, Sobrenome, Email, Documento, Telefones, Permissao
-    E a senha n„o deve estar presente na resposta
+  Cen√°rio: Listar todos os funcion√°rios
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 5 funcion√°rios cadastrados no sistema
+    Quando o usu√°rio solicita a listagem de funcion√°rios atrav√©s do endpoint GET /api/employees
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar uma lista com 5 funcion√°rios
+    E cada funcion√°rio na lista deve conter: ID, Nome, Sobrenome, Email, Documento, Telefones, Permissao
+    E a senha n√£o deve estar presente na resposta
 
   @funcionario @listar @paginacao
-  Cen·rio: Listar funcion·rios com paginaÁ„o
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 25 funcion·rios cadastrados no sistema
-    Quando o usu·rio solicita a listagem de funcion·rios com:
+  Cen√°rio: Listar funcion√°rios com pagina√ß√£o
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 25 funcion√°rios cadastrados no sistema
+    Quando o usu√°rio solicita a listagem de funcion√°rios com:
       | Page | PageSize |
       | 1    | 10       |
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar 10 funcion·rios
-    E a resposta deve conter informaÁıes de paginaÁ„o
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar 10 funcion√°rios
+    E a resposta deve conter informa√ß√µes de pagina√ß√£o
 
   @funcionario @listar @paginacao
-  Cen·rio: Listar segunda p·gina de funcion·rios
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem 25 funcion·rios cadastrados no sistema
-    Quando o usu·rio solicita a listagem de funcion·rios com:
+  Cen√°rio: Listar segunda p√°gina de funcion√°rios
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem 25 funcion√°rios cadastrados no sistema
+    Quando o usu√°rio solicita a listagem de funcion√°rios com:
       | Page | PageSize |
       | 2    | 10       |
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar 10 funcion·rios
-    E os funcion·rios devem ser diferentes da primeira p·gina
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar 10 funcion√°rios
+    E os funcion√°rios devem ser diferentes da primeira p√°gina
 
   @funcionario @listar @filtro
-  Cen·rio: Listar funcion·rios com filtro por nome
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem funcion·rios cadastrados:
+  Cen√°rio: Listar funcion√°rios com filtro por nome
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem funcion√°rios cadastrados:
       | Nome  | Sobrenome |
-      | Jo„o  | Silva     |
+      | Jo√£o  | Silva     |
       | Maria | Santos    |
-      | Jo„o  | Costa     |
-    Quando o usu·rio solicita a listagem de funcion·rios com filtro por nome "Jo„o"
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar apenas funcion·rios cujo nome contenha "Jo„o"
-    E a lista deve conter pelo menos 2 funcion·rios
+      | Jo√£o  | Costa     |
+    Quando o usu√°rio solicita a listagem de funcion√°rios com filtro por nome "Jo√£o"
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar apenas funcion√°rios cujo nome contenha "Jo√£o"
+    E a lista deve conter pelo menos 2 funcion√°rios
 
   @funcionario @listar @filtro
-  Cen·rio: Listar funcion·rios com filtro por email
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem funcion·rios cadastrados:
+  Cen√°rio: Listar funcion√°rios com filtro por email
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem funcion√°rios cadastrados:
       | Email            |
       | joao@supply.com  |
       | maria@supply.com |
       | pedro@supply.com |
-    Quando o usu·rio solicita a listagem de funcion·rios com filtro por email "joao@supply.com"
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar apenas funcion·rios com email "joao@supply.com"
-    E a lista deve conter exatamente 1 funcion·rio
+    Quando o usu√°rio solicita a listagem de funcion√°rios com filtro por email "joao@supply.com"
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar apenas funcion√°rios com email "joao@supply.com"
+    E a lista deve conter exatamente 1 funcion√°rio
 
   @funcionario @listar @filtro
-  Cen·rio: Listar funcion·rios com filtro por permiss„o
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem funcion·rios cadastrados:
+  Cen√°rio: Listar funcion√°rios com filtro por permiss√£o
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem funcion√°rios cadastrados:
       | Nome  | Permissao |
-      | Jo„o  | Employee  |
-      | Maria | Manager   |
-      | Pedro | Admin     |
-    Quando o usu·rio solicita a listagem de funcion·rios com filtro por permiss„o "Manager"
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar apenas funcion·rios com permiss„o "Manager"
+      | Jo√£o  | Employee  |
+      | Maria | Leader   |
+      | Pedro | Director     |
+    Quando o usu√°rio solicita a listagem de funcion√°rios com filtro por permiss√£o "Leader"
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar apenas funcion√°rios com permiss√£o "Leader"
 
   @funcionario @buscar @sucesso
-  Cen·rio: Buscar funcion·rio por ID existente
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existe um funcion·rio cadastrado com ID conhecido e nome "Jo„o Silva"
-    Quando o usu·rio solicita os dados do funcion·rio atravÈs do endpoint GET /api/employees/{id}
-    Ent„o o sistema deve retornar status 200
-    E o sistema deve retornar os dados completos do funcion·rio
+  Cen√°rio: Buscar funcion√°rio por ID existente
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existe um funcion√°rio cadastrado com ID conhecido e nome "Jo√£o Silva"
+    Quando o usu√°rio solicita os dados do funcion√°rio atrav√©s do endpoint GET /api/employees/{id}
+    Ent√£o o sistema deve retornar status 200
+    E o sistema deve retornar os dados completos do funcion√°rio
     E a resposta deve conter: ID, Nome, Sobrenome, Email, Documento, Telefones, Permissao
-    E a senha n„o deve estar presente na resposta
+    E a senha n√£o deve estar presente na resposta
 
   @funcionario @buscar @falha
-  Cen·rio: Buscar funcion·rio por ID inexistente
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que n„o existe funcion·rio com ID "99999999-9999-9999-9999-999999999999"
-    Quando o usu·rio solicita os dados do funcion·rio atravÈs do endpoint GET /api/employees/{id}
-    Ent„o o sistema deve retornar status 404
-    E o sistema deve retornar mensagem "Funcion·rio n„o encontrado"
+  Cen√°rio: Buscar funcion√°rio por ID inexistente
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que n√£o existe funcion√°rio com ID "99999999-9999-9999-9999-999999999999"
+    Quando o usu√°rio solicita os dados do funcion√°rio atrav√©s do endpoint GET /api/employees/{id}
+    Ent√£o o sistema deve retornar status 404
+    E o sistema deve retornar mensagem "Funcion√°rio n√£o encontrado"
 
   @funcionario @listar @autenticacao
-  Cen·rio: Listar funcion·rios sem autenticaÁ„o
-    Dado que o usu·rio n„o est· autenticado
-    Quando o usu·rio tenta listar funcion·rios atravÈs do endpoint GET /api/employees
-    Ent„o o sistema deve retornar status 401
-    E o sistema deve retornar mensagem "N„o autorizado"
+  Cen√°rio: Listar funcion√°rios sem autentica√ß√£o
+    Dado que o usu√°rio n√£o est√° autenticado
+    Quando o usu√°rio tenta listar funcion√°rios atrav√©s do endpoint GET /api/employees
+    Ent√£o o sistema deve retornar status 401
+    E o sistema deve retornar mensagem "N√£o autorizado"
 
   @funcionario @buscar @cache
-  Cen·rio: Buscar funcion·rio deve usar cache quando disponÌvel
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    E que os dados do funcion·rio est„o em cache
-    Quando o usu·rio solicita os dados do funcion·rio atravÈs do endpoint GET /api/employees/{id}
-    Ent„o o sistema deve retornar status 200
+  Cen√°rio: Buscar funcion√°rio deve usar cache quando dispon√≠vel
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    E que os dados do funcion√°rio est√£o em cache
+    Quando o usu√°rio solicita os dados do funcion√°rio atrav√©s do endpoint GET /api/employees/{id}
+    Ent√£o o sistema deve retornar status 200
     E os dados devem ser recuperados do cache
-    E o banco de dados n„o deve ser consultado
+    E o banco de dados n√£o deve ser consultado
 
   @funcionario @listar @ordenacao
-  Cen·rio: Listar funcion·rios ordenados por nome
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existem funcion·rios cadastrados:
+  Cen√°rio: Listar funcion√°rios ordenados por nome
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existem funcion√°rios cadastrados:
       | Nome   |
       | Carlos |
       | Ana    |
       | Bruno  |
-    Quando o usu·rio solicita a listagem de funcion·rios ordenada por nome ascendente
-    Ent„o o sistema deve retornar status 200
-    E os funcion·rios devem estar ordenados alfabeticamente por nome
+    Quando o usu√°rio solicita a listagem de funcion√°rios ordenada por nome ascendente
+    Ent√£o o sistema deve retornar status 200
+    E os funcion√°rios devem estar ordenados alfabeticamente por nome

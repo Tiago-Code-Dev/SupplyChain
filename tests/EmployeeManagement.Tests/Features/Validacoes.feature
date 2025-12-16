@@ -1,124 +1,124 @@
 # language: pt-BR
-Funcionalidade: ValidaÁıes de Campos
+Funcionalidade: Valida√ß√µes de Campos
   Como um sistema robusto
   Eu quero validar todos os campos de entrada
   Para garantir a integridade dos dados
 
   @validacao @email
-  Cen·rio: Validar formato de email inv·lido sem arroba
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com email "email-sem-arroba"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de email inv·lido
+  Cen√°rio: Validar formato de email inv√°lido sem arroba
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com email "email-sem-arroba"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de email inv√°lido
 
   @validacao @email
-  Cen·rio: Validar formato de email inv·lido sem domÌnio
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com email "usuario@"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de email inv·lido
+  Cen√°rio: Validar formato de email inv√°lido sem dom√≠nio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com email "usuario@"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de email inv√°lido
 
   @validacao @email
-  Cen·rio: Validar formato de email inv·lido com espaÁos
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com email "usuario @email.com"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de email inv·lido
+  Cen√°rio: Validar formato de email inv√°lido com espa√ßos
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com email "usuario @email.com"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de email inv√°lido
 
   @validacao @telefone
-  Cen·rio: Validar formato de telefone muito curto
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com telefone "123"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de telefone inv·lido
+  Cen√°rio: Validar formato de telefone muito curto
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com telefone "123"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de telefone inv√°lido
 
   @validacao @telefone
-  Cen·rio: Validar formato de telefone com letras
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com telefone "11ABCD99999"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de telefone inv·lido
+  Cen√°rio: Validar formato de telefone com letras
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com telefone "11ABCD99999"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de telefone inv√°lido
 
   @validacao @documento
-  Cen·rio: Validar documento CPF com formato inv·lido
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com documento "123"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de documento inv·lido
+  Cen√°rio: Validar documento CPF com formato inv√°lido
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com documento "123"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de documento inv√°lido
 
   @validacao @documento
-  Cen·rio: Validar documento CPF com letras
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com documento "123ABC45678"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de documento inv·lido
+  Cen√°rio: Validar documento CPF com letras
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com documento "123ABC45678"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de documento inv√°lido
 
   @validacao @documento
-  Cen·rio: Validar documento CPF com todos dÌgitos iguais
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com documento "11111111111"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando documento inv·lido
+  Cen√°rio: Validar documento CPF com todos d√≠gitos iguais
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com documento "11111111111"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando documento inv√°lido
 
   @validacao @senha
-  Cen·rio: Validar senha muito curta
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com senha "123"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando que a senha È muito curta
+  Cen√°rio: Validar senha muito curta
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com senha "123"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando que a senha √© muito curta
 
   @validacao @senha
-  Cen·rio: Validar senha sem caracteres especiais
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com senha "Senha123456"
-    Ent„o o sistema deve retornar status 400
+  Cen√°rio: Validar senha sem caracteres especiais
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com senha "Senha123456"
+    Ent√£o o sistema deve retornar status 400
     E o sistema deve retornar mensagem indicando que a senha deve conter caracteres especiais
 
   @validacao @senha
-  Cen·rio: Validar senha sem n˙meros
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com senha "Senha@Forte"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando que a senha deve conter n˙meros
+  Cen√°rio: Validar senha sem n√∫meros
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com senha "Senha@Forte"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando que a senha deve conter n√∫meros
 
   @validacao @senha
-  Cen·rio: Validar senha sem letras mai˙sculas
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com senha "senha@123456"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando que a senha deve conter letras mai˙sculas
+  Cen√°rio: Validar senha sem letras mai√∫sculas
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com senha "senha@123456"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando que a senha deve conter letras mai√∫sculas
 
   @validacao @data
-  Cen·rio: Validar data de nascimento no futuro
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com data de nascimento "2030-01-01"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando data de nascimento inv·lida
+  Cen√°rio: Validar data de nascimento no futuro
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com data de nascimento "2030-01-01"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando data de nascimento inv√°lida
 
   @validacao @data
-  Cen·rio: Validar data de nascimento muito antiga
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com data de nascimento "1800-01-01"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando data de nascimento inv·lida
+  Cen√°rio: Validar data de nascimento muito antiga
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com data de nascimento "1800-01-01"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando data de nascimento inv√°lida
 
   @validacao @nome
-  Cen·rio: Validar nome com n˙meros
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com nome "Jo„o123"
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando formato de nome inv·lido
+  Cen√°rio: Validar nome com n√∫meros
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com nome "Jo√£o123"
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando formato de nome inv√°lido
 
   @validacao @nome
-  Cen·rio: Validar nome muito curto
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com nome "A"
-    Ent„o o sistema deve retornar status 400
+  Cen√°rio: Validar nome muito curto
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com nome "A"
+    Ent√£o o sistema deve retornar status 400
     E o sistema deve retornar mensagem indicando que o nome deve ter pelo menos 2 caracteres
 
   @validacao @nome
-  Cen·rio: Validar sobrenome muito longo
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um funcion·rio com sobrenome de 300 caracteres
-    Ent„o o sistema deve retornar status 400
+  Cen√°rio: Validar sobrenome muito longo
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio tenta criar um funcion√°rio com sobrenome de 300 caracteres
+    Ent√£o o sistema deve retornar status 400
     E o sistema deve retornar mensagem indicando que o sobrenome excede o limite de caracteres

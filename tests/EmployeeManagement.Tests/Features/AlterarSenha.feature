@@ -1,93 +1,93 @@
 # language: pt-BR
-Funcionalidade: AlteraÁ„o de Senha
-  Como um funcion·rio do sistema
+Funcionalidade: Altera√ß√£o de Senha
+  Como um funcion√°rio do sistema
   Eu quero alterar minha senha
   Para manter minha conta segura
 
   @senha @alterar @sucesso
-  Cen·rio: Alterar senha com sucesso
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o funcion·rio est· autenticado
-    Quando o funcion·rio solicita alteraÁ„o de senha informando:
+  Cen√°rio: Alterar senha com sucesso
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o funcion√°rio est√° autenticado
+    Quando o funcion√°rio solicita altera√ß√£o de senha informando:
       | SenhaAtual     | NovaSenha      |
       | SenhaAtual@123 | NovaSenha@456  |
-    Ent„o a senha deve ser alterada com sucesso
+    Ent√£o a senha deve ser alterada com sucesso
     E o sistema deve retornar status 200
     E a nova senha deve estar hasheada no banco de dados
 
   @senha @alterar @falha
-  Cen·rio: N„o deve alterar senha quando senha atual est· incorreta
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o funcion·rio est· autenticado
-    Quando o funcion·rio solicita alteraÁ„o de senha informando:
+  Cen√°rio: N√£o deve alterar senha quando senha atual est√° incorreta
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o funcion√°rio est√° autenticado
+    Quando o funcion√°rio solicita altera√ß√£o de senha informando:
       | SenhaAtual     | NovaSenha      |
       | SenhaErrada123 | NovaSenha@456  |
-    Ent„o o sistema deve retornar status 400
+    Ent√£o o sistema deve retornar status 400
     E o sistema deve retornar mensagem "Senha atual incorreta"
-    E a senha n„o deve ser alterada
+    E a senha n√£o deve ser alterada
 
   @senha @alterar @validacao
-  Cen·rio: N„o deve alterar para senha vazia
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o funcion·rio est· autenticado
-    Quando o funcion·rio solicita alteraÁ„o de senha informando:
+  Cen√°rio: N√£o deve alterar para senha vazia
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o funcion√°rio est√° autenticado
+    Quando o funcion√°rio solicita altera√ß√£o de senha informando:
       | SenhaAtual     | NovaSenha |
       | SenhaAtual@123 |           |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Nova senha È obrigatÛria"
-    E a senha n„o deve ser alterada
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem "Nova senha √© obrigat√≥ria"
+    E a senha n√£o deve ser alterada
 
   @senha @alterar @validacao
-  Cen·rio: N„o deve alterar para senha fraca
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o funcion·rio est· autenticado
-    Quando o funcion·rio solicita alteraÁ„o de senha informando:
+  Cen√°rio: N√£o deve alterar para senha fraca
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o funcion√°rio est√° autenticado
+    Quando o funcion√°rio solicita altera√ß√£o de senha informando:
       | SenhaAtual     | NovaSenha |
       | SenhaAtual@123 | 123       |
-    Ent„o o sistema deve retornar status 400
-    E o sistema deve retornar mensagem indicando que a senha n„o atende aos critÈrios de seguranÁa
-    E a senha n„o deve ser alterada
+    Ent√£o o sistema deve retornar status 400
+    E o sistema deve retornar mensagem indicando que a senha n√£o atende aos crit√©rios de seguran√ßa
+    E a senha n√£o deve ser alterada
 
   @senha @alterar @validacao
-  Cen·rio: N„o deve alterar para mesma senha atual
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o funcion·rio est· autenticado
-    Quando o funcion·rio solicita alteraÁ„o de senha informando:
+  Cen√°rio: N√£o deve alterar para mesma senha atual
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o funcion√°rio est√° autenticado
+    Quando o funcion√°rio solicita altera√ß√£o de senha informando:
       | SenhaAtual     | NovaSenha       |
       | SenhaAtual@123 | SenhaAtual@123  |
-    Ent„o o sistema deve retornar status 400
+    Ent√£o o sistema deve retornar status 400
     E o sistema deve retornar mensagem "Nova senha deve ser diferente da atual"
-    E a senha n„o deve ser alterada
+    E a senha n√£o deve ser alterada
 
   @senha @alterar @autenticacao
-  Cen·rio: N„o deve alterar senha de funcion·rio inexistente
-    Dado que n„o existe funcion·rio com ID "99999999-9999-9999-9999-999999999999"
-    Quando È solicitada alteraÁ„o de senha do funcion·rio inexistente
-    Ent„o o sistema deve retornar status 404
-    E o sistema deve retornar mensagem "Funcion·rio n„o encontrado"
+  Cen√°rio: N√£o deve alterar senha de funcion√°rio inexistente
+    Dado que n√£o existe funcion√°rio com ID "99999999-9999-9999-9999-999999999999"
+    Quando √© solicitada altera√ß√£o de senha do funcion√°rio inexistente
+    Ent√£o o sistema deve retornar status 404
+    E o sistema deve retornar mensagem "Employee not found"
 
   @senha @alterar @autenticacao
-  Cen·rio: N„o deve alterar senha sem autenticaÁ„o
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com"
-    E que o usu·rio n„o est· autenticado
-    Quando o usu·rio tenta alterar a senha sem autenticaÁ„o
-    Ent„o o sistema deve retornar status 401
-    E o sistema deve retornar mensagem "N„o autorizado"
+  Cen√°rio: N√£o deve alterar senha sem autentica√ß√£o
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com"
+    E que o usu√°rio n√£o est√° autenticado
+    Quando o usu√°rio tenta alterar a senha sem autentica√ß√£o
+    Ent√£o o sistema deve retornar status 401
+    E o sistema deve retornar mensagem "N√£o autorizado"
 
   @senha @alterar @seguranca
-  Cen·rio: AlteraÁ„o de senha deve gerar evento de domÌnio
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o funcion·rio est· autenticado
-    Quando o funcion·rio solicita alteraÁ„o de senha informando:
+  Cen√°rio: Altera√ß√£o de senha deve gerar evento de dom√≠nio
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o funcion√°rio est√° autenticado
+    Quando o funcion√°rio solicita altera√ß√£o de senha informando:
       | SenhaAtual     | NovaSenha      |
       | SenhaAtual@123 | NovaSenha@456  |
-    Ent„o a senha deve ser alterada com sucesso
+    Ent√£o a senha deve ser alterada com sucesso
     E o evento PasswordChangedEvent deve ser disparado
 
   @senha @alterar @seguranca
-  Cen·rio: Deve invalidar sessıes anteriores apÛs alteraÁ„o de senha
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o funcion·rio possui sessıes ativas
-    Quando o funcion·rio altera sua senha com sucesso
-    Ent„o todas as sessıes anteriores devem ser invalidadas
-    E apenas a sess„o atual deve permanecer v·lida
+  Cen√°rio: Deve invalidar sess√µes anteriores ap√≥s altera√ß√£o de senha
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o funcion√°rio possui sess√µes ativas
+    Quando o funcion√°rio altera sua senha com sucesso
+    Ent√£o todas as sess√µes anteriores devem ser invalidadas
+    E apenas a sess√£o atual deve permanecer v√°lida

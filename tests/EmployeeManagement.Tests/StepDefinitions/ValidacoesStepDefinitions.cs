@@ -1,13 +1,11 @@
-﻿using TechTalk.SpecFlow;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
-using EmployeeManagement.Application.Features.Employees.Common;
-using EmployeeManagement.Tests.Helpers;
-using EmployeeManagement.Tests.Fixtures;
+using FluentValidation;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Validações de Campos")]
 public class ValidacoesStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
@@ -34,51 +32,51 @@ public class ValidacoesStepDefinitions
         SetupRepositoryForNewEmployee();
     }
 
-    [Given(@"que o usuario esta autenticado como ""(.*)""")]
+    [Given(@"que o usuário está autenticado como ""(.*)""")]
     public void DadoQueOUsuarioEstaAutenticadoComo(string role)
     {
         var parsedRole = Enum.Parse<Role>(role);
         _scenarioContext.Set(parsedRole, "CurrentUserRole");
     }
 
-    [When(@"o usuario tenta criar um funcionario com email ""(.*)""")]
+    [When(@"o usuário tenta criar um funcionário com email ""(.*)""")]
     public async Task QuandoOUsuarioTentaCriarUmFuncionarioComEmail(string email)
     {
         await CriarFuncionarioComEmail(email);
     }
 
-    [When(@"o usuario tenta criar um funcionario com telefone ""(.*)""")]
+    [When(@"o usuário tenta criar um funcionário com telefone ""(.*)""")]
     public async Task QuandoOUsuarioTentaCriarUmFuncionarioComTelefone(string telefone)
     {
         await CriarFuncionarioComTelefone(telefone);
     }
 
-    [When(@"o usuario tenta criar um funcionario com documento ""(.*)""")]
+    [When(@"o usuário tenta criar um funcionário com documento ""(.*)""")]
     public async Task QuandoOUsuarioTentaCriarUmFuncionarioComDocumento(string documento)
     {
         await CriarFuncionarioComDocumento(documento);
     }
 
-    [When(@"o usuario tenta criar um funcionario com senha ""(.*)""")]
+    [When(@"o usuário tenta criar um funcionário com senha ""(.*)""")]
     public async Task QuandoOUsuarioTentaCriarUmFuncionarioComSenha(string senha)
     {
         await CriarFuncionarioComSenha(senha);
     }
 
-    [When(@"o usuario tenta criar um funcionario com data de nascimento ""(.*)""")]
+    [When(@"o usuário tenta criar um funcionário com data de nascimento ""(.*)""")]
     public async Task QuandoOUsuarioTentaCriarUmFuncionarioComDataDeNascimento(string dataNascimento)
     {
         var date = DateTime.Parse(dataNascimento);
         await CriarFuncionarioComDataNascimento(date);
     }
 
-    [When(@"o usuario tenta criar um funcionario com nome ""(.*)""")]
+    [When(@"o usuário tenta criar um funcionário com nome ""(.*)""")]
     public async Task QuandoOUsuarioTentaCriarUmFuncionarioComNome(string nome)
     {
         await CriarFuncionarioComNome(nome);
     }
 
-    [When(@"o usuario tenta criar um funcionario com sobrenome de (.*) caracteres")]
+    [When(@"o usuário tenta criar um funcionário com sobrenome de (.*) caracteres")]
     public async Task QuandoOUsuarioTentaCriarUmFuncionarioComSobrenomeDeMuitosCaracteres(int caracteres)
     {
         var sobrenomeLongo = new string('A', caracteres);
@@ -91,35 +89,35 @@ public class ValidacoesStepDefinitions
         _httpStatus.Should().Be(status);
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando formato de email invalido")]
+    [Then(@"o sistema deve retornar mensagem indicando formato de email inválido")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoFormatoDeEmailInvalido()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando formato de telefone invalido")]
+    [Then(@"o sistema deve retornar mensagem indicando formato de telefone inválido")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoFormatoDeTelefoneInvalido()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando formato de documento invalido")]
+    [Then(@"o sistema deve retornar mensagem indicando formato de documento inválido")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoFormatoDeDocumentoInvalido()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando documento invalido")]
+    [Then(@"o sistema deve retornar mensagem indicando documento inválido")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoDocumentoInvalido()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando que a senha e muito curta")]
+    [Then(@"o sistema deve retornar mensagem indicando que a senha é muito curta")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoQueSenhaEMuitoCurta()
     {
         _result.Should().NotBeNull();
@@ -133,28 +131,28 @@ public class ValidacoesStepDefinitions
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando que a senha deve conter numeros")]
+    [Then(@"o sistema deve retornar mensagem indicando que a senha deve conter números")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoQueSenhaDeveConterNumeros()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando que a senha deve conter letras maiusculas")]
+    [Then(@"o sistema deve retornar mensagem indicando que a senha deve conter letras maiúsculas")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoQueSenhaDeveConterLetrasMaiusculas()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando data de nascimento invalida")]
+    [Then(@"o sistema deve retornar mensagem indicando data de nascimento inválida")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoDataDeNascimentoInvalida()
     {
         _result.Should().NotBeNull();
         _result!.IsFailure.Should().BeTrue();
     }
 
-    [Then(@"o sistema deve retornar mensagem indicando formato de nome invalido")]
+    [Then(@"o sistema deve retornar mensagem indicando formato de nome inválido")]
     public void EntaoOSistemaDeveRetornarMensagemIndicandoFormatoDeNomeInvalido()
     {
         _result.Should().NotBeNull();
@@ -231,7 +229,7 @@ public class ValidacoesStepDefinitions
         var currentRole = _scenarioContext.TryGetValue<Role>("CurrentUserRole", out var role) ? role : Role.Director;
 
         return new CreateEmployeeCommand(
-            nome ?? "Joao",
+            nome ?? "João",
             sobrenome ?? "Silva",
             email ?? $"joao{Guid.NewGuid()}@supply.com",
             documento ?? TestHelper.GenerateValidCpf(),
@@ -245,6 +243,21 @@ public class ValidacoesStepDefinitions
 
     private async Task ExecutarCriacao(CreateEmployeeCommand command)
     {
+        var validator = new CreateEmployeeCommandValidator();
+        var validation = await validator.ValidateAsync(command);
+
+        if (!validation.IsValid)
+        {
+            var message = string.Join("; ", validation.Errors.Select(e => e.ErrorMessage));
+            _result = Result<EmployeeResponse>.Failure(Error.Validation("Validation", message));
+
+            _httpStatus = 400;
+            _scenarioContext.Set(_httpStatus, "HttpStatus");
+            _scenarioContext.Set(_result, "OperationResult");
+            _scenarioContext.Set(_result.Error.Description, "ErrorMessage");
+            return;
+        }
+
         var handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
@@ -252,15 +265,7 @@ public class ValidacoesStepDefinitions
             _loggerMock.Object);
 
         _result = await handler.Handle(command, CancellationToken.None);
-
         _httpStatus = _result.IsSuccess ? 201 : 400;
-        _scenarioContext.Set(_httpStatus, "HttpStatus");
-        _scenarioContext.Set(_result, "OperationResult");
-
-        if (_result.IsFailure)
-        {
-            _scenarioContext.Set(_result.Error.Description, "ErrorMessage");
-        }
     }
 
     private void SetupRepositoryForNewEmployee()
@@ -275,7 +280,7 @@ public class ValidacoesStepDefinitions
 
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-            .Returns((Task<Employee>)Task.CompletedTask);
+            .ReturnsAsync((Employee e, CancellationToken _) => e);
     }
 
     #endregion

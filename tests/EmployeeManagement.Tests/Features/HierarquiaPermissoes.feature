@@ -1,108 +1,100 @@
 # language: pt-BR
-Funcionalidade: Hierarquia de Permissıes
-  Como um administrador do sistema
-  Eu quero garantir que a hierarquia de permissıes seja respeitada
-  Para manter a seguranÁa e governanÁa do sistema
+Funcionalidade: Hierarquia de Permiss√µes
+  Como um Directoristrador do sistema
+  Eu quero garantir que a hierarquia de permiss√µes seja respeitada
+  Para manter a seguran√ßa e governan√ßa do sistema
 
-  # Hierarquia: Admin > Director > Manager > Leader > Employee
-
-  @hierarquia @criar @sucesso
-  Cen·rio: Admin pode criar qualquer nÌvel de permiss„o
-    Dado que o usu·rio est· autenticado como "Admin"
-    Quando o usu·rio cria um novo funcion·rio com permiss„o "Director"
-    Ent„o o funcion·rio deve ser criado com sucesso
-    E o funcion·rio deve ter permiss„o "Director"
+  # Hierarquia: Director > Leader > Employee
 
   @hierarquia @criar @sucesso
-  Cen·rio: Director pode criar Manager
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com permiss„o "Manager"
-    Ent„o o funcion·rio deve ser criado com sucesso
-    E o funcion·rio deve ter permiss„o "Manager"
+  Cen√°rio: Director pode criar qualquer n√≠vel de permiss√£o
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com permiss√£o "Director"
+    Ent√£o o funcion√°rio deve ser criado com sucesso
+    E o funcion√°rio deve ter permiss√£o "Director"
 
   @hierarquia @criar @sucesso
-  Cen·rio: Director pode criar Employee
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio cria um novo funcion·rio com permiss„o "Employee"
-    Ent„o o funcion·rio deve ser criado com sucesso
-    E o funcion·rio deve ter permiss„o "Employee"
+  Cen√°rio: Director pode criar Leader
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com permiss√£o "Leader"
+    Ent√£o o funcion√°rio deve ser criado com sucesso
+    E o funcion√°rio deve ter permiss√£o "Leader"
 
   @hierarquia @criar @sucesso
-  Cen·rio: Manager pode criar Employee
-    Dado que o usu·rio est· autenticado como "Manager"
-    Quando o usu·rio cria um novo funcion·rio com permiss„o "Employee"
-    Ent„o o funcion·rio deve ser criado com sucesso
-    E o funcion·rio deve ter permiss„o "Employee"
+  Cen√°rio: Director pode criar Employee
+    Dado que o usu√°rio est√° autenticado como "Director"
+    Quando o usu√°rio cria um novo funcion√°rio com permiss√£o "Employee"
+    Ent√£o o funcion√°rio deve ser criado com sucesso
+    E o funcion√°rio deve ter permiss√£o "Employee"
+
+  @hierarquia @criar @sucesso
+  Cen√°rio: Leader pode criar Employee
+    Dado que o usu√°rio est√° autenticado como "Leader"
+    Quando o usu√°rio cria um novo funcion√°rio com permiss√£o "Employee"
+    Ent√£o o funcion√°rio deve ser criado com sucesso
+    E o funcion√°rio deve ter permiss√£o "Employee"
 
   @hierarquia @criar @falha
-  Cen·rio: Director n„o pode criar Admin
-    Dado que o usu·rio est· autenticado como "Director"
-    Quando o usu·rio tenta criar um novo funcion·rio com permiss„o "Admin"
-    Ent„o o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "VocÍ n„o tem permiss„o para criar usu·rios com nÌvel de permiss„o superior"
-    E o funcion·rio n„o deve ser criado no banco de dados
+  Cen√°rio: Leader n√£o pode criar Director
+    Dado que o usu√°rio est√° autenticado como "Leader"
+    Quando o usu√°rio tenta criar um novo funcion√°rio com permiss√£o "Director"
+    Ent√£o o sistema deve retornar status 403
+    E o sistema deve retornar mensagem "You cannot create an employee with a role equal to or higher than yours"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @hierarquia @criar @falha
-  Cen·rio: Manager n„o pode criar Director
-    Dado que o usu·rio est· autenticado como "Manager"
-    Quando o usu·rio tenta criar um novo funcion·rio com permiss„o "Director"
-    Ent„o o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "VocÍ n„o tem permiss„o para criar usu·rios com nÌvel de permiss„o superior"
-    E o funcion·rio n„o deve ser criado no banco de dados
+  Cen√°rio: Leader n√£o pode criar Leader
+    Dado que o usu√°rio est√° autenticado como "Leader"
+    Quando o usu√°rio tenta criar um novo funcion√°rio com permiss√£o "Leader"
+    Ent√£o o sistema deve retornar status 403
+    E o sistema deve retornar mensagem "You cannot create an employee with a role equal to or higher than yours"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @hierarquia @criar @falha
-  Cen·rio: Manager n„o pode criar Manager
-    Dado que o usu·rio est· autenticado como "Manager"
-    Quando o usu·rio tenta criar um novo funcion·rio com permiss„o "Manager"
-    Ent„o o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "VocÍ n„o tem permiss„o para criar usu·rios com nÌvel de permiss„o igual ou superior"
-    E o funcion·rio n„o deve ser criado no banco de dados
-
-  @hierarquia @criar @falha
-  Cen·rio: Employee n„o pode criar nenhum funcion·rio
-    Dado que o usu·rio est· autenticado como "Employee"
-    Quando o usu·rio tenta criar um novo funcion·rio com permiss„o "Employee"
-    Ent„o o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "VocÍ n„o tem permiss„o para criar funcion·rios"
-    E o funcion·rio n„o deve ser criado no banco de dados
+  Cen√°rio: Employee n√£o pode criar nenhum funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    Quando o usu√°rio tenta criar um novo funcion√°rio com permiss√£o "Employee"
+    Ent√£o o sistema deve retornar status 403
+    E o sistema deve retornar mensagem "You cannot create an employee with a role equal to or higher than yours"
+    E o funcion√°rio n√£o deve ser criado no banco de dados
 
   @hierarquia @atualizar @falha
-  Cen·rio: Manager n„o pode promover Employee para Director
-    Dado que o usu·rio est· autenticado como "Manager"
-    E que existe um funcion·rio com permiss„o "Employee"
-    Quando o usu·rio tenta atualizar o funcion·rio para permiss„o "Director"
-    Ent„o o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "VocÍ n„o tem permiss„o para alterar usu·rios para nÌvel de permiss„o superior"
-    E o funcion·rio n„o deve ser atualizado no banco de dados
+  Cen√°rio: Leader n√£o pode promover Employee para Director
+    Dado que o usu√°rio est√° autenticado como "Leader"
+    E que existe um funcion√°rio com permiss√£o "Employee"
+    Quando o usu√°rio tenta atualizar o funcion√°rio para permiss√£o "Director"
+    Ent√£o o sistema deve retornar status 403
+    E o sistema deve retornar mensagem "Voc√™ n√£o tem permiss√£o para alterar usu√°rios para n√≠vel de permiss√£o superior"
+    E o funcion√°rio n√£o deve ser atualizado no banco de dados
 
   @hierarquia @atualizar @sucesso
-  Cen·rio: Admin pode alterar qualquer permiss„o
-    Dado que o usu·rio est· autenticado como "Admin"
-    E que existe um funcion·rio com permiss„o "Employee"
-    Quando o usu·rio atualiza o funcion·rio para permiss„o "Director"
-    Ent„o o sistema deve retornar status 200
-    E o funcion·rio deve ter permiss„o "Director"
+  Cen√°rio: Director pode alterar qualquer permiss√£o
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio com permiss√£o "Employee"
+    Quando o usu√°rio atualiza o funcion√°rio para permiss√£o "Director"
+    Ent√£o o sistema deve retornar status 200
+    E o funcion√°rio deve ter permiss√£o "Director"
 
   @hierarquia @excluir @falha
-  Cen·rio: Employee n„o pode excluir outros funcion·rios
-    Dado que o usu·rio est· autenticado como "Employee"
-    E que existe um funcion·rio cadastrado para exclus„o
-    Quando o usu·rio tenta excluir o funcion·rio
-    Ent„o o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "VocÍ n„o tem permiss„o para excluir funcion·rios"
+  Cen√°rio: Employee n√£o pode excluir outros funcion√°rios
+    Dado que o usu√°rio est√° autenticado como "Employee"
+    E que existe um funcion√°rio cadastrado para exclus√£o
+    Quando o usu√°rio tenta excluir o funcion√°rio
+    Ent√£o o sistema deve retornar status 403
+    E o sistema deve retornar mensagem "Voc√™ n√£o tem permiss√£o para excluir funcion√°rios"
 
   @hierarquia @excluir @sucesso
-  Cen·rio: Director pode excluir Employee
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio com permiss„o "Employee" para exclus„o
-    Quando o usu·rio exclui o funcion·rio
-    Ent„o o sistema deve retornar status 204
-    E o funcion·rio deve ser marcado como excluÌdo
+  Cen√°rio: Director pode excluir Employee
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio com permiss√£o "Employee" para exclus√£o
+    Quando o usu√°rio exclui o funcion√°rio
+    Ent√£o o sistema deve retornar status 204
+    E o funcion√°rio deve ser marcado como exclu√≠do
 
   @hierarquia @excluir @sucesso
-  Cen·rio: Admin pode excluir qualquer funcion·rio
-    Dado que o usu·rio est· autenticado como "Admin"
-    E que existe um funcion·rio com permiss„o "Director" para exclus„o
-    Quando o usu·rio exclui o funcion·rio
-    Ent„o o sistema deve retornar status 204
-    E o funcion·rio deve ser marcado como excluÌdo
+  Cen√°rio: Director pode excluir qualquer funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio com permiss√£o "Director" para exclus√£o
+    Quando o usu√°rio exclui o funcion√°rio
+    Ent√£o o sistema deve retornar status 204
+    E o funcion√°rio deve ser marcado como exclu√≠do

@@ -1,101 +1,101 @@
 # language: pt-BR
 Funcionalidade: Logging e Auditoria
   Como um administrador do sistema
-  Eu quero que todas as operaÁıes sejam registradas em log
+  Eu quero que todas as opera√ß√µes sejam registradas em log
   Para garantir rastreabilidade e auditoria
 
   @logging @criar
-  Cen·rio: Registrar log ao criar funcion·rio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que o sistema de logging est· configurado
-    Quando o usu·rio cria um novo funcion·rio com sucesso
-    Ent„o o sistema deve registrar um log com nÌvel "Information"
-    E o log deve conter a operaÁ„o realizada "CreateEmployee"
-    E o log deve conter o ID do usu·rio que executou a operaÁ„o
-    E o log deve conter o ID do funcion·rio criado
-    E o log deve conter timestamp da operaÁ„o
+  Cen√°rio: Registrar log ao criar funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que o sistema de logging est√° configurado
+    Quando o usu√°rio cria um novo funcion√°rio com sucesso
+    Ent√£o o sistema deve registrar um log com n√≠vel "Information"
+    E o log deve conter a opera√ß√£o realizada "CreateEmployee"
+    E o log deve conter o ID do usu√°rio que executou a opera√ß√£o
+    E o log deve conter o ID do funcion√°rio criado
+    E o log deve conter timestamp da opera√ß√£o
 
   @logging @atualizar
-  Cen·rio: Registrar log ao atualizar funcion·rio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    E que o sistema de logging est· configurado
-    Quando o usu·rio atualiza o funcion·rio com sucesso
-    Ent„o o sistema deve registrar um log com nÌvel "Information"
-    E o log deve conter a operaÁ„o realizada "UpdateEmployee"
-    E o log deve conter o ID do funcion·rio atualizado
+  Cen√°rio: Registrar log ao atualizar funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    E que o sistema de logging est√° configurado
+    Quando o usu√°rio atualiza o funcion√°rio com sucesso
+    Ent√£o o sistema deve registrar um log com n√≠vel "Information"
+    E o log deve conter a opera√ß√£o realizada "UpdateEmployee"
+    E o log deve conter o ID do funcion√°rio atualizado
     E o log deve conter os campos alterados
-    E o log deve conter timestamp da operaÁ„o
+    E o log deve conter timestamp da opera√ß√£o
 
   @logging @excluir
-  Cen·rio: Registrar log ao excluir funcion·rio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado para exclus„o
-    E que o sistema de logging est· configurado
-    Quando o usu·rio exclui o funcion·rio com sucesso
-    Ent„o o sistema deve registrar um log com nÌvel "Warning"
-    E o log deve conter a operaÁ„o realizada "DeleteEmployee"
-    E o log deve conter o ID do funcion·rio excluÌdo
-    E o log deve conter timestamp da operaÁ„o
+  Cen√°rio: Registrar log ao excluir funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado para exclus√£o
+    E que o sistema de logging est√° configurado
+    Quando o usu√°rio exclui o funcion√°rio com sucesso
+    Ent√£o o sistema deve registrar um log com n√≠vel "Warning"
+    E o log deve conter a opera√ß√£o realizada "DeleteEmployee"
+    E o log deve conter o ID do funcion√°rio exclu√≠do
+    E o log deve conter timestamp da opera√ß√£o
 
   @logging @seguranca
-  Cen·rio: Registrar log de tentativa de acesso n„o autorizado
-    Dado que o usu·rio n„o est· autenticado
-    E que o sistema de logging est· configurado
-    Quando o usu·rio tenta acessar um endpoint protegido
-    Ent„o o sistema deve registrar um log com nÌvel "Warning"
+  Cen√°rio: Registrar log de tentativa de acesso n√£o autorizado
+    Dado que o usu√°rio n√£o est√° autenticado
+    E que o sistema de logging est√° configurado
+    Quando o usu√°rio tenta acessar um endpoint protegido
+    Ent√£o o sistema deve registrar um log com n√≠vel "Warning"
     E o log deve conter "Unauthorized access attempt"
     E o log deve conter o endpoint acessado
-    E o log deve conter timestamp da operaÁ„o
+    E o log deve conter timestamp da opera√ß√£o
 
   @logging @login
-  Cen·rio: Registrar log de login bem-sucedido
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "Senha@123"
-    E que o sistema de logging est· configurado
-    Quando o usu·rio realiza login com sucesso
-    Ent„o o sistema deve registrar um log com nÌvel "Information"
+  Cen√°rio: Registrar log de login bem-sucedido
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "Senha@123"
+    E que o sistema de logging est√° configurado
+    Quando o usu√°rio realiza login com sucesso
+    Ent√£o o sistema deve registrar um log com n√≠vel "Information"
     E o log deve conter "Login successful"
-    E o log deve conter o email do usu·rio
-    E o log deve conter timestamp da operaÁ„o
+    E o log deve conter o email do usu√°rio
+    E o log deve conter timestamp da opera√ß√£o
 
   @logging @login @falha
-  Cen·rio: Registrar log de tentativa de login falha
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "Senha@123"
-    E que o sistema de logging est· configurado
-    Quando o usu·rio tenta fazer login com senha incorreta
-    Ent„o o sistema deve registrar um log com nÌvel "Warning"
+  Cen√°rio: Registrar log de tentativa de login falha
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "Senha@123"
+    E que o sistema de logging est√° configurado
+    Quando o usu√°rio tenta fazer login com senha incorreta
+    Ent√£o o sistema deve registrar um log com n√≠vel "Warning"
     E o log deve conter "Login failed"
     E o log deve conter o email tentado
-    E o log deve conter timestamp da operaÁ„o
+    E o log deve conter timestamp da opera√ß√£o
 
   @logging @senha
-  Cen·rio: Registrar log ao alterar senha
-    Dado que existe um funcion·rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
-    E que o sistema de logging est· configurado
-    Quando o funcion·rio altera sua senha com sucesso
-    Ent„o o sistema deve registrar um log com nÌvel "Information"
+  Cen√°rio: Registrar log ao alterar senha
+    Dado que existe um funcion√°rio cadastrado com email "usuario@supply.com" e senha "SenhaAtual@123"
+    E que o sistema de logging est√° configurado
+    Quando o funcion√°rio altera sua senha com sucesso
+    Ent√£o o sistema deve registrar um log com n√≠vel "Information"
     E o log deve conter "Password changed"
-    E o log deve conter o ID do funcion·rio
-    E o log deve conter timestamp da operaÁ„o
-    E o log N√O deve conter a senha antiga ou nova
+    E o log deve conter o ID do funcion√°rio
+    E o log deve conter timestamp da opera√ß√£o
+    E o log N√ÉO deve conter a senha antiga ou nova
 
   @logging @erro
-  Cen·rio: Registrar log de erro interno
-    Dado que o usu·rio est· autenticado como "Director"
-    E que o sistema de logging est· configurado
-    Quando ocorre um erro interno durante uma operaÁ„o
-    Ent„o o sistema deve registrar um log com nÌvel "Error"
+  Cen√°rio: Registrar log de erro interno
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que o sistema de logging est√° configurado
+    Quando ocorre um erro interno durante uma opera√ß√£o
+    Ent√£o o sistema deve registrar um log com n√≠vel "Error"
     E o log deve conter a stack trace do erro
-    E o log deve conter o contexto da operaÁ„o
-    E o log deve conter timestamp da operaÁ„o
+    E o log deve conter o contexto da opera√ß√£o
+    E o log deve conter timestamp da opera√ß√£o
 
   @auditoria @historico
-  Cen·rio: Manter histÛrico de alteraÁıes do funcion·rio
-    Dado que o usu·rio est· autenticado como "Director"
-    E que existe um funcion·rio cadastrado com ID conhecido
-    Quando o usu·rio atualiza o nome do funcion·rio de "Jo„o" para "Carlos"
-    Ent„o o sistema deve registrar a alteraÁ„o no histÛrico de auditoria
-    E o histÛrico deve conter o valor anterior "Jo„o"
-    E o histÛrico deve conter o novo valor "Carlos"
-    E o histÛrico deve conter o usu·rio que fez a alteraÁ„o
-    E o histÛrico deve conter a data da alteraÁ„o
+  Cen√°rio: Manter hist√≥rico de altera√ß√µes do funcion√°rio
+    Dado que o usu√°rio est√° autenticado como "Director"
+    E que existe um funcion√°rio cadastrado com ID conhecido
+    Quando o usu√°rio atualiza o nome do funcion√°rio de "Jo√£o" para "Carlos"
+    Ent√£o o sistema deve registrar a altera√ß√£o no hist√≥rico de auditoria
+    E o hist√≥rico deve conter o valor anterior "Jo√£o"
+    E o hist√≥rico deve conter o novo valor "Carlos"
+    E o hist√≥rico deve conter o usu√°rio que fez a altera√ß√£o
+    E o hist√≥rico deve conter a data da altera√ß√£o

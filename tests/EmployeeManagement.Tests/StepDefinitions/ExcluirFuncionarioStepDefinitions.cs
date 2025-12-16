@@ -1,12 +1,10 @@
-﻿using TechTalk.SpecFlow;
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
-using EmployeeManagement.Tests.Helpers;
-using EmployeeManagement.Tests.Fixtures;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
 [Binding]
+[Scope(Feature = "Exclusão de Funcionário")]
 public class ExcluirFuncionarioStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
@@ -16,6 +14,7 @@ public class ExcluirFuncionarioStepDefinitions
     private readonly Mock<ILogger<DeleteEmployeeCommandHandler>> _loggerMock;
 
     private Employee? _employeeToDelete;
+    private List<Employee> _allEmployees = new();
     private List<Employee> _subordinates = new();
     private Result? _deleteResult;
     private int _httpStatus = 200;
@@ -41,6 +40,20 @@ public class ExcluirFuncionarioStepDefinitions
             .Returns(Task.CompletedTask);
     }
 
+    [Given(@"que o usuário está autenticado como ""(.*)""")]
+    public void DadoQueOUsuarioEstaAutenticadoComo(string role)
+    {
+        var parsedRole = Enum.Parse<Role>(role);
+        _scenarioContext.Set(parsedRole, "CurrentUserRole");
+        _scenarioContext.Set(true, "IsAuthenticated");
+    }
+
+    [Given(@"que o usuário não está autenticado")]
+    public void DadoQueOUsuarioNaoEstaAutenticado()
+    {
+        _scenarioContext.Set(false, "IsAuthenticated");
+    }
+
     [Given(@"que existe um funcionário cadastrado com ID conhecido para exclusão")]
     public void DadoQueExisteUmFuncionarioCadastradoComIdConhecidoParaExclusao()
     {
@@ -64,9 +77,11 @@ public class ExcluirFuncionarioStepDefinitions
             TestHelper.CreateValidEmployee(managerId: _employeeToDelete.Id)
         };
 
+        _allEmployees.AddRange(_subordinates);
+
         _repositoryMock
-            .Setup(x => x.GetByManagerIdAsync(_employeeToDelete.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_subordinates);
+            .Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_allEmployees);
     }
 
     [Given(@"que não existe funcionário com ID ""(.*)""")]
@@ -247,13 +262,16 @@ public class ExcluirFuncionarioStepDefinitions
 
     private void SetupEmployeeForDeletion()
     {
+        _allEmployees.Add(_employeeToDelete!);
+
         _repositoryMock
             .Setup(x => x.GetByIdAsync(_employeeToDelete!.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(_employeeToDelete);
 
+        // Simular que não há subordinados por padrão
         _repositoryMock
-            .Setup(x => x.GetByManagerIdAsync(_employeeToDelete!.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Employee>());
+            .Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_allEmployees);
 
         _scenarioContext.Set(_employeeToDelete!.Id, "EmployeeId");
         _scenarioContext.Set(_employeeToDelete, "EmployeeToDelete");
