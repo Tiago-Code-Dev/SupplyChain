@@ -12,17 +12,20 @@ public class UpdateEmployeeCommandHandlerTests
     private readonly Mock<IEmployeeRepository> _repositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _loggerMock;
+    private readonly Mock<ICacheService> _cacheMock;
     private readonly UpdateEmployeeCommandHandler _handler;
 
     public UpdateEmployeeCommandHandlerTests()
     {
         _repositoryMock = Fixtures.MockFactory.CreateEmployeeRepositoryMock();
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
+        _cacheMock = new Mock<ICacheService>();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<UpdateEmployeeCommandHandler>();
 
         _handler = new UpdateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
+            _cacheMock.Object,
             _loggerMock.Object);
     }
 
@@ -57,7 +60,10 @@ public class UpdateEmployeeCommandHandlerTests
             newEmail,
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>());
+            new List<string>(),
+            null, 
+            Role.Employee 
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -91,17 +97,19 @@ public class UpdateEmployeeCommandHandlerTests
             employee.Id,
             "Novo Nome",
             "Sobrenome",
-            employee.Email, // Mesmo email
+            employee.Email,
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>());
+            new List<string>(),
+            null,
+            Role.Employee 
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        // Não deve verificar duplicação de email quando é o mesmo
         _repositoryMock.Verify(x => x.GetByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -134,7 +142,10 @@ public class UpdateEmployeeCommandHandlerTests
             "novo@email.com",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            newPhones);
+            newPhones,
+            null, 
+            Role.Employee 
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -166,7 +177,10 @@ public class UpdateEmployeeCommandHandlerTests
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>());
+            new List<string>(),
+            null, 
+            Role.Employee 
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -196,10 +210,13 @@ public class UpdateEmployeeCommandHandlerTests
             employee.Id,
             "Test",
             "User",
-            "existing@test.com", // Email que já existe em outro funcionário
+            "existing@test.com",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>());
+            new List<string>(),
+            null, 
+            Role.Employee 
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -231,8 +248,11 @@ public class UpdateEmployeeCommandHandlerTests
             "User",
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
-            employee.Id, // Próprio ID como gerente
-            new List<string>());
+            employee.Id, 
+            new List<string>(),
+            null, 
+            Role.Employee 
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -240,7 +260,7 @@ public class UpdateEmployeeCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("Validation");
-        result.Error.Description.Should().Contain("cannot be their own manager");
+        result.Error.Description.Should().Contain("O funcionário não pode ser seu próprio gestor");
     }
 
     [Fact]
@@ -270,7 +290,10 @@ public class UpdateEmployeeCommandHandlerTests
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
             nonExistentManagerId,
-            new List<string>());
+            new List<string>(),
+            null, 
+            Role.Employee
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -302,7 +325,10 @@ public class UpdateEmployeeCommandHandlerTests
             "invalid-email",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>());
+            new List<string>(),
+            null,
+            Role.Employee
+        );
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

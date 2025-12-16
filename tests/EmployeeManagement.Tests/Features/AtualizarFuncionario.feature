@@ -21,7 +21,7 @@ Funcionalidade: Atualização de Funcionário
     E que não existe funcionário com ID "99999999-9999-9999-9999-999999999999"
     Quando o usuário tenta atualizar o funcionário inexistente com dados válidos
     Então o sistema deve retornar status 404
-    E o sistema deve retornar mensagem "Employee not found"
+    E o sistema deve retornar mensagem "Employee 'Funcionário não encontrado' was not found"
 
   @funcionario @atualizar @autenticacao
   Cenário: Atualizar funcionário sem autenticação
@@ -58,7 +58,7 @@ Funcionalidade: Atualização de Funcionário
     E que existe outro funcionário com email "maria@supply.com"
     Quando o usuário tenta atualizar o funcionário para email "maria@supply.com"
     Então o sistema deve retornar status 409
-    E o sistema deve retornar mensagem "Email already exists"
+    E o sistema deve retornar mensagem "Email já cadastrado"
     E o funcionário não deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao @negocio
@@ -95,7 +95,7 @@ Funcionalidade: Atualização de Funcionário
     E que existe um funcionário cadastrado com ID conhecido
     Quando o usuário tenta atualizar o funcionário para ser seu próprio gestor
     Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Employee cannot be their own manager"
+    E o sistema deve retornar mensagem "O funcionário não pode ser seu próprio gestor"
     E o funcionário não deve ser atualizado no banco de dados
 
   @funcionario @atualizar @validacao

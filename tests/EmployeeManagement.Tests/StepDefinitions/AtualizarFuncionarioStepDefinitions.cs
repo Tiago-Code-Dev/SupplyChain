@@ -120,6 +120,10 @@ public class AtualizarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByEmailAsync(email.ToLowerInvariant(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(_otherEmployee);
+        
+        _repositoryMock
+            .Setup(x => x.EmailExistsAsync(email, It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
     }
 
     [Given(@"que os dados do funcionário estão em cache")]
@@ -163,7 +167,9 @@ public class AtualizarFuncionarioStepDefinitions
             data["Email"],
             data.ContainsKey("DataNascimento") ? DateTime.Parse(data["DataNascimento"]) : _existingEmployee.BirthDate,
             null,
-            telefones);
+            telefones,
+            null,           
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -178,7 +184,9 @@ public class AtualizarFuncionarioStepDefinitions
             "novo@email.com",
             _existingEmployee.BirthDate,
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -194,7 +202,9 @@ public class AtualizarFuncionarioStepDefinitions
             "test@test.com",
             DateTime.UtcNow.AddYears(-25),
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -226,7 +236,9 @@ public class AtualizarFuncionarioStepDefinitions
             "novo@email.com",
             _existingEmployee.BirthDate,
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" }, 
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -241,7 +253,9 @@ public class AtualizarFuncionarioStepDefinitions
             _existingEmployee.Email,
             DateTime.Parse(dataNascimento),
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -256,7 +270,9 @@ public class AtualizarFuncionarioStepDefinitions
             _existingEmployee.Email,
             _existingEmployee.BirthDate,
             null,
-            new List<string>());
+            new List<string>(),
+            null,           
+            GetCurrentUserRole()); 
 
         await ExecutarAtualizacao(command);
     }
@@ -272,7 +288,9 @@ public class AtualizarFuncionarioStepDefinitions
             _existingEmployee.Email,
             _existingEmployee.BirthDate,
             nonExistentManagerId,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -287,7 +305,9 @@ public class AtualizarFuncionarioStepDefinitions
             _existingEmployee.Email,
             _existingEmployee.BirthDate,
             _existingEmployee.Id,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -302,7 +322,26 @@ public class AtualizarFuncionarioStepDefinitions
             email,
             _existingEmployee.BirthDate,
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
+
+        await ExecutarAtualizacao(command);
+    }
+
+    [When(@"o usuário tenta atualizar o funcionário para email ""(.*)""")]
+    public async Task QuandoOUsuarioTentaAtualizarOFuncionarioParaEmail(string email)
+    {
+        var command = new UpdateEmployeeCommand(
+            _existingEmployee!.Id,
+            _existingEmployee.FirstName,
+            _existingEmployee.LastName,
+            email,
+            _existingEmployee.BirthDate,
+            null,
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -317,7 +356,9 @@ public class AtualizarFuncionarioStepDefinitions
             _existingEmployee.Email,
             _existingEmployee.BirthDate,
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null,
+            GetCurrentUserRole());
 
         await ExecutarAtualizacao(command);
     }
@@ -410,6 +451,10 @@ public class AtualizarFuncionarioStepDefinitions
             .Setup(x => x.GetByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
 
+        _repositoryMock
+            .Setup(x => x.EmailExistsAsync(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
         _scenarioContext.Set(_existingEmployee!.Id, "EmployeeId");
         _scenarioContext.Set(_existingEmployee, "ExistingEmployee");
     }
@@ -419,6 +464,7 @@ public class AtualizarFuncionarioStepDefinitions
         var handler = new UpdateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
+            _cacheServiceMock.Object,
             _loggerMock.Object);
 
         _result = await handler.Handle(command, CancellationToken.None);
@@ -428,5 +474,11 @@ public class AtualizarFuncionarioStepDefinitions
              _result.Error.Code.Contains("Conflict") ? 409 : 400);
 
         _scenarioContext.Set(_httpStatus, "HttpStatus");
+    }
+    private Role GetCurrentUserRole()
+    {
+        return _scenarioContext.TryGetValue<Role>("CurrentUserRole", out var role)
+            ? role
+            : Role.Director;
     }
 }

@@ -8,7 +8,6 @@ public class TestHooks
     [BeforeTestRun]
     public static void BeforeTestRun()
     {
-        // Configuração global antes de todos os testes BDD
         Console.WriteLine("========================================");
         Console.WriteLine("Iniciando execução dos testes BDD...");
         Console.WriteLine("========================================");
@@ -17,7 +16,6 @@ public class TestHooks
     [AfterTestRun]
     public static void AfterTestRun()
     {
-        // Limpeza global após todos os testes BDD
         Console.WriteLine("========================================");
         Console.WriteLine("Finalizando execução dos testes BDD...");
         Console.WriteLine("========================================");
@@ -26,14 +24,12 @@ public class TestHooks
     [BeforeScenario]
     public void BeforeScenario(ScenarioContext scenarioContext)
     {
-        // Configuração antes de cada cenário
         Console.WriteLine($"Iniciando cenário: {scenarioContext.ScenarioInfo.Title}");
     }
 
     [AfterScenario]
     public void AfterScenario(ScenarioContext scenarioContext)
     {
-        // Limpeza após cada cenário
         if (scenarioContext.TestError != null)
         {
             Console.WriteLine($"Cenário falhou: {scenarioContext.TestError.Message}");

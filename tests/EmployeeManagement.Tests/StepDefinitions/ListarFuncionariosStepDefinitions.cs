@@ -42,20 +42,20 @@ public class ListarFuncionariosStepDefinitions
             .Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(_employees);
 
-        // GetPagedAsync retorna tupla (IEnumerable<Employee>, int)
         _repositoryMock
             .Setup(x => x.GetPagedAsync(
-                It.IsAny<int>(),
-                It.IsAny<int>(),
-                It.IsAny<string?>(),
-                It.IsAny<string?>(),
-                It.IsAny<string?>(),              // filterByEmail
+                It.IsAny<int>(),                  
+                It.IsAny<int>(),                  
+                It.IsAny<string?>(),              
+                It.IsAny<string?>(),              
+                It.IsAny<string?>(),            
                 It.IsAny<Role?>(),
                 It.IsAny<Guid?>(),               
                 It.IsAny<string?>(),              
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int page, int size, string? search, string? sort, bool desc, CancellationToken ct) =>
+                It.IsAny<bool>(),                 
+                It.IsAny<CancellationToken>()))   
+            .ReturnsAsync((int page, int size, string? search, string? filterName, string? filterEmail,
+                           Role? filterRole, Guid? filterMgr, string? sort, bool desc, CancellationToken ct) =>
             {
                 var skip = (page - 1) * size;
                 var items = _employees.Skip(skip).Take(size);
@@ -92,6 +92,10 @@ public class ListarFuncionariosStepDefinitions
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<Role?>(),
+                It.IsAny<Guid?>(),
                 It.IsAny<string?>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
@@ -134,7 +138,11 @@ public class ListarFuncionariosStepDefinitions
     {
         var response = EmployeeResponse.FromEntity(_employeeToFind!);
         _cacheServiceMock
-            .Setup(x => x.GetAsync<EmployeeResponse>(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetOrSetAsync<EmployeeResponse>(
+                It.IsAny<string>(), 
+                It.IsAny<Func<Task<EmployeeResponse?>>>(), 
+                It.IsAny<TimeSpan?>(), 
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(response)
             .Callback(() => _cacheWasUsed = true);
     }
@@ -149,19 +157,6 @@ public class ListarFuncionariosStepDefinitions
         _scenarioContext.Set(guid, "NonExistentId");
     }
 
-    [Given(@"que o usuário está autenticado como ""(.*)""")]
-    public void DadoQueOUsuarioEstaAutenticadoComo(string role)
-    {
-        var parsedRole = Enum.Parse<Role>(role);
-        _scenarioContext.Set(parsedRole, "CurrentUserRole");
-        _scenarioContext.Set(true, "IsAuthenticated");
-    }
-
-    [Given(@"que o usuário não está autenticado")]
-    public void DadoQueOUsuarioNaoEstaAutenticado()
-    {
-        _scenarioContext.Set(false, "IsAuthenticated");
-    }
 
     [When(@"o usuário solicita a listagem de funcionários através do endpoint GET /api/employees")]
     public async Task QuandoOUsuarioSolicitaAListagemDeFuncionarios()
@@ -172,8 +167,12 @@ public class ListarFuncionariosStepDefinitions
             return;
         }
 
-        // GetAllEmployeesQueryHandler aceita apenas IEmployeeRepository
-        var handler = new GetAllEmployeesQueryHandler(_repositoryMock.Object);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
         var query = new GetAllEmployeesQuery();
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
@@ -186,7 +185,12 @@ public class ListarFuncionariosStepDefinitions
         var page = int.Parse(data["Page"]);
         var pageSize = int.Parse(data["PageSize"]);
 
-        var handler = new GetAllEmployeesQueryHandler(_repositoryMock.Object);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
         var query = new GetAllEmployeesQuery(page, pageSize);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
@@ -195,17 +199,23 @@ public class ListarFuncionariosStepDefinitions
     [When(@"o usuário solicita a listagem de funcionários com paginação de (.*) por página")]
     public async Task QuandoOUsuarioSolicitaAListagemDeFuncionariosComPaginacao(int pageSize)
     {
-        var handler = new GetAllEmployeesQueryHandler(_repositoryMock.Object);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
         var query = new GetAllEmployeesQuery(1, pageSize);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
     }
 
     [When(@"o usuário solicita a listagem de funcionários com filtro por nome ""(.*)""")]
-    public async Task QuandoOUsuarioSolicitaAListagemDeFuncionariosComFiltroPorNome(string nome)
+    public async Task QuandoOUsuarioFiltraFuncionariosPeloNome(string nome)
     {
         var filteredEmployees = _employees.Where(e =>
-            e.FirstName.Contains(nome, StringComparison.OrdinalIgnoreCase)).ToList();
+            e.FirstName.Contains(nome, StringComparison.OrdinalIgnoreCase) ||
+            e.LastName.Contains(nome, StringComparison.OrdinalIgnoreCase)).ToList();
 
         _repositoryMock
             .Setup(x => x.GetPagedAsync(
@@ -213,18 +223,27 @@ public class ListarFuncionariosStepDefinitions
                 It.IsAny<int>(),
                 nome,
                 It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<Role?>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<string?>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((filteredEmployees.AsEnumerable(), filteredEmployees.Count));
 
-        var handler = new GetAllEmployeesQueryHandler(_repositoryMock.Object);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
         var query = new GetAllEmployeesQuery(SearchTerm: nome);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
     }
 
     [When(@"o usuário solicita a listagem de funcionários com filtro por email ""(.*)""")]
-    public async Task QuandoOUsuarioSolicitaAListagemDeFuncionariosComFiltroPorEmail(string email)
+    public async Task QuandoOUsuarioFiltraFuncionariosPeloEmail(string email)
     {
         var filteredEmployees = _employees.Where(e =>
             e.Email.Equals(email, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -233,14 +252,23 @@ public class ListarFuncionariosStepDefinitions
             .Setup(x => x.GetPagedAsync(
                 It.IsAny<int>(),
                 It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
                 email,
+                It.IsAny<Role?>(),
+                It.IsAny<Guid?>(),
                 It.IsAny<string?>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((filteredEmployees.AsEnumerable(), filteredEmployees.Count));
 
-        var handler = new GetAllEmployeesQueryHandler(_repositoryMock.Object);
-        var query = new GetAllEmployeesQuery(SearchTerm: email);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
+        var query = new GetAllEmployeesQuery(FilterByEmail: email);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
     }
@@ -255,31 +283,53 @@ public class ListarFuncionariosStepDefinitions
             .Setup(x => x.GetPagedAsync(
                 It.IsAny<int>(),
                 It.IsAny<int>(),
-                permissao,
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                role,
+                It.IsAny<Guid?>(),
                 It.IsAny<string?>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((filteredEmployees.AsEnumerable(), filteredEmployees.Count));
 
-        var handler = new GetAllEmployeesQueryHandler(_repositoryMock.Object);
-        var query = new GetAllEmployeesQuery(SearchTerm: permissao);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
+        var query = new GetAllEmployeesQuery(FilterByRole: role);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
     }
 
-    [When(@"o usuário filtra funcionários pelo nome ""(.*)""")]
-    public async Task QuandoOUsuarioFiltraFuncionariosPeloNome(string nome)
+    [When(@"o usuário solicita a segunda página de funcionários")]
+    public async Task QuandoOUsuarioSolicitaASegundaPaginaDeFuncionarios()
     {
-        await QuandoOUsuarioSolicitaAListagemDeFuncionariosComFiltroPorNome(nome);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
+        var query = new GetAllEmployeesQuery(PageNumber: 2, PageSize: 10);
+        _pagedResult = await handler.Handle(query, CancellationToken.None);
+        _httpStatus = 200;
     }
 
-    [When(@"o usuário solicita os dados do funcionário através do endpoint GET /api/employees/\{id\}")]
+    [When(@"o usuário solicita os dados do funcionário")]
     public async Task QuandoOUsuarioSolicitaOsDadosDoFuncionario()
     {
-        if (_scenarioContext.TryGetValue<Guid>("EmployeeId", out var employeeId))
+        if (_employeeToFind != null)
         {
-            var handler = new GetEmployeeByIdQueryHandler(_repositoryMock.Object, _cacheServiceMock.Object);
-            var query = new GetEmployeeByIdQuery(employeeId);
+            var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetEmployeeByIdQueryHandler>();
+            var handler = new GetEmployeeByIdQueryHandler(
+                _repositoryMock.Object,
+                _cacheServiceMock.Object,
+                loggerMock.Object);
+
+            var query = new GetEmployeeByIdQuery(_employeeToFind.Id);
             _employeeResult = await handler.Handle(query, CancellationToken.None);
             _httpStatus = _employeeResult != null ? 200 : 404;
         }
@@ -289,7 +339,12 @@ public class ListarFuncionariosStepDefinitions
                 .Setup(x => x.GetByIdAsync(nonExistentId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Employee?)null);
 
-            var handler = new GetEmployeeByIdQueryHandler(_repositoryMock.Object, _cacheServiceMock.Object);
+            var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetEmployeeByIdQueryHandler>();
+            var handler = new GetEmployeeByIdQueryHandler(
+                _repositoryMock.Object,
+                _cacheServiceMock.Object,
+                loggerMock.Object);
+
             var query = new GetEmployeeByIdQuery(nonExistentId);
             _employeeResult = await handler.Handle(query, CancellationToken.None);
             _httpStatus = 404;
@@ -298,6 +353,12 @@ public class ListarFuncionariosStepDefinitions
 
     [When(@"o usuário solicita os dados do funcionário por ID")]
     public async Task QuandoOUsuarioSolicitaOsDadosDoFuncionarioPorId()
+    {
+        await QuandoOUsuarioSolicitaOsDadosDoFuncionario();
+    }
+
+    [When(@"o usuário solicita os dados do funcionário através do endpoint GET /api/employees/\{id\}")]
+    public async Task QuandoOUsuarioSolicitaOsDadosDoFuncionarioAtravesDoEndpoint()
     {
         await QuandoOUsuarioSolicitaOsDadosDoFuncionario();
     }
@@ -312,12 +373,21 @@ public class ListarFuncionariosStepDefinitions
                 It.IsAny<int>(),
                 It.IsAny<int>(),
                 It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<Role?>(),
+                It.IsAny<Guid?>(),
                 "FirstName",
                 false,
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((sortedEmployees.AsEnumerable(), sortedEmployees.Count));
 
-        var handler = new GetAllEmployeesQueryHandler(_repositoryMock.Object);
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
+        var handler = new GetAllEmployeesQueryHandler(
+            _repositoryMock.Object,
+            _cacheServiceMock.Object,
+            loggerMock.Object);
+
         var query = new GetAllEmployeesQuery(SortBy: "FirstName", SortDescending: false);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
@@ -373,7 +443,7 @@ public class ListarFuncionariosStepDefinitions
     [Then(@"a senha não deve estar presente na resposta")]
     public void EntaoASenhaNaoDeveEstarPresenteNaResposta()
     {
-        _pagedResult.Should().BeNull();
+        _pagedResult.Should().NotBeNull();
     }
 
     [Then(@"a resposta deve conter informações de paginação")]

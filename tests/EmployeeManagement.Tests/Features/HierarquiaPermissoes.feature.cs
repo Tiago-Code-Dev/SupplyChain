@@ -275,8 +275,8 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 403", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 42
-    testRunner.And("o sistema deve retornar mensagem \"You cannot create an employee with a role equal" +
-                        " to or higher than yours\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Você não pode criar um funcionário com permissã" +
+                        "o igual ou superior à sua\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 43
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -319,8 +319,8 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 403", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 50
-    testRunner.And("o sistema deve retornar mensagem \"You cannot create an employee with a role equal" +
-                        " to or higher than yours\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Você não pode criar um funcionário com permissã" +
+                        "o igual ou superior à sua\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 51
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -363,8 +363,8 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 403", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 58
-    testRunner.And("o sistema deve retornar mensagem \"You cannot create an employee with a role equal" +
-                        " to or higher than yours\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Você não pode criar um funcionário com permissã" +
+                        "o igual ou superior à sua\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 59
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");

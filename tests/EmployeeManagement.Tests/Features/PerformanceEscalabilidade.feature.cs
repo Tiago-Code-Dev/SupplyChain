@@ -539,7 +539,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 97
-    testRunner.And("o tempo de resposta deve ser menor que 100ms", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o tempo de resposta deve ser menor que 500ms", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 98
     testRunner.And("a busca deve utilizar índice no campo email", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");

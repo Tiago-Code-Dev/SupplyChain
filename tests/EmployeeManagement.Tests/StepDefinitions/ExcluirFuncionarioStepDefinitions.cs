@@ -116,8 +116,9 @@ public class ExcluirFuncionarioStepDefinitions
     public async Task QuandoOUsuarioTentaExcluirOFuncionarioInexistente()
     {
         var nonExistentId = _scenarioContext.Get<Guid>("NonExistentId");
+        var currentRole = _scenarioContext.TryGetValue<Role>("CurrentUserRole", out var role) ? role : Role.Employee;
 
-        var command = new DeleteEmployeeCommand(nonExistentId);
+        var command = new DeleteEmployeeCommand(nonExistentId, currentRole);
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
@@ -268,7 +269,6 @@ public class ExcluirFuncionarioStepDefinitions
             .Setup(x => x.GetByIdAsync(_employeeToDelete!.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(_employeeToDelete);
 
-        // Simular que não há subordinados por padrão
         _repositoryMock
             .Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(_allEmployees);
@@ -279,7 +279,8 @@ public class ExcluirFuncionarioStepDefinitions
 
     private async Task ExecutarExclusao()
     {
-        var command = new DeleteEmployeeCommand(_employeeToDelete!.Id);
+        var currentRole = _scenarioContext.TryGetValue<Role>("CurrentUserRole", out var role) ? role : Role.Employee;
+        var command = new DeleteEmployeeCommand(_employeeToDelete!.Id, currentRole);
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,

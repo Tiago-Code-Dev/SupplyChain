@@ -415,7 +415,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve registrar um log com nível \"Information\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 77
-    testRunner.And("o log deve conter \"Password changed\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o log deve conter \"Credentials updated\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 78
     testRunner.And("o log deve conter o ID do funcionário", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");

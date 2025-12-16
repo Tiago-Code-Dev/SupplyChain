@@ -16,4 +16,3 @@ global using EmployeeManagement.Application.Features.Employees.Common;
 
 // Test Helpers
 global using EmployeeManagement.Tests.Helpers;
-global using EmployeeManagement.Tests.Fixtures;

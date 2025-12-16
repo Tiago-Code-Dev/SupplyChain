@@ -14,6 +14,7 @@ public class CreateEmployeeCommandHandlerTests
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _loggerMock;
+    private readonly Mock<ICacheService> _cacheMock;
     private readonly CreateEmployeeCommandHandler _handler;
 
     public CreateEmployeeCommandHandlerTests()
@@ -21,6 +22,7 @@ public class CreateEmployeeCommandHandlerTests
         _repositoryMock = Fixtures.MockFactory.CreateEmployeeRepositoryMock();
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _passwordHasherMock = new Mock<IPasswordHasher>();
+        _cacheMock = new Mock<ICacheService>();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<CreateEmployeeCommandHandler>();
 
         _passwordHasherMock
@@ -31,6 +33,7 @@ public class CreateEmployeeCommandHandlerTests
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
+            _cacheMock.Object,
             _loggerMock.Object);
     }
 
@@ -181,10 +184,10 @@ public class CreateEmployeeCommandHandlerTests
             TestHelper.GenerateValidCpf(),
             TestHelper.GenerateAdultBirthDate(),
             "Password123",
-            Role.Director,       // Tentando criar Admin
+            Role.Director,      
             null,
             new List<string>(),
-            Role.Leader);    // Mas usuário atual é Manager
+            Role.Leader);    
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -192,7 +195,7 @@ public class CreateEmployeeCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("Forbidden");
-        result.Error.Description.Should().Contain("cannot create an employee with a role equal to or higher");
+        result.Error.Description.Should().Contain("Você não pode criar um funcionário com permissão igual ou superior à sua");
     }
 
     [Fact]
@@ -207,10 +210,10 @@ public class CreateEmployeeCommandHandlerTests
             TestHelper.GenerateValidCpf(),
             TestHelper.GenerateAdultBirthDate(),
             "Password123",
-            Role.Leader,     // Tentando criar Manager
+            Role.Leader,    
             null,
             new List<string>(),
-            Role.Leader);    // Usuário atual também é Manager
+            Role.Leader);    
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

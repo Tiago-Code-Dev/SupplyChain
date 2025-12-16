@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
-using FluentValidation;
 
 namespace EmployeeManagement.Tests.StepDefinitions;
 
@@ -258,10 +257,13 @@ public class ValidacoesStepDefinitions
             return;
         }
 
+        var cacheServiceMock = new Mock<ICacheService>();
+
         var handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
+            cacheServiceMock.Object,
             _loggerMock.Object);
 
         _result = await handler.Handle(command, CancellationToken.None);

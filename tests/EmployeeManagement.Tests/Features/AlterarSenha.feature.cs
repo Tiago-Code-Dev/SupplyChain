@@ -178,7 +178,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 26
-    testRunner.And("o sistema deve retornar mensagem \"Senha atual incorreta\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Current password is incorrect\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 27
     testRunner.And("a senha não deve ser alterada", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -381,7 +381,8 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 404", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 67
-    testRunner.And("o sistema deve retornar mensagem \"Employee not found\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Employee with ID \'99999999-9999-9999-9999-99999" +
+                        "9999999\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -412,7 +413,7 @@ namespace EmployeeManagement.Tests.Features
             {
                 this.ScenarioStart();
 #line 71
-    testRunner.Given("que existe um funcionário cadastrado com email \"usuario@supply.com\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
+    testRunner.Given("que existe um funcionario cadastrado com email \"usuario@supply.com\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
 #line 72
     testRunner.And("que o usuário não está autenticado", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");

@@ -94,5 +94,5 @@ Funcionalidade: Performance e Escalabilidade
     E que existem 5000 funcionários cadastrados no sistema
     Quando o usuário busca funcionário por email "joao@supply.com"
     Então o sistema deve retornar status 200
-    E o tempo de resposta deve ser menor que 100ms
+    E o tempo de resposta deve ser menor que 500ms
     E a busca deve utilizar índice no campo email

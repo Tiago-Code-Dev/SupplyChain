@@ -213,6 +213,7 @@ public class HierarquiaPermissoesStepDefinitions
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
+            _cacheServiceMock.Object,
             _createLoggerMock.Object);
 
         _createResult = await handler.Handle(command, CancellationToken.None);
@@ -238,11 +239,14 @@ public class HierarquiaPermissoesStepDefinitions
                 _targetEmployee.Email,
                 _targetEmployee.BirthDate,
                 null,
-                new List<string> { "11999999999" });
+                new List<string> { "11999999999" },
+                targetRole,
+                _currentUserRole);
 
             var handler = new UpdateEmployeeCommandHandler(
                 _repositoryMock.Object,
                 _unitOfWorkMock.Object,
+                _cacheServiceMock.Object,
                 _updateLoggerMock.Object);
 
             _repositoryMock
@@ -264,7 +268,7 @@ public class HierarquiaPermissoesStepDefinitions
             return;
         }
 
-        var command = new DeleteEmployeeCommand(_targetEmployee!.Id);
+        var command = new DeleteEmployeeCommand(_targetEmployee!.Id, _currentUserRole);
 
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,

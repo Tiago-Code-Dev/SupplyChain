@@ -42,7 +42,7 @@ public class DeleteEmployeeCommandHandlerTests
             .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(employee);
 
-        var command = new DeleteEmployeeCommand(employee.Id);
+        var command = new DeleteEmployeeCommand(employee.Id, Role.Admin);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -66,7 +66,7 @@ public class DeleteEmployeeCommandHandlerTests
             .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(employee);
 
-        var command = new DeleteEmployeeCommand(employee.Id);
+        var command = new DeleteEmployeeCommand(employee.Id, Role.Admin);
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
@@ -74,7 +74,7 @@ public class DeleteEmployeeCommandHandlerTests
         // Assert
         _cacheServiceMock.Verify(
             x => x.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
-            Times.AtLeast(2)); // Cache do employee e AllEmployees
+            Times.AtLeast(2)); 
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public class DeleteEmployeeCommandHandlerTests
             .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(employee);
 
-        var command = new DeleteEmployeeCommand(employee.Id);
+        var command = new DeleteEmployeeCommand(employee.Id, Role.Admin);
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
@@ -113,7 +113,7 @@ public class DeleteEmployeeCommandHandlerTests
             .Setup(x => x.GetByIdAsync(nonExistentId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
 
-        var command = new DeleteEmployeeCommand(nonExistentId);
+        var command = new DeleteEmployeeCommand(nonExistentId, Role.Admin);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -136,7 +136,7 @@ public class DeleteEmployeeCommandHandlerTests
             .Setup(x => x.GetByIdAsync(emptyId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
 
-        var command = new DeleteEmployeeCommand(emptyId);
+        var command = new DeleteEmployeeCommand(emptyId, Role.Admin);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

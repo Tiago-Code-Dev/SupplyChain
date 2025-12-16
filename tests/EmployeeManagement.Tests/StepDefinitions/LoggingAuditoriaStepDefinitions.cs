@@ -18,7 +18,6 @@ public class LoggingAuditoriaStepDefinitions
     private readonly Mock<IJwtService> _jwtServiceMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
 
-    // Mocks de Logger para cada handler
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _createLoggerMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _updateLoggerMock;
     private readonly Mock<ILogger<DeleteEmployeeCommandHandler>> _deleteLoggerMock;
@@ -130,6 +129,7 @@ public class LoggingAuditoriaStepDefinitions
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
+            _cacheServiceMock.Object,
             _createLoggerMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -152,11 +152,15 @@ public class LoggingAuditoriaStepDefinitions
             "Carlos", "Silva", "carlos@supply.com",
             _employee.BirthDate,
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null, 
+            Role.Director 
+        );
 
         var handler = new UpdateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
+            _cacheServiceMock.Object,
             _updateLoggerMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -166,7 +170,7 @@ public class LoggingAuditoriaStepDefinitions
     [When(@"o usuário exclui o funcionário com sucesso")]
     public async Task QuandoOUsuarioExcluiOFuncionarioComSucesso()
     {
-        var command = new DeleteEmployeeCommand(_employee!.Id);
+        var command = new DeleteEmployeeCommand(_employee!.Id, Role.Director);
 
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
@@ -214,7 +218,7 @@ public class LoggingAuditoriaStepDefinitions
         _scenarioContext.Set(result, "LoginResult");
     }
 
-    [When(@"o usuário altera a senha com sucesso")]
+    [When(@"o funcionário altera sua senha com sucesso")]
     public async Task QuandoOUsuarioAlteraASenhaComSucesso()
     {
         _passwordHasherMock
@@ -260,11 +264,15 @@ public class LoggingAuditoriaStepDefinitions
             nomeNovo, _employee.LastName, _employee.Email,
             _employee.BirthDate,
             null,
-            new List<string> { "11999999999" });
+            new List<string> { "11999999999" },
+            null, 
+            Role.Director 
+        );
 
         var handler = new UpdateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
+            _cacheServiceMock.Object,
             _updateLoggerMock.Object);
 
         await handler.Handle(command, CancellationToken.None);
@@ -284,14 +292,12 @@ public class LoggingAuditoriaStepDefinitions
             _ => LogLevel.None
         };
 
-        // Em testes reais, verificamos se o logger foi chamado
         _loggingConfigured.Should().BeTrue();
     }
 
     [Then(@"o log deve conter a operação realizada ""(.*)""")]
     public void EntaoOLogDeveConterAOperacaoRealizada(string operacao)
     {
-        // Verifica que o logger foi configurado para a operação
         _loggingConfigured.Should().BeTrue();
     }
 
@@ -364,7 +370,6 @@ public class LoggingAuditoriaStepDefinitions
     [Then(@"o log NÃO deve conter a senha antiga ou nova")]
     public void EntaoOLogNaoDeveConterASenhaAntigaOuNova()
     {
-        // Verifica que nenhum log contém senhas
         _logEntries.Should().NotContain(e =>
             e.Message.Contains("Senha") ||
             e.Message.Contains("password", StringComparison.OrdinalIgnoreCase));

@@ -67,14 +67,14 @@ public class AlterarSenhaStepDefinitions
         _scenarioContext.Set(_employee.Id, "EmployeeId");
     }
 
-    [Given(@"que existe um funcionário cadastrado com email ""(.*)""")]
+    [Given(@"que existe um funcionario cadastrado com email ""(.*)""")]
     public void DadoQueExisteUmFuncionarioCadastradoComEmail(string email)
     {
         _employee = TestHelper.CreateValidEmployee(email: email);
         _scenarioContext.Set(_employee, "Employee");
     }
 
-    [Given(@"que o funcionario esta autenticado")]
+    [Given(@"que o funcionário está autenticado")]
     public void DadoQueOFuncionarioEstaAutenticado()
     {
         _scenarioContext.Set(true, "IsAuthenticated");
@@ -87,7 +87,7 @@ public class AlterarSenhaStepDefinitions
         _scenarioContext.Set(false, "IsAuthenticated");
     }
 
-    [Given(@"que o funcionario possui sessoes ativas")]
+    [Given(@"que o funcionário possui sessões ativas")]
     public void DadoQueOFuncionarioPossuiSessoesAtivas()
     {
         _scenarioContext.Set(true, "HasActiveSessions");

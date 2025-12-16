@@ -194,7 +194,6 @@ public class LoginCommandHandlerTests
         var email = "test@test.com";
         var employee = TestHelper.CreateValidEmployee(email: email);
 
-        // Cenário 1: Email existe, senha errada
         _repositoryMock
             .Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(employee);
@@ -207,7 +206,6 @@ public class LoginCommandHandlerTests
             new LoginCommand(email, "wrongpassword"),
             CancellationToken.None);
 
-        // Cenário 2: Email não existe
         _repositoryMock
             .Setup(x => x.GetByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
@@ -216,7 +214,7 @@ public class LoginCommandHandlerTests
             new LoginCommand("wrong@test.com", "password"),
             CancellationToken.None);
 
-        // Assert - Ambos devem ter a mesma mensagem genérica
+        // Assert 
         resultWithWrongPassword.Error.Description.Should().Be(resultWithWrongEmail.Error.Description);
         resultWithWrongPassword.Error.Description.Should().Be("Invalid email or password");
     }

@@ -39,7 +39,7 @@ Funcionalidade: Hierarquia de Permissões
     Dado que o usuário está autenticado como "Leader"
     Quando o usuário tenta criar um novo funcionário com permissão "Director"
     Então o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "You cannot create an employee with a role equal to or higher than yours"
+    E o sistema deve retornar mensagem "Você não pode criar um funcionário com permissão igual ou superior à sua"
     E o funcionário não deve ser criado no banco de dados
 
   @hierarquia @criar @falha
@@ -47,7 +47,7 @@ Funcionalidade: Hierarquia de Permissões
     Dado que o usuário está autenticado como "Leader"
     Quando o usuário tenta criar um novo funcionário com permissão "Leader"
     Então o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "You cannot create an employee with a role equal to or higher than yours"
+    E o sistema deve retornar mensagem "Você não pode criar um funcionário com permissão igual ou superior à sua"
     E o funcionário não deve ser criado no banco de dados
 
   @hierarquia @criar @falha
@@ -55,7 +55,7 @@ Funcionalidade: Hierarquia de Permissões
     Dado que o usuário está autenticado como "Employee"
     Quando o usuário tenta criar um novo funcionário com permissão "Employee"
     Então o sistema deve retornar status 403
-    E o sistema deve retornar mensagem "You cannot create an employee with a role equal to or higher than yours"
+    E o sistema deve retornar mensagem "Você não pode criar um funcionário com permissão igual ou superior à sua"
     E o funcionário não deve ser criado no banco de dados
 
   @hierarquia @atualizar @falha

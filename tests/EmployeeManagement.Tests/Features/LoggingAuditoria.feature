@@ -74,7 +74,7 @@ Funcionalidade: Logging e Auditoria
     E que o sistema de logging está configurado
     Quando o funcionário altera sua senha com sucesso
     Então o sistema deve registrar um log com nível "Information"
-    E o log deve conter "Password changed"
+    E o log deve conter "Credentials updated"
     E o log deve conter o ID do funcionário
     E o log deve conter timestamp da operação
     E o log NÃO deve conter a senha antiga ou nova

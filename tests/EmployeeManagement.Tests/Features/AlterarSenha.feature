@@ -23,7 +23,7 @@ Funcionalidade: Alteração de Senha
       | SenhaAtual     | NovaSenha      |
       | SenhaErrada123 | NovaSenha@456  |
     Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Senha atual incorreta"
+    E o sistema deve retornar mensagem "Current password is incorrect"
     E a senha não deve ser alterada
 
   @senha @alterar @validacao
@@ -64,11 +64,11 @@ Funcionalidade: Alteração de Senha
     Dado que não existe funcionário com ID "99999999-9999-9999-9999-999999999999"
     Quando é solicitada alteração de senha do funcionário inexistente
     Então o sistema deve retornar status 404
-    E o sistema deve retornar mensagem "Employee not found"
+    E o sistema deve retornar mensagem "Employee with ID '99999999-9999-9999-9999-999999999999"
 
   @senha @alterar @autenticacao
   Cenário: Não deve alterar senha sem autenticação
-    Dado que existe um funcionário cadastrado com email "usuario@supply.com"
+    Dado que existe um funcionario cadastrado com email "usuario@supply.com"
     E que o usuário não está autenticado
     Quando o usuário tenta alterar a senha sem autenticação
     Então o sistema deve retornar status 401

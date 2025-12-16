@@ -174,7 +174,8 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 404", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 24
-    testRunner.And("o sistema deve retornar mensagem \"Employee not found\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Employee \'Funcionário não encontrado\' was not f" +
+                        "ound\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -363,7 +364,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 409", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 61
-    testRunner.And("o sistema deve retornar mensagem \"Email already exists\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Email já cadastrado\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 62
     testRunner.And("o funcionário não deve ser atualizado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -557,7 +558,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 98
-    testRunner.And("o sistema deve retornar mensagem \"Employee cannot be their own manager\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"O funcionário não pode ser seu próprio gestor\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 99
     testRunner.And("o funcionário não deve ser atualizado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");

@@ -334,10 +334,13 @@ public class CriarFuncionarioStepDefinitions
             .Callback<Employee, CancellationToken>((e, _) => _capturedEmployee = e)
             .Returns((Employee e, CancellationToken _) => Task.FromResult(e));
 
+        var cacheServiceMock = new Mock<ICacheService>();
+
         var handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
+            cacheServiceMock.Object,
             _loggerMock.Object);
 
         _result = await handler.Handle(command, CancellationToken.None);
