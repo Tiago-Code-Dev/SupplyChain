@@ -72,6 +72,8 @@ public class Employee : Entity
 
     public bool CanCreateEmployeeWithRole(Role targetRole) => Role > targetRole;
 
+    public bool CanUpdateEmployeeToRole(Role targetRole) => Role > targetRole;
+
     public Result Update(
         string firstName,
         string lastName,
@@ -104,6 +106,21 @@ public class Employee : Entity
         return Result.Success();
     }
 
+    public Result UpdateRole(Role newRole)
+    {
+        if (Role == newRole)
+            return Result.Success();
+
+        var oldRole = Role;
+        Role = newRole;
+        SetUpdatedAt();
+
+        // Raise domain event
+        RaiseDomainEvent(new EmployeeRoleChangedEvent(Id, oldRole, newRole));
+
+        return Result.Success();
+    }
+
     public void AddPhone(PhoneNumber phone) => _phoneNumbers.Add(phone);
 
     public void ClearPhones() => _phoneNumbers.Clear();
@@ -122,9 +139,9 @@ public class Employee : Entity
         return Result.Success();
     }
 
-    public override void Delete()
+    public override void Delete(Guid? deletedBy = null)
     {
-        base.Delete();
+        base.Delete(deletedBy);
         RaiseDomainEvent(new EmployeeDeletedEvent(Id, Email));
     }
 

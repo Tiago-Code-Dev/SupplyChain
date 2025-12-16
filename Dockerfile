@@ -1,5 +1,6 @@
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy csproj files and restore
@@ -24,14 +25,15 @@ COPY src/Shared/Shared.CrossCutting/ ./Shared.CrossCutting/
 
 # Build
 WORKDIR /src/EmployeeManagement.Api
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
 
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+EXPOSE 8081
+
+COPY --from=build /app/publish .
 
 ENTRYPOINT ["dotnet", "EmployeeManagement.Api.dll"]

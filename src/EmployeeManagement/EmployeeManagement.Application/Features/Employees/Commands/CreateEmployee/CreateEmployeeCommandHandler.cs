@@ -1,6 +1,8 @@
-﻿using EmployeeManagement.Application.Common.Interfaces;
+﻿using EmployeeManagement.Application.Common;
+using EmployeeManagement.Application.Common.Interfaces;
 using EmployeeManagement.Application.Features.Employees.Common;
 using EmployeeManagement.Application.Interfaces;
+using EmployeeManagement.Application.Resources;
 using EmployeeManagement.Domain.Common;
 using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Interfaces;
@@ -14,17 +16,20 @@ public sealed class CreateEmployeeCommandHandler
     private readonly IEmployeeRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly ICacheService _cache;
     private readonly ILogger<CreateEmployeeCommandHandler> _logger;
 
     public CreateEmployeeCommandHandler(
         IEmployeeRepository repository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
+        ICacheService cache,
         ILogger<CreateEmployeeCommandHandler> logger)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -38,33 +43,34 @@ public sealed class CreateEmployeeCommandHandler
         if (request.CurrentUserRole <= request.Role)
         {
             return Result<EmployeeResponse>.Failure(
-                Error.Forbidden("You cannot create an employee with a role equal to or higher than yours"));
+                Error.Forbidden(ValidationMessages.CannotCreateHigherRole));
         }
 
-        // Verificar email único
-        var existingByEmail = await _repository.GetByEmailAsync(request.Email, cancellationToken);
-        if (existingByEmail is not null)
+        // Verificar email único usando método otimizado
+        if (await _repository.EmailExistsAsync(request.Email, cancellationToken: cancellationToken))
         {
+            _logger.LogWarning("Email {Email} already exists", request.Email);
             return Result<EmployeeResponse>.Failure(
-                Error.Conflict("Email", "Email already exists"));
+                Error.Conflict("Email", ValidationMessages.EmailAlreadyExists));
         }
 
-        // Verificar documento único
-        var existingByDocument = await _repository.GetByDocumentAsync(request.DocumentNumber, cancellationToken);
-        if (existingByDocument is not null)
+        // Verificar documento único usando método otimizado
+        if (await _repository.DocumentExistsAsync(request.DocumentNumber, cancellationToken: cancellationToken))
         {
+            _logger.LogWarning("Document {Document} already exists", request.DocumentNumber);
             return Result<EmployeeResponse>.Failure(
-                Error.Conflict("DocumentNumber", "Document number already exists"));
+                Error.Conflict("DocumentNumber", ValidationMessages.DocumentAlreadyExists));
         }
 
         // Validar manager se fornecido
         if (request.ManagerId.HasValue)
         {
-            var manager = await _repository.GetByIdAsync(request.ManagerId.Value, cancellationToken);
-            if (manager is null)
+            var managerExists = await _repository.ExistsAsync(request.ManagerId.Value, cancellationToken);
+            if (!managerExists)
             {
+                _logger.LogWarning("Manager {ManagerId} not found", request.ManagerId.Value);
                 return Result<EmployeeResponse>.Failure(
-                    Error.NotFound("Manager", request.ManagerId.Value));
+                    Error.NotFound("Manager", ValidationMessages.ManagerNotFound));
             }
         }
 
@@ -95,6 +101,9 @@ public sealed class CreateEmployeeCommandHandler
 
         await _repository.AddAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Invalidar cache de listagem
+        await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
 
         _logger.LogInformation("Employee created successfully: {Id}", employee.Id);
 

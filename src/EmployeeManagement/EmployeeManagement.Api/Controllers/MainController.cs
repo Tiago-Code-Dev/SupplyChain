@@ -1,7 +1,10 @@
 using Asp.Versioning;
+using EmployeeManagement.Api.Contracts;
+using EmployeeManagement.Api.Infrastructure;
 using EmployeeManagement.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using System.Security.Claims;
 
 namespace EmployeeManagement.Api.Controllers;
@@ -11,7 +14,6 @@ namespace EmployeeManagement.Api.Controllers;
 /// </summary>
 [ApiController]
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/[controller]")]
 [Produces("application/json")]
 public abstract class MainController : ControllerBase
 {
@@ -47,6 +49,12 @@ public abstract class MainController : ControllerBase
 
     #endregion
 
+    #region Tracing
+
+    protected string GetTraceId() => Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+
+    #endregion
+
     #region Result Handling
 
     protected IActionResult HandleResult<T>(Result<T> result)
@@ -73,13 +81,20 @@ public abstract class MainController : ControllerBase
     protected IActionResult HandleError(Error error)
     {
         var statusCode = GetStatusCodeFromError(error);
+        var traceId = GetTraceId();
+        
+        // Adiciona headers de rastreamento
+        Response.Headers["X-Trace-Id"] = traceId;
+        Response.Headers["X-Error-Contract-Version"] = "1.0";
 
         if (statusCode == StatusCodes.Status403Forbidden)
         {
-            return Forbid();
+            var forbiddenResponse = ErrorResponseFactory.Forbidden(error.Description, traceId);
+            return StatusCode(403, forbiddenResponse);
         }
 
-        return StatusCode(statusCode, CreateProblemDetails(error, statusCode));
+        var errorResponse = ErrorResponseFactory.FromDomainError(error, statusCode, traceId);
+        return StatusCode(statusCode, errorResponse);
     }
 
     private static int GetStatusCodeFromError(Error error)
@@ -92,32 +107,6 @@ public abstract class MainController : ControllerBase
             _ when error.Code.Contains("Unauthorized") => StatusCodes.Status401Unauthorized,
             _ when error.Code.Contains("Validation") => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status400BadRequest
-        };
-    }
-
-    private static ProblemDetails CreateProblemDetails(Error error, int statusCode) => new()
-    {
-        Status = statusCode,
-        Title = GetTitleFromCode(error.Code),
-        Detail = error.Description,
-        Type = $"https://httpstatuses.com/{statusCode}",
-        Extensions =
-        {
-            ["errorCode"] = error.Code,
-            ["traceId"] = Guid.NewGuid().ToString()
-        }
-    };
-
-    private static string GetTitleFromCode(string code)
-    {
-        return code switch
-        {
-            _ when code.Contains("NotFound") => "Resource Not Found",
-            _ when code.Contains("Conflict") => "Resource Conflict",
-            _ when code.Contains("Forbidden") => "Access Forbidden",
-            _ when code.Contains("Unauthorized") => "Unauthorized Access",
-            _ when code.Contains("Validation") => "Validation Error",
-            _ => "Bad Request"
         };
     }
 

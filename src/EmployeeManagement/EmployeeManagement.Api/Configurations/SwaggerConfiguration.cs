@@ -62,6 +62,7 @@ public static class SwaggerConfiguration
         app.UseSwagger();
         app.UseSwaggerUI(options =>
         {
+            // Gera endpoint para cada versão
             foreach (var description in provider.ApiVersionDescriptions)
             {
                 options.SwaggerEndpoint(
@@ -69,7 +70,7 @@ public static class SwaggerConfiguration
                     $"Employee Management API {description.GroupName.ToUpperInvariant()}");
             }
 
-            options.RoutePrefix = string.Empty;
+            options.RoutePrefix = "swagger";
             options.DocumentTitle = "Employee Management API";
             options.DefaultModelsExpandDepth(-1);
         });
@@ -78,6 +79,9 @@ public static class SwaggerConfiguration
     }
 }
 
+/// <summary>
+/// Configura Swagger para cada versão da API
+/// </summary>
 public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 {
     private readonly IApiVersionDescriptionProvider _provider;
@@ -101,7 +105,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
         {
             Title = "Employee Management API",
             Version = description.ApiVersion.ToString(),
-            Description = "API para gerenciamento de funcionários",
+            Description = "API para gerenciamento de funcionários da empresa.",
             Contact = new OpenApiContact
             {
                 Name = "Suporte",
@@ -116,7 +120,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 
         if (description.IsDeprecated)
         {
-            info.Description += " [DEPRECATED]";
+            info.Description += " **Esta versão da API está obsoleta.**";
         }
 
         return info;

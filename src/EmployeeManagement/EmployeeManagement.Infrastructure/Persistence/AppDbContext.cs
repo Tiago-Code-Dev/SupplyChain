@@ -1,3 +1,4 @@
+using EmployeeManagement.Application.Interfaces;
 using EmployeeManagement.Domain.Common;
 using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Interfaces;
@@ -9,11 +10,16 @@ namespace EmployeeManagement.Infrastructure.Persistence;
 public class AppDbContext : DbContext, IUnitOfWork
 {
     private readonly IPublisher _publisher;
+    private readonly ICurrentUserService? _currentUserService;
 
-    public AppDbContext(DbContextOptions<AppDbContext> options, IPublisher publisher)
+    public AppDbContext(
+        DbContextOptions<AppDbContext> options, 
+        IPublisher publisher,
+        ICurrentUserService? currentUserService = null)
         : base(options)
     {
         _publisher = publisher;
+        _currentUserService = currentUserService;
     }
 
     public DbSet<Employee> Employees => Set<Employee>();
@@ -31,13 +37,26 @@ public class AppDbContext : DbContext, IUnitOfWork
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // Converter Delete em Soft Delete
+        var currentUserId = _currentUserService?.UserId;
+
+        // Aplicar auditoria automaticamente
         foreach (var entry in ChangeTracker.Entries<Entity>())
         {
-            if (entry.State == EntityState.Deleted)
+            switch (entry.State)
             {
-                entry.State = EntityState.Modified;
-                entry.Entity.Delete();
+                case EntityState.Added:
+                    entry.Entity.SetCreatedBy(currentUserId);
+                    break;
+
+                case EntityState.Modified:
+                    entry.Entity.SetUpdatedBy(currentUserId);
+                    break;
+
+                case EntityState.Deleted:
+                    // Converter Delete em Soft Delete com auditoria
+                    entry.State = EntityState.Modified;
+                    entry.Entity.Delete(currentUserId);
+                    break;
             }
         }
 

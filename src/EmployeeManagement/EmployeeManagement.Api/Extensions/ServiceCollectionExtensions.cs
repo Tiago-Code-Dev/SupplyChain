@@ -16,11 +16,11 @@ public static class ServiceCollectionExtensions
 
         // API Configurations
         services.AddControllers();
-        services.AddApiVersioningConfiguration(); // Adicionar versionamento
+        services.AddApiVersioningConfiguration(); // Novo!
         services.AddSwaggerConfiguration();
         services.AddCorsConfiguration(configuration);
         services.AddCompressionConfiguration();
-        services.AddRateLimitingConfiguration();
+        services.AddRateLimitingConfiguration(configuration);
         services.AddHealthCheckConfiguration();
 
         return services;

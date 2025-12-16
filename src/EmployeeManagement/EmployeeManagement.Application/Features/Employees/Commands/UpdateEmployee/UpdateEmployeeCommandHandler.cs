@@ -1,5 +1,8 @@
+using EmployeeManagement.Application.Common;
 using EmployeeManagement.Application.Common.Interfaces;
 using EmployeeManagement.Application.Features.Employees.Common;
+using EmployeeManagement.Application.Interfaces;
+using EmployeeManagement.Application.Resources;
 using EmployeeManagement.Domain.Common;
 using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Interfaces;
@@ -12,15 +15,18 @@ public sealed class UpdateEmployeeCommandHandler
 {
     private readonly IEmployeeRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheService _cache;
     private readonly ILogger<UpdateEmployeeCommandHandler> _logger;
 
     public UpdateEmployeeCommandHandler(
         IEmployeeRepository repository,
         IUnitOfWork unitOfWork,
+        ICacheService cache,
         ILogger<UpdateEmployeeCommandHandler> logger)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -34,17 +40,44 @@ public sealed class UpdateEmployeeCommandHandler
         if (employee is null)
         {
             return Result<EmployeeResponse>.Failure(
-                Error.NotFound("Employee", request.Id));
+                Error.NotFound("Employee", ValidationMessages.EmployeeNotFound));
         }
 
-        // Verificar se email está sendo alterado e é único
+        // Guardar email antigo para invalidar cache depois
+        var oldEmail = employee.Email;
+
+        // Validação de atualização de Role - hierarquia
+        if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
+        {
+            // Usuário não pode promover para role igual ou superior à sua
+            if (request.CurrentUserRole <= request.NewRole.Value)
+            {
+                _logger.LogWarning(
+                    "User with role {CurrentRole} tried to update employee {Id} to role {TargetRole}",
+                    request.CurrentUserRole, request.Id, request.NewRole.Value);
+                return Result<EmployeeResponse>.Failure(
+                    Error.Forbidden(ValidationMessages.CannotUpdateToHigherRole));
+            }
+
+            // Usuário não pode alterar role de funcionário com role igual ou superior
+            if (request.CurrentUserRole <= employee.Role)
+            {
+                _logger.LogWarning(
+                    "User with role {CurrentRole} tried to update role of employee {Id} with role {EmployeeRole}",
+                    request.CurrentUserRole, request.Id, employee.Role);
+                return Result<EmployeeResponse>.Failure(
+                    Error.Forbidden(ValidationMessages.CannotUpdateHigherRoleEmployee));
+            }
+        }
+
+        // Verificar se email está sendo alterado e é único (excluindo o próprio funcionário)
         if (!employee.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase))
         {
-            var existingByEmail = await _repository.GetByEmailAsync(request.Email, cancellationToken);
-            if (existingByEmail is not null)
+            if (await _repository.EmailExistsAsync(request.Email, request.Id, cancellationToken))
             {
+                _logger.LogWarning("Email {Email} already exists for another employee", request.Email);
                 return Result<EmployeeResponse>.Failure(
-                    Error.Conflict("Email", "Email already exists"));
+                    Error.Conflict("Email", ValidationMessages.EmailAlreadyExists));
             }
         }
 
@@ -54,14 +87,15 @@ public sealed class UpdateEmployeeCommandHandler
             if (request.ManagerId.Value == request.Id)
             {
                 return Result<EmployeeResponse>.Failure(
-                    Error.Validation("ManagerId", "Employee cannot be their own manager"));
+                    Error.Validation("ManagerId", ValidationMessages.CannotBeSelfManager));
             }
 
-            var manager = await _repository.GetByIdAsync(request.ManagerId.Value, cancellationToken);
-            if (manager is null)
+            var managerExists = await _repository.ExistsAsync(request.ManagerId.Value, cancellationToken);
+            if (!managerExists)
             {
+                _logger.LogWarning("Manager {ManagerId} not found", request.ManagerId.Value);
                 return Result<EmployeeResponse>.Failure(
-                    Error.NotFound("Manager", request.ManagerId.Value));
+                    Error.NotFound("Manager", ValidationMessages.ManagerNotFound));
             }
         }
 
@@ -78,6 +112,20 @@ public sealed class UpdateEmployeeCommandHandler
             return Result<EmployeeResponse>.Failure(updateResult.Error);
         }
 
+        // Atualizar Role se fornecido
+        if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
+        {
+            var roleUpdateResult = employee.UpdateRole(request.NewRole.Value);
+            if (roleUpdateResult.IsFailure)
+            {
+                return Result<EmployeeResponse>.Failure(roleUpdateResult.Error);
+            }
+            
+            _logger.LogInformation(
+                "Employee {Id} role updated from {OldRole} to {NewRole}",
+                request.Id, employee.Role, request.NewRole.Value);
+        }
+
         // Atualizar telefones
         employee.ClearPhones();
         foreach (var phone in request.PhoneNumbers)
@@ -88,7 +136,16 @@ public sealed class UpdateEmployeeCommandHandler
         await _repository.UpdateAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Employee updated successfully: {Id}", request.Id);
+        // Invalidar cache
+        await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
+        if (!oldEmail.Equals(employee.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(oldEmail), cancellationToken);
+        }
+        await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
+
+        _logger.LogInformation("Employee updated successfully: {Id}", employee.Id);
 
         return Result<EmployeeResponse>.Success(EmployeeResponse.FromEntity(employee));
     }

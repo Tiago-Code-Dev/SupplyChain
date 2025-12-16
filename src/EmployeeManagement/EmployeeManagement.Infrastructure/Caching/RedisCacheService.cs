@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace EmployeeManagement.Infrastructure.Caching;
 
 /// <summary>
-/// Implementação do cache usando Redis
+/// Implementação do cache usando Redis (IDistributedCache)
 /// </summary>
 public class RedisCacheService : ICacheService
 {
@@ -18,6 +18,8 @@ public class RedisCacheService : ICacheService
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = false
     };
+
+    private static readonly TimeSpan DefaultExpiration = TimeSpan.FromMinutes(5);
 
     public RedisCacheService(IDistributedCache cache, ILogger<RedisCacheService> logger)
     {
@@ -57,13 +59,14 @@ public class RedisCacheService : ICacheService
         {
             var options = new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = expiration ?? TimeSpan.FromMinutes(30)
+                AbsoluteExpirationRelativeToNow = expiration ?? DefaultExpiration,
+                SlidingExpiration = TimeSpan.FromMinutes(2)
             };
 
             var serializedValue = JsonSerializer.Serialize(value, JsonOptions);
             await _cache.SetStringAsync(key, serializedValue, options, cancellationToken);
 
-            _logger.LogDebug("Cache SET for key: {Key}, expiration: {Expiration}", key, expiration);
+            _logger.LogDebug("Cache SET for key: {Key}, expiration: {Expiration}", key, expiration ?? DefaultExpiration);
         }
         catch (Exception ex)
         {
@@ -84,29 +87,22 @@ public class RedisCacheService : ICacheService
         }
     }
 
-    public Task RemoveByPrefixAsync(string prefix, CancellationToken cancellationToken = default)
-    {
-        // Redis via IDistributedCache não suporta remoção por prefixo
-        // Para isso seria necessário usar StackExchange.Redis diretamente
-        _logger.LogDebug("RemoveByPrefix called for prefix: {Prefix} (not supported via IDistributedCache)", prefix);
-        return Task.CompletedTask;
-    }
-
-    public async Task<T> GetOrSetAsync<T>(
+    public async Task<T?> GetOrSetAsync<T>(
         string key,
-        Func<Task<T>> factory,
+        Func<Task<T?>> factory,
         TimeSpan? expiration = null,
         CancellationToken cancellationToken = default)
     {
-        var cachedValue = await GetAsync<T>(key, cancellationToken);
-
-        if (cachedValue is not null)
+        // Tentar obter do cache primeiro
+        var cached = await GetAsync<T>(key, cancellationToken);
+        if (cached is not null)
         {
-            return cachedValue;
+            return cached;
         }
 
+        // Se não encontrou, executar factory
         var value = await factory();
-
+        
         if (value is not null)
         {
             await SetAsync(key, value, expiration, cancellationToken);

@@ -49,6 +49,10 @@ public class ListarFuncionariosStepDefinitions
                 It.IsAny<int>(),
                 It.IsAny<string?>(),
                 It.IsAny<string?>(),
+                It.IsAny<string?>(),              // filterByEmail
+                It.IsAny<Role?>(),
+                It.IsAny<Guid?>(),               
+                It.IsAny<string?>(),              
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((int page, int size, string? search, string? sort, bool desc, CancellationToken ct) =>
