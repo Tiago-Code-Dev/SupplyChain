@@ -1,3 +1,4 @@
+using EmployeeManagement.Application.Resources;
 using FluentValidation;
 
 namespace EmployeeManagement.Application.Features.Employees.Commands.UpdateEmployee;
@@ -7,34 +8,42 @@ public sealed class UpdateEmployeeCommandValidator : AbstractValidator<UpdateEmp
     public UpdateEmployeeCommandValidator()
     {
         RuleFor(x => x.Id)
-            .NotEmpty().WithMessage("Employee ID is required");
+            .NotEmpty().WithMessage(ValidationMessages.EmployeeIdRequired);
 
         RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("First name is required")
-            .MaximumLength(100).WithMessage("First name must not exceed 100 characters");
+            .NotEmpty().WithMessage(ValidationMessages.FirstNameRequired)
+            .MaximumLength(100).WithMessage(ValidationMessages.FirstNameMaxLength.Replace("{MaxLength}", "100"));
 
         RuleFor(x => x.LastName)
-            .NotEmpty().WithMessage("Last name is required")
-            .MaximumLength(100).WithMessage("Last name must not exceed 100 characters");
+            .NotEmpty().WithMessage(ValidationMessages.LastNameRequired)
+            .MaximumLength(100).WithMessage(ValidationMessages.LastNameMaxLength.Replace("{MaxLength}", "100"));
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email is required")
-            .EmailAddress().WithMessage("Invalid email format")
-            .MaximumLength(255).WithMessage("Email must not exceed 255 characters");
+            .NotEmpty().WithMessage(ValidationMessages.EmailRequired)
+            .EmailAddress().WithMessage(ValidationMessages.EmailInvalid)
+            .MaximumLength(255).WithMessage(ValidationMessages.EmailMaxLength.Replace("{MaxLength}", "255"));
 
         RuleFor(x => x.BirthDate)
-            .NotEmpty().WithMessage("Birth date is required")
-            .Must(BeAtLeast18YearsOld).WithMessage("Employee must be at least 18 years old");
+            .NotEmpty().WithMessage(ValidationMessages.BirthDateRequired)
+            .Must(BeAtLeast18YearsOld).WithMessage(ValidationMessages.EmployeeMustBeAdult);
 
+        // Validação de telefones - deve ter pelo menos um
         RuleFor(x => x.PhoneNumbers)
-            .NotEmpty().WithMessage("At least one phone number is required");
+            .NotNull().WithMessage(ValidationMessages.PhoneNumbersRequired)
+            .Must(phones => phones != null && phones.Count > 0)
+            .WithMessage(ValidationMessages.AtLeastOnePhoneRequired);
 
+        // Validação de cada telefone na lista - formato brasileiro
+        RuleForEach(x => x.PhoneNumbers)
+            .NotEmpty().WithMessage(ValidationMessages.PhoneNumberEmpty)
+            .Matches(@"^\d{10,11}$").WithMessage(ValidationMessages.PhoneNumberInvalidFormat);
+
+        // Validação de manager - não pode ser o próprio funcionário
         RuleFor(x => x.ManagerId)
-            .NotEqual(x => x.Id)
-            .When(x => x.ManagerId.HasValue)
-            .WithMessage("Employee cannot be their own manager");
+            .Must((command, managerId) => !managerId.HasValue || managerId.Value != command.Id)
+            .WithMessage(ValidationMessages.CannotBeSelfManager);
     }
 
     private static bool BeAtLeast18YearsOld(DateTime birthDate) =>
-        DateTime.UtcNow.AddYears(-18) >= birthDate;
+        birthDate <= DateTime.UtcNow.AddYears(-18);
 }

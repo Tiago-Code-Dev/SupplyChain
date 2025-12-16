@@ -1,3 +1,4 @@
+using EmployeeManagement.Application.Resources;
 using FluentValidation;
 
 namespace EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
@@ -7,41 +8,50 @@ public sealed class CreateEmployeeCommandValidator : AbstractValidator<CreateEmp
     public CreateEmployeeCommandValidator()
     {
         RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("First name is required")
-            .MaximumLength(100).WithMessage("First name must not exceed 100 characters");
+            .NotEmpty().WithMessage(ValidationMessages.FirstNameRequired)
+            .MaximumLength(100).WithMessage(ValidationMessages.FirstNameMaxLength.Replace("{MaxLength}", "100"));
 
         RuleFor(x => x.LastName)
-            .NotEmpty().WithMessage("Last name is required")
-            .MaximumLength(100).WithMessage("Last name must not exceed 100 characters");
+            .NotEmpty().WithMessage(ValidationMessages.LastNameRequired)
+            .MaximumLength(100).WithMessage(ValidationMessages.LastNameMaxLength.Replace("{MaxLength}", "100"));
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email is required")
-            .EmailAddress().WithMessage("Invalid email format")
-            .MaximumLength(255).WithMessage("Email must not exceed 255 characters");
+            .NotEmpty().WithMessage(ValidationMessages.EmailRequired)
+            .EmailAddress().WithMessage(ValidationMessages.EmailInvalid)
+            .MaximumLength(255).WithMessage(ValidationMessages.EmailMaxLength.Replace("{MaxLength}", "255"));
 
         RuleFor(x => x.DocumentNumber)
-            .NotEmpty().WithMessage("Document number is required")
-            .MaximumLength(20).WithMessage("Document number must not exceed 20 characters");
+            .NotEmpty().WithMessage(ValidationMessages.DocumentRequired)
+            .MaximumLength(20).WithMessage(ValidationMessages.DocumentMaxLength.Replace("{MaxLength}", "20"))
+            .Matches(@"^\d{11}$|^\d{14}$").WithMessage(ValidationMessages.DocumentInvalidFormat);
 
         RuleFor(x => x.BirthDate)
-            .NotEmpty().WithMessage("Birth date is required")
-            .Must(BeAtLeast18YearsOld).WithMessage("Employee must be at least 18 years old");
+            .NotEmpty().WithMessage(ValidationMessages.BirthDateRequired)
+            .Must(BeAtLeast18YearsOld).WithMessage(ValidationMessages.EmployeeMustBeAdult);
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("Password is required")
-            .MinimumLength(8).WithMessage("Password must be at least 8 characters")
-            .Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter")
-            .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter")
-            .Matches("[0-9]").WithMessage("Password must contain at least one digit")
-            .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character");
+            .NotEmpty().WithMessage(ValidationMessages.PasswordRequired)
+            .MinimumLength(8).WithMessage(ValidationMessages.PasswordMinLength.Replace("{MinLength}", "8"))
+            .Matches("[A-Z]").WithMessage(ValidationMessages.PasswordUppercase)
+            .Matches("[a-z]").WithMessage(ValidationMessages.PasswordLowercase)
+            .Matches("[0-9]").WithMessage(ValidationMessages.PasswordDigit)
+            .Matches("[^a-zA-Z0-9]").WithMessage(ValidationMessages.PasswordSpecialChar);
 
+        // Validação de telefones - deve ter pelo menos um
         RuleFor(x => x.PhoneNumbers)
-            .NotEmpty().WithMessage("At least one phone number is required");
+            .NotNull().WithMessage(ValidationMessages.PhoneNumbersRequired)
+            .Must(phones => phones != null && phones.Count > 0)
+            .WithMessage(ValidationMessages.AtLeastOnePhoneRequired);
+
+        // Validação de cada telefone na lista - formato brasileiro
+        RuleForEach(x => x.PhoneNumbers)
+            .NotEmpty().WithMessage(ValidationMessages.PhoneNumberEmpty)
+            .Matches(@"^\d{10,11}$").WithMessage(ValidationMessages.PhoneNumberInvalidFormat);
 
         RuleFor(x => x.Role)
-            .IsInEnum().WithMessage("Invalid role");
+            .IsInEnum().WithMessage(ValidationMessages.RoleInvalid);
     }
 
     private static bool BeAtLeast18YearsOld(DateTime birthDate) => 
-        DateTime.UtcNow.AddYears(-18) >= birthDate;
+        birthDate <= DateTime.UtcNow.AddYears(-18);
 }

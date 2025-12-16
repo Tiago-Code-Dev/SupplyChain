@@ -1,4 +1,3 @@
-using Asp.Versioning;
 using EmployeeManagement.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +9,6 @@ namespace EmployeeManagement.Api.Controllers;
 /// Controller base com funcionalidades comuns
 /// </summary>
 [ApiController]
-[ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/[controller]")]
 [Produces("application/json")]
 public abstract class MainController : ControllerBase
 {
@@ -73,7 +70,7 @@ public abstract class MainController : ControllerBase
     protected IActionResult HandleError(Error error)
     {
         var statusCode = GetStatusCodeFromError(error);
-
+        
         if (statusCode == StatusCodes.Status403Forbidden)
         {
             return Forbid();

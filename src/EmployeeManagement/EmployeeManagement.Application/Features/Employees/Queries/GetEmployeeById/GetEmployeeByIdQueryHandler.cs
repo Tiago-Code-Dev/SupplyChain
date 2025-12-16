@@ -3,48 +3,44 @@ using EmployeeManagement.Application.Common.Interfaces;
 using EmployeeManagement.Application.Features.Employees.Common;
 using EmployeeManagement.Application.Interfaces;
 using EmployeeManagement.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace EmployeeManagement.Application.Features.Employees.Queries.GetEmployeeById;
 
-public sealed class GetEmployeeByIdQueryHandler
+public sealed class GetEmployeeByIdQueryHandler 
     : IQueryHandler<GetEmployeeByIdQuery, EmployeeResponse?>
 {
     private readonly IEmployeeRepository _repository;
     private readonly ICacheService _cache;
+    private readonly ILogger<GetEmployeeByIdQueryHandler> _logger;
 
     public GetEmployeeByIdQueryHandler(
         IEmployeeRepository repository,
-        ICacheService cache)
+        ICacheService cache,
+        ILogger<GetEmployeeByIdQueryHandler> logger)
     {
         _repository = repository;
         _cache = cache;
+        _logger = logger;
     }
 
     public async Task<EmployeeResponse?> Handle(
-        GetEmployeeByIdQuery request,
+        GetEmployeeByIdQuery request, 
         CancellationToken cancellationToken)
     {
         var cacheKey = CacheKeys.Employee(request.Id);
 
-        // Tentar obter do cache primeiro
-        var cached = await _cache.GetAsync<EmployeeResponse>(cacheKey, cancellationToken);
-        if (cached is not null)
-        {
-            return cached;
-        }
-
-        // Se não estiver no cache, buscar do banco
-        var employee = await _repository.GetByIdAsync(request.Id, cancellationToken);
-
-        if (employee is null)
-        {
-            return null;
-        }
-
-        var response = EmployeeResponse.FromEntity(employee);
-
-        // Salvar no cache
-        await _cache.SetAsync(cacheKey, response, TimeSpan.FromMinutes(10), cancellationToken);
+        // Tentar obter do cache ou buscar do banco
+        var response = await _cache.GetOrSetAsync(
+            cacheKey,
+            async () =>
+            {
+                _logger.LogInformation("Fetching employee {Id} from database", request.Id);
+                var employee = await _repository.GetByIdAsync(request.Id, cancellationToken);
+                return employee is null ? null : EmployeeResponse.FromEntity(employee);
+            },
+            TimeSpan.FromMinutes(5),
+            cancellationToken);
 
         return response;
     }

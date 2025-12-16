@@ -122,9 +122,9 @@ public class Employee : Entity
         return Result.Success();
     }
 
-    public override void Delete()
+    public override void Delete(Guid? deletedBy = null)
     {
-        base.Delete();
+        base.Delete(deletedBy);
         RaiseDomainEvent(new EmployeeDeletedEvent(Id, Email));
     }
 

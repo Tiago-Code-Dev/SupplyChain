@@ -15,8 +15,11 @@ public sealed record EmployeeResponse(
     Guid? ManagerId,
     string? ManagerName,
     IReadOnlyList<string> PhoneNumbers,
+    // Audit Fields
     DateTime CreatedAt,
-    DateTime? UpdatedAt)
+    Guid? CreatedBy,
+    DateTime? UpdatedAt,
+    Guid? UpdatedBy)
 {
     public static EmployeeResponse FromEntity(Employee employee) => new(
         employee.Id,
@@ -30,6 +33,9 @@ public sealed record EmployeeResponse(
         employee.ManagerId,
         employee.Manager?.FullName,
         employee.PhoneNumbers.Select(p => p.Number).ToList(),
+        // Audit Fields
         employee.CreatedAt,
-        employee.UpdatedAt);
+        employee.CreatedBy,
+        employee.UpdatedAt,
+        employee.UpdatedBy);
 }

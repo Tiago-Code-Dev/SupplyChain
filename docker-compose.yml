@@ -1,9 +1,7 @@
-﻿version: '3.8'
-
-services:
+﻿services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: employeemanagement-sqlserver
+    container_name: employee-sqlserver
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=SqlServer@123
@@ -19,34 +17,29 @@ services:
       retries: 10
       start_period: 30s
 
-  redis:
-    image: redis:7-alpine
-    container_name: employeemanagement-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-
   api:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: employeemanagement-api
+      context: ./src
+      dockerfile: EmployeeManagement/EmployeeManagement.Api/Dockerfile
+    container_name: employee-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=EmployeeManagement;User Id=sa;Password=SqlServer@123;TrustServerCertificate=True
-      - ConnectionStrings__Redis=redis:6379
       - Jwt__Secret=YourSuperSecretKeyWithAtLeast32Characters!
       - Jwt__Issuer=EmployeeManagement.Api
       - Jwt__Audience=EmployeeManagement.Client
     ports:
-      - "5000:80"
+      - "5000:8080"
+      - "5001:8081"
+    volumes:
+      - ./certs:/https:ro
     depends_on:
-      - sqlserver
-      - redis
+      sqlserver:
+        condition: service_healthy
 
 volumes:
   sqlserver_data:
-  redis_data:

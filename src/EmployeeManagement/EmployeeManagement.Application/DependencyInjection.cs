@@ -1,7 +1,8 @@
 ﻿using System.Reflection;
 using EmployeeManagement.Application.Common.Behaviors;
+using EmployeeManagement.Application.Interfaces;
+using EmployeeManagement.Application.Services;
 using FluentValidation;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EmployeeManagement.Application;
@@ -12,17 +13,19 @@ public static class DependencyInjection
     {
         var assembly = Assembly.GetExecutingAssembly();
 
-        services.AddMediatR(cfg =>
+        // ✅ MediatR com Behaviors
+        services.AddMediatR(config =>
         {
-            cfg.RegisterServicesFromAssembly(assembly);
-            
-            // Pipeline behaviors (ordem importa!)
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-            // Cache behaviors serão adicionados depois quando implementados
+            config.RegisterServicesFromAssembly(assembly);
+            config.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            config.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
 
+        // ✅ FluentValidation
         services.AddValidatorsFromAssembly(assembly);
+
+        // ✅ Manter AuthService (ainda não migrado para CQRS)
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
