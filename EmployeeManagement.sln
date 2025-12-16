@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11304.174 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
@@ -20,10 +20,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Contracts", "src\Shared\Shared.Contracts\Shared.Contracts.csproj", "{C9D0E1F2-A3B4-5678-2345-901234567890}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.CrossCutting", "src\Shared\Shared.CrossCutting\Shared.CrossCutting.csproj", "{D0E1F2A3-B4C5-6789-3456-012345678901}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeManagement.Tests", "tests\EmployeeManagement.Tests\EmployeeManagement.Tests.csproj", "{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,18 +103,6 @@ Global
 		{D0E1F2A3-B4C5-6789-3456-012345678901}.Release|x64.Build.0 = Release|Any CPU
 		{D0E1F2A3-B4C5-6789-3456-012345678901}.Release|x86.ActiveCfg = Release|Any CPU
 		{D0E1F2A3-B4C5-6789-3456-012345678901}.Release|x86.Build.0 = Release|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Debug|x64.Build.0 = Debug|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Debug|x86.Build.0 = Debug|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Release|x64.ActiveCfg = Release|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Release|x64.Build.0 = Release|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Release|x86.ActiveCfg = Release|Any CPU
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +116,5 @@ Global
 		{B8C9D0E1-F2A3-4567-1234-890123456789} = {B2C3D4E5-F6A7-8901-BCDE-F23456789012}
 		{C9D0E1F2-A3B4-5678-2345-901234567890} = {C3D4E5F6-A7B8-9012-CDEF-345678901234}
 		{D0E1F2A3-B4C5-6789-3456-012345678901} = {C3D4E5F6-A7B8-9012-CDEF-345678901234}
-		{C7443CCE-B688-45DF-AB06-727F1C2EC9BB} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
