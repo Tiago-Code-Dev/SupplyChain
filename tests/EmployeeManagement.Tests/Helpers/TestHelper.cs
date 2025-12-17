@@ -20,8 +20,11 @@ public static class TestHelper
         DateTime? birthDate = null,
         string? passwordHash = null,
         Role role = Role.Employee,
-        Guid? managerId = null)
+        Guid? managerId = null,
+        IEnumerable<string>? phoneNumbers = null)
     {
+        var phones = phoneNumbers ?? new List<string> { GenerateValidPhoneNumber() };
+
         var result = Employee.Create(
             firstName ?? Faker.Name.FirstName(),
             lastName ?? Faker.Name.LastName(),
@@ -30,7 +33,8 @@ public static class TestHelper
             birthDate ?? GenerateAdultBirthDate(),
             passwordHash ?? "hashed_password_123",
             role,
-            managerId);
+            managerId,
+            phones);
 
         if (result.IsFailure)
         {

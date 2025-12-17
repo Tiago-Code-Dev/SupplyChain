@@ -76,6 +76,15 @@ public class PerformanceEscalabilidadeStepDefinitions
             .Setup(x => x.GetByIdAsync(_employeeToFind.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(_employeeToFind);
 
+        _cacheServiceMock
+            .Setup(x => x.GetOrSetAsync<EmployeeResponse>(
+                It.IsAny<string>(),
+                It.IsAny<Func<Task<EmployeeResponse?>>>(),
+                It.IsAny<TimeSpan?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct) 
+                => factory().Result);
+
         _scenarioContext.Set(_employeeToFind.Id, "EmployeeId");
     }
 

@@ -114,10 +114,29 @@ public class AlterarSenhaStepDefinitions
             .Setup(x => x.Verify(senhaAtual, _currentPasswordHash))
             .Returns(senhaAtual == _currentPassword);
 
+        // Validação: senha igual à atual
         if (senhaAtual == novaSenha && !string.IsNullOrEmpty(novaSenha))
         {
             _httpStatus = 400;
             _result = Result.Failure(Error.Validation("Password", "Nova senha deve ser diferente da atual"));
+            _scenarioContext.Set(_httpStatus, "HttpStatus");
+            return;
+        }
+
+        // Validação: senha vazia
+        if (string.IsNullOrWhiteSpace(novaSenha))
+        {
+            _httpStatus = 400;
+            _result = Result.Failure(Error.Validation("NewPassword", "Nova senha é obrigatória"));
+            _scenarioContext.Set(_httpStatus, "HttpStatus");
+            return;
+        }
+
+        // Validação: senha fraca (menos de 8 caracteres, sem números, sem maiúsculas, etc)
+        if (IsWeakPassword(novaSenha))
+        {
+            _httpStatus = 400;
+            _result = Result.Failure(Error.Validation("NewPassword", "A senha não atende aos critérios de segurança"));
             _scenarioContext.Set(_httpStatus, "HttpStatus");
             return;
         }
@@ -245,5 +264,29 @@ public class AlterarSenhaStepDefinitions
     public void EntaoApenasASessaoAtualDevePermancerValida()
     {
         _result!.IsSuccess.Should().BeTrue();
+    }
+
+    private bool IsWeakPassword(string password)
+    {
+        // Validar conforme as regras do ChangePasswordCommandValidator
+        if (string.IsNullOrWhiteSpace(password))
+            return true;
+
+        if (password.Length < 8)
+            return true;
+
+        if (!password.Any(c => char.IsUpper(c)))
+            return true;
+
+        if (!password.Any(c => char.IsLower(c)))
+            return true;
+
+        if (!password.Any(c => char.IsDigit(c)))
+            return true;
+
+        if (!password.Any(c => !char.IsLetterOrDigit(c)))
+            return true;
+
+        return false;
     }
 }

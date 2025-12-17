@@ -149,6 +149,9 @@ public class AtualizarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByIdAsync(guid, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
+        _repositoryMock
+            .Setup(x => x.ExistsAsync(guid, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
         _scenarioContext.Set(guid, "NonExistentManagerId");
     }
 

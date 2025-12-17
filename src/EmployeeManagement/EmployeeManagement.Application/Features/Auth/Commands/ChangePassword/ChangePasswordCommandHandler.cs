@@ -43,6 +43,12 @@ public sealed class ChangePasswordCommandHandler : ICommandHandler<ChangePasswor
             return Result.Failure(Error.Validation("CurrentPassword", "Current password is incorrect"));
         }
 
+
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
+        {
+            return Result.Failure(Error.Validation("NewPassword", "Nova senha é obrigatória"));
+        }
+
         var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
         var updateResult = employee.UpdatePassword(newPasswordHash);
 

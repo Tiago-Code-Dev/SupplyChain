@@ -126,6 +126,14 @@ public sealed class UpdateEmployeeCommandHandler
                 request.Id, employee.Role, request.NewRole.Value);
         }
 
+
+        // Validar se há pelo menos um telefone
+        if (request.PhoneNumbers == null || !request.PhoneNumbers.Any())
+        {
+            return Result<EmployeeResponse>.Failure(
+                Error.Validation("PhoneNumbers", "Funcionário deve possuir pelo menos um telefone"));
+        }
+
         // Atualizar telefones
         employee.ClearPhones();
         foreach (var phone in request.PhoneNumbers)

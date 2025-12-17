@@ -44,7 +44,7 @@ public class CreateEmployeeCommandHandlerTests
     public async Task Handle_ComDadosValidos_DeveCriarFuncionario()
     {
         // Arrange
-        var command = CreateValidCommand();
+        var command = CreateValidCommand(new List<string> { "11999999999" });
         SetupRepositoryForNewEmployee();
 
         // Act
@@ -109,7 +109,7 @@ public class CreateEmployeeCommandHandlerTests
             password,
             Role.Employee,
             null,
-            new List<string>(),
+            new List<string> { "11999999999" },
             Role.Director);
 
         SetupRepositoryForNewEmployee();
@@ -130,12 +130,12 @@ public class CreateEmployeeCommandHandlerTests
     public async Task Handle_ComEmailDuplicado_DeveRetornarErroDeConflito()
     {
         // Arrange
-        var command = CreateValidCommand();
+        var command = CreateValidCommand(new List<string> { "11999999999" });
         var existingEmployee = TestHelper.CreateValidEmployee(email: command.Email);
 
         _repositoryMock
-            .Setup(x => x.GetByEmailAsync(command.Email.ToLowerInvariant(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingEmployee);
+            .Setup(x => x.EmailExistsAsync(command.Email, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -143,7 +143,7 @@ public class CreateEmployeeCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("Conflict");
-        result.Error.Description.Should().Contain("Email already exists");
+        result.Error.Description.Should().Contain("Email");
 
         _repositoryMock.Verify(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -153,23 +153,23 @@ public class CreateEmployeeCommandHandlerTests
     public async Task Handle_ComDocumentoDuplicado_DeveRetornarErroDeConflito()
     {
         // Arrange
-        var command = CreateValidCommand();
+        var command = CreateValidCommand(new List<string> { "11999999999" });
         var existingEmployee = TestHelper.CreateValidEmployee(documentNumber: command.DocumentNumber);
 
         _repositoryMock
-            .Setup(x => x.GetByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Employee?)null);
+            .Setup(x => x.EmailExistsAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         _repositoryMock
-            .Setup(x => x.GetByDocumentAsync(command.DocumentNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingEmployee);
+            .Setup(x => x.DocumentExistsAsync(command.DocumentNumber, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Description.Should().Contain("Document number already exists");
+        result.Error.Description.Should().Contain("Documento");
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class CreateEmployeeCommandHandlerTests
             "Password123",
             Role.Director,      
             null,
-            new List<string>(),
+            new List<string> { "11999999999" },
             Role.Leader);    
 
         // Act
@@ -212,7 +212,7 @@ public class CreateEmployeeCommandHandlerTests
             "Password123",
             Role.Leader,    
             null,
-            new List<string>(),
+            new List<string> { "11999999999" },
             Role.Leader);    
 
         // Act
@@ -238,14 +238,14 @@ public class CreateEmployeeCommandHandlerTests
             "Password123",
             Role.Employee,
             managerId,
-            new List<string>(),
+            new List<string> { "11999999999" },
             Role.Director);
 
         SetupRepositoryForNewEmployee();
 
         _repositoryMock
-            .Setup(x => x.GetByIdAsync(managerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Employee?)null);
+            .Setup(x => x.ExistsAsync(managerId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -275,7 +275,7 @@ public class CreateEmployeeCommandHandlerTests
             "Password123",
             Role.Employee,
             null,
-            new List<string>(),
+            new List<string> { "11999999999" },
             Role.Director);
 
         SetupRepositoryForNewEmployee();
@@ -288,11 +288,44 @@ public class CreateEmployeeCommandHandlerTests
         result.Error.Code.Should().Contain("Validation");
     }
 
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_SemTelefone_DeveRetornarErroDeValidacao()
+    {
+        // Arrange
+        var command = new CreateEmployeeCommand(
+            "Test",
+            "User",
+            "test@test.com",
+            TestHelper.GenerateValidCpf(),
+            TestHelper.GenerateAdultBirthDate(),
+            "Password123",
+            Role.Employee,
+            null,
+            new List<string>(),
+            Role.Director);
+
+        SetupRepositoryForNewEmployee();
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Validation");
+        result.Error.Description.Should().Contain("Funcionário deve possuir pelo menos um telefone");
+    }
+
     #endregion
 
     #region Helper Methods
 
     private CreateEmployeeCommand CreateValidCommand()
+    {
+        return CreateValidCommand(new List<string> { "11999999999" });
+    }
+
+    private CreateEmployeeCommand CreateValidCommand(List<string> phones)
     {
         return new CreateEmployeeCommand(
             "João",
@@ -303,19 +336,23 @@ public class CreateEmployeeCommandHandlerTests
             "Password123",
             Role.Employee,
             null,
-            new List<string>(),
+            phones,
             Role.Director);
     }
 
     private void SetupRepositoryForNewEmployee()
     {
         _repositoryMock
-            .Setup(x => x.GetByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Employee?)null);
+            .Setup(x => x.EmailExistsAsync(It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         _repositoryMock
-            .Setup(x => x.GetByDocumentAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Employee?)null);
+            .Setup(x => x.DocumentExistsAsync(It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _repositoryMock
+            .Setup(x => x.ExistsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))

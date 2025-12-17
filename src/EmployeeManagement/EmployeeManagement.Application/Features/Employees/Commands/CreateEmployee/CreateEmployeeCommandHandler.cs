@@ -37,7 +37,15 @@ public sealed class CreateEmployeeCommandHandler
         CreateEmployeeCommand request, 
         CancellationToken cancellationToken)
     {
+
         _logger.LogInformation("Creating employee with email: {Email}", request.Email);
+
+        // Validar se há pelo menos um telefone
+        if (request.PhoneNumbers == null || !request.PhoneNumbers.Any())
+        {
+            return Result<EmployeeResponse>.Failure(
+                Error.Validation("PhoneNumbers", "Funcionário deve possuir pelo menos um telefone"));
+        }
 
         // Validação de autorização
         if (request.CurrentUserRole <= request.Role)
@@ -84,7 +92,8 @@ public sealed class CreateEmployeeCommandHandler
             request.BirthDate,
             passwordHash,
             request.Role,
-            request.ManagerId);
+            request.ManagerId,
+            request.PhoneNumbers);
 
         if (employeeResult.IsFailure)
         {
@@ -92,12 +101,6 @@ public sealed class CreateEmployeeCommandHandler
         }
 
         var employee = employeeResult.Value;
-
-        // Adicionar telefones
-        foreach (var phone in request.PhoneNumbers)
-        {
-            employee.AddPhone(new PhoneNumber(phone, employee.Id));
-        }
 
         await _repository.AddAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
