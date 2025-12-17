@@ -30,7 +30,9 @@ public class EmployeeTests
             documentNumber,
             birthDate,
             passwordHash,
-            role);
+            role,
+            null,
+            new List<string> { "(11) 99999-8888" });
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -158,7 +160,9 @@ public class EmployeeTests
             TestHelper.GenerateValidCpf(),
             TestHelper.GenerateAdultBirthDate(),
             "hash",
-            Role.Employee);
+            Role.Employee,
+            null,
+            new List<string> { "(11) 99999-8888" });
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -399,6 +403,7 @@ public class EmployeeTests
     {
         // Arrange
         var employee = TestHelper.CreateValidEmployee();
+        employee.ClearPhones();
         var phone = new PhoneNumber("(11) 99999-8888", employee.Id);
 
         // Act
