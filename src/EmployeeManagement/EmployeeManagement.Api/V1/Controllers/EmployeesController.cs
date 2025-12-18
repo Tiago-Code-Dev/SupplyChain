@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using EmployeeManagement.Api.Contracts;
+using EmployeeManagement.Api.Controllers;
 using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
 using EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
 using EmployeeManagement.Application.Features.Employees.Commands.UpdateEmployee;
@@ -12,13 +13,13 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EmployeeManagement.Api.Controllers;
+namespace EmployeeManagement.Api.V1.Controllers;
 
 /// <summary>
 /// Controller para gerenciamento de funcionários
 /// </summary>
 [Route("api/v{version:apiVersion}/[controller]")]
-[Route("api/[controller]")] // Mantém rota legada para compatibilidade
+[Route("api/[controller]")]
 [ApiVersion("1.0")]
 [Authorize]
 [Tags("Employees")]

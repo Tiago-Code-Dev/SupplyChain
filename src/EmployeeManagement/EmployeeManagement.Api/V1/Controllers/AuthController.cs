@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace EmployeeManagement.Api.Controllers;
+namespace EmployeeManagement.Api.V1.Controllers;
 
 /// <summary>
 /// Controller para autenticação usando Identity com suporte a Refresh Token
 /// </summary>
 [Route("api/v{version:apiVersion}/[controller]")]
-[Route("api/[controller]")] // Mantém rota legada para compatibilidade
+[Route("api/[controller]")]
 [ApiController]
 [ApiVersion("1.0")]
 [Tags("Auth")]
@@ -176,8 +176,6 @@ public class AuthController : ControllerBase
     {
         var result = await _identityService.GeneratePasswordResetTokenAsync(request.Email, cancellationToken);
 
-        // Em produção, enviar token por email
-        // Por segurança, não revelamos se o email existe ou não
         if (result.IsSuccess && !string.IsNullOrEmpty(result.Value))
         {
             _logger.LogInformation("Password reset token generated for {Email}", request.Email);
@@ -409,7 +407,6 @@ public class AuthController : ControllerBase
 
     private string? GetIpAddress()
     {
-        // Verifica header de proxy (X-Forwarded-For)
         if (Request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
         {
             return forwardedFor.FirstOrDefault()?.Split(',').FirstOrDefault()?.Trim();

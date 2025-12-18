@@ -13,7 +13,6 @@ namespace EmployeeManagement.Api.Controllers;
 /// Controller base com funcionalidades comuns
 /// </summary>
 [ApiController]
-[ApiVersion("1.0")]
 [Produces("application/json")]
 public abstract class MainController : ControllerBase
 {
@@ -83,7 +82,6 @@ public abstract class MainController : ControllerBase
         var statusCode = GetStatusCodeFromError(error);
         var traceId = GetTraceId();
         
-        // Adiciona headers de rastreamento
         Response.Headers["X-Trace-Id"] = traceId;
         Response.Headers["X-Error-Contract-Version"] = "1.0";
 
