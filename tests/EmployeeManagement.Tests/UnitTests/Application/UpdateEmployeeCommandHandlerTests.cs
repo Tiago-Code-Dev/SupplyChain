@@ -60,7 +60,7 @@ public class UpdateEmployeeCommandHandlerTests
             newEmail,
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>(),
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null, 
             Role.Employee 
         );
@@ -100,7 +100,7 @@ public class UpdateEmployeeCommandHandlerTests
             employee.Email,
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>(),
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null,
             Role.Employee 
         );
@@ -177,7 +177,7 @@ public class UpdateEmployeeCommandHandlerTests
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>(),
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null, 
             Role.Employee 
         );
@@ -203,8 +203,8 @@ public class UpdateEmployeeCommandHandlerTests
             .ReturnsAsync(employee);
 
         _repositoryMock
-            .Setup(x => x.GetByEmailAsync("existing@test.com", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(otherEmployee);
+            .Setup(x => x.EmailExistsAsync("existing@test.com", employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         var command = new UpdateEmployeeCommand(
             employee.Id,
@@ -213,7 +213,7 @@ public class UpdateEmployeeCommandHandlerTests
             "existing@test.com",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>(),
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null, 
             Role.Employee 
         );
@@ -224,7 +224,7 @@ public class UpdateEmployeeCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("Conflict");
-        result.Error.Description.Should().Contain("Email already exists");
+        result.Error.Description.Should().Contain("Email já cadastrado");
     }
 
     [Fact]
@@ -249,7 +249,7 @@ public class UpdateEmployeeCommandHandlerTests
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
             employee.Id, 
-            new List<string>(),
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null, 
             Role.Employee 
         );
@@ -290,7 +290,7 @@ public class UpdateEmployeeCommandHandlerTests
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
             nonExistentManagerId,
-            new List<string>(),
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null, 
             Role.Employee
         );
@@ -325,7 +325,7 @@ public class UpdateEmployeeCommandHandlerTests
             "invalid-email",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>(),
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null,
             Role.Employee
         );
@@ -336,6 +336,42 @@ public class UpdateEmployeeCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("Validation");
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_SemTelefone_DeveRetornarErroDeValidacao()
+    {
+        // Arrange
+        var employee = TestHelper.CreateValidEmployee();
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(employee);
+
+        _repositoryMock
+            .Setup(x => x.GetByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Employee?)null);
+
+        var command = new UpdateEmployeeCommand(
+            employee.Id,
+            "Test",
+            "User",
+            "test@test.com",
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string>(), // Lista vazia - deve falhar
+            null,
+            Role.Employee
+        );
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Validation");
+        result.Error.Description.Should().Contain("pelo menos um telefone");
     }
 
     #endregion

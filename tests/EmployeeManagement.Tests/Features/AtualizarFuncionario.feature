@@ -85,7 +85,7 @@ Funcionalidade: Atualização de Funcionário
     E que existe um funcionário cadastrado com ID conhecido
     E que não existe gestor com ID "99999999-9999-9999-9999-999999999999"
     Quando o usuário tenta atualizar o funcionário com gestor inexistente
-    Então o sistema deve retornar status 400
+    Então o sistema deve retornar status 404
     E o sistema deve retornar mensagem "Gestor não encontrado"
     E o funcionário não deve ser atualizado no banco de dados
 

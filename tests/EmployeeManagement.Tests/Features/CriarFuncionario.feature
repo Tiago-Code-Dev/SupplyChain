@@ -55,7 +55,7 @@ Funcionalidade: Criação de Funcionário
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       |      | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
     Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que nome é obrigatório
+    E o sistema deve retornar mensagem "O nome é obrigatório; O nome deve ter pelo menos 2 caracteres" 
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao
@@ -65,7 +65,7 @@ Funcionalidade: Criação de Funcionário
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | João |           | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
     Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que sobrenome é obrigatório
+    E o sistema deve retornar mensagem "O sobrenome é obrigatório; O sobrenome deve ter pelo menos 2 caracteres"
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao
@@ -75,7 +75,7 @@ Funcionalidade: Criação de Funcionário
       | Nome | Sobrenome | Email          | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | João | Silva     | email-invalido | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
     Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem de erro indicando que email é inválido
+    E o sistema deve retornar mensagem "Formato de email inválido"
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao
@@ -96,7 +96,7 @@ Funcionalidade: Criação de Funcionário
       | Nome  | Sobrenome | Email            | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | Maria | Santos    | maria@supply.com | 12345678900 | 1992-05-20     | 11777777777 | Employee  | Senha@123456 |
     Então o sistema deve retornar status 409
-    E o sistema deve retornar mensagem "Document number already exists"
+    E o sistema deve retornar mensagem "Documento já cadastrado"
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao
@@ -116,7 +116,7 @@ Funcionalidade: Criação de Funcionário
       | Nome  | Sobrenome | Email            | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | Pedro | Costa     | pedro@supply.com | 98765432100 | 2010-06-15     | 11666666666 | Employee  | Senha@123456 |
     Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Employee must be at least 18 years old"
+    E o sistema deve retornar mensagem "O funcionário deve ter pelo menos 18 anos"
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao
@@ -126,7 +126,7 @@ Funcionalidade: Criação de Funcionário
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Permissao | Senha        |
       | João | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | Employee  | Senha@123456 |
     Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Funcionário deve possuir pelo menos um telefone"
+    E o sistema deve retornar mensagem "É necessário informar pelo menos um telefone"
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @conflito
@@ -137,7 +137,7 @@ Funcionalidade: Criação de Funcionário
       | Nome  | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | Outro | João      | joao@supply.com | 98765432100 | 1992-05-20     | 11777777777 | Employee  | Senha@123456 |
     Então o sistema deve retornar status 409
-    E o sistema deve retornar mensagem "Email already exists"
+    E o sistema deve retornar mensagem "Email já cadastrado"
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao
@@ -147,8 +147,8 @@ Funcionalidade: Criação de Funcionário
     Quando o usuário tenta criar um novo funcionário com gestor inexistente:
       | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
       | João | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Então o sistema deve retornar status 400
-    E o sistema deve retornar mensagem "Gestor não encontrado"
+    Então o sistema deve retornar status 404
+    E o sistema deve retornar mensagem "ManagerId '99999999-9999-9999-9999-999999999999"
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao

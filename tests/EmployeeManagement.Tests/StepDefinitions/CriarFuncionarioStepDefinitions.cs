@@ -47,6 +47,10 @@ public class CriarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByDocumentAsync(documento, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
+
+        _repositoryMock
+            .Setup(x => x.DocumentExistsAsync(documento, It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
     }
 
     [Given(@"que existe um gestor cadastrado com ID válido")]
@@ -56,6 +60,11 @@ public class CriarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByIdAsync(manager.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(manager);
+
+        _repositoryMock
+            .Setup(x => x.ExistsAsync(manager.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         _scenarioContext.Set(manager.Id, "ManagerId");
     }
 
@@ -66,6 +75,10 @@ public class CriarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByDocumentAsync(documento, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEmployee);
+
+        _repositoryMock
+            .Setup(x => x.DocumentExistsAsync(documento, It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
     }
 
     [Given(@"que já existe um funcionário cadastrado com email ""(.*)""")]
@@ -75,6 +88,10 @@ public class CriarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByEmailAsync(email.ToLowerInvariant(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEmployee);
+
+        _repositoryMock
+            .Setup(x => x.EmailExistsAsync(email.ToLowerInvariant(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
     }
 
     [Given(@"que não existe gestor com ID ""(.*)""")]
@@ -84,6 +101,9 @@ public class CriarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByIdAsync(guid, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
+        _repositoryMock
+            .Setup(x => x.ExistsAsync(guid, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
         _scenarioContext.Set(guid, "NonExistentManagerId");
     }
 
@@ -329,6 +349,20 @@ public class CriarFuncionarioStepDefinitions
 
     private async Task ExecutarCriacao(CreateEmployeeCommand command)
     {
+        // Validar o comando usando FluentValidation (simula ValidationBehavior do MediatR)
+        var validator = new CreateEmployeeCommandValidator();
+        var validationResult = await validator.ValidateAsync(command, CancellationToken.None);
+        
+        if (!validationResult.IsValid)
+        {
+            var errorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
+            var error = Error.Validation("Validation", errorMessage);
+            _result = Result<EmployeeResponse>.Failure(error);
+            _httpStatus = 400;
+            _scenarioContext.Set(_httpStatus, "HttpStatus");
+            return;
+        }
+
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
             .Callback<Employee, CancellationToken>((e, _) => _capturedEmployee = e)
@@ -362,5 +396,13 @@ public class CriarFuncionarioStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByDocumentAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
+
+        _repositoryMock
+            .Setup(x => x.EmailExistsAsync(It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _repositoryMock
+            .Setup(x => x.DocumentExistsAsync(It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
     }
 }

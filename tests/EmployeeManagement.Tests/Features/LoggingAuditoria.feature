@@ -93,6 +93,7 @@ Funcionalidade: Logging e Auditoria
   Cenário: Manter histórico de alterações do funcionário
     Dado que o usuário está autenticado como "Director"
     E que existe um funcionário cadastrado com ID conhecido
+    E que o sistema de logging está configurado
     Quando o usuário atualiza o nome do funcionário de "João" para "Carlos"
     Então o sistema deve registrar a alteração no histórico de auditoria
     E o histórico deve conter o valor anterior "João"

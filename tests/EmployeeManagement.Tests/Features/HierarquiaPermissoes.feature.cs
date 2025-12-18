@@ -81,20 +81,20 @@ namespace EmployeeManagement.Tests.Features
             this.TestTearDown();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Director pode criar qualquer nível de permissão")]
+        [Xunit.SkippableFactAttribute(DisplayName="Admin pode criar qualquer nível de permissão")]
         [Xunit.TraitAttribute("FeatureTitle", "Hierarquia de Permissões")]
-        [Xunit.TraitAttribute("Description", "Director pode criar qualquer nível de permissão")]
+        [Xunit.TraitAttribute("Description", "Admin pode criar qualquer nível de permissão")]
         [Xunit.TraitAttribute("Category", "hierarquia")]
         [Xunit.TraitAttribute("Category", "criar")]
         [Xunit.TraitAttribute("Category", "sucesso")]
-        public void DirectorPodeCriarQualquerNivelDePermissao()
+        public void AdminPodeCriarQualquerNivelDePermissao()
         {
             string[] tagsOfScenario = new string[] {
                     "hierarquia",
                     "criar",
                     "sucesso"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Director pode criar qualquer nível de permissão", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Admin pode criar qualquer nível de permissão", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 10
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -106,16 +106,16 @@ namespace EmployeeManagement.Tests.Features
             {
                 this.ScenarioStart();
 #line 11
-    testRunner.Given("que o usuário está autenticado como \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
+    testRunner.Given("que o usuário está autenticado como \"Admin\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
 #line 12
-    testRunner.When("o usuário cria um novo funcionário com permissão \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
+    testRunner.When("o usuário cria um novo funcionário com permissão \"Admin\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
 #line hidden
 #line 13
     testRunner.Then("o funcionário deve ser criado com sucesso", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 14
-    testRunner.And("o funcionário deve ter permissão \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o funcionário deve ter permissão \"Admin\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
             }
             this.ScenarioCleanup();
@@ -420,20 +420,20 @@ namespace EmployeeManagement.Tests.Features
             this.ScenarioCleanup();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Director pode alterar qualquer permissão")]
+        [Xunit.SkippableFactAttribute(DisplayName="Admin pode alterar qualquer permissão")]
         [Xunit.TraitAttribute("FeatureTitle", "Hierarquia de Permissões")]
-        [Xunit.TraitAttribute("Description", "Director pode alterar qualquer permissão")]
+        [Xunit.TraitAttribute("Description", "Admin pode alterar qualquer permissão")]
         [Xunit.TraitAttribute("Category", "hierarquia")]
         [Xunit.TraitAttribute("Category", "atualizar")]
         [Xunit.TraitAttribute("Category", "sucesso")]
-        public void DirectorPodeAlterarQualquerPermissao()
+        public void AdminPodeAlterarQualquerPermissao()
         {
             string[] tagsOfScenario = new string[] {
                     "hierarquia",
                     "atualizar",
                     "sucesso"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Director pode alterar qualquer permissão", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Admin pode alterar qualquer permissão", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 71
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -445,19 +445,19 @@ namespace EmployeeManagement.Tests.Features
             {
                 this.ScenarioStart();
 #line 72
-    testRunner.Given("que o usuário está autenticado como \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
+    testRunner.Given("que o usuário está autenticado como \"Admin\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
 #line 73
     testRunner.And("que existe um funcionário com permissão \"Employee\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 74
-    testRunner.When("o usuário atualiza o funcionário para permissão \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
+    testRunner.When("o usuário atualiza o funcionário para permissão \"Admin\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
 #line hidden
 #line 75
     testRunner.Then("o sistema deve retornar status 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 76
-    testRunner.And("o funcionário deve ter permissão \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o funcionário deve ter permissão \"Admin\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
             }
             this.ScenarioCleanup();

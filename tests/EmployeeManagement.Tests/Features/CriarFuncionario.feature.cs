@@ -375,7 +375,8 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 58
-    testRunner.And("o sistema deve retornar mensagem de erro indicando que nome é obrigatório", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"O nome é obrigatório; O nome deve ter pelo meno" +
+                        "s 2 caracteres\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 59
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -436,7 +437,8 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 68
-    testRunner.And("o sistema deve retornar mensagem de erro indicando que sobrenome é obrigatório", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"O sobrenome é obrigatório; O sobrenome deve ter" +
+                        " pelo menos 2 caracteres\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 69
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -497,7 +499,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 78
-    testRunner.And("o sistema deve retornar mensagem de erro indicando que email é inválido", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Formato de email inválido\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 79
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -622,7 +624,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 409", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 99
-    testRunner.And("o sistema deve retornar mensagem \"Document number already exists\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Documento já cadastrado\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 100
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -746,7 +748,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 119
-    testRunner.And("o sistema deve retornar mensagem \"Employee must be at least 18 years old\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"O funcionário deve ter pelo menos 18 anos\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 120
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -805,8 +807,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 129
-    testRunner.And("o sistema deve retornar mensagem \"Funcionário deve possuir pelo menos um telefone" +
-                        "\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"É necessário informar pelo menos um telefone\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 130
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -870,7 +871,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.Then("o sistema deve retornar status 409", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 140
-    testRunner.And("o sistema deve retornar mensagem \"Email already exists\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"Email já cadastrado\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 141
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
@@ -931,10 +932,11 @@ namespace EmployeeManagement.Tests.Features
     testRunner.When("o usuário tenta criar um novo funcionário com gestor inexistente:", ((string)(null)), table26, "Quando ");
 #line hidden
 #line 150
-    testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
+    testRunner.Then("o sistema deve retornar status 404", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 151
-    testRunner.And("o sistema deve retornar mensagem \"Gestor não encontrado\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o sistema deve retornar mensagem \"ManagerId \'99999999-9999-9999-9999-999999999999" +
+                        "\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 152
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");

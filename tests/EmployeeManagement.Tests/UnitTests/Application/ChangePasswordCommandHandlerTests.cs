@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Auth.Commands.ChangePassword;
-using EmployeeManagement.Tests.Helpers;
 
 namespace EmployeeManagement.Tests.UnitTests.Application;
 
@@ -188,7 +187,7 @@ public class ChangePasswordCommandHandlerTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Description.Should().Contain("Password is required");
+        result.Error.Description.Should().Contain("Nova senha é obrigatória");
     }
 
     #endregion

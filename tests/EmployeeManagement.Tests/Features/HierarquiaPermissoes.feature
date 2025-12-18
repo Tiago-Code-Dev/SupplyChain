@@ -7,11 +7,11 @@ Funcionalidade: Hierarquia de Permissões
   # Hierarquia: Director > Leader > Employee
 
   @hierarquia @criar @sucesso
-  Cenário: Director pode criar qualquer nível de permissão
-    Dado que o usuário está autenticado como "Director"
-    Quando o usuário cria um novo funcionário com permissão "Director"
+  Cenário: Admin pode criar qualquer nível de permissão
+    Dado que o usuário está autenticado como "Admin"
+    Quando o usuário cria um novo funcionário com permissão "Admin"
     Então o funcionário deve ser criado com sucesso
-    E o funcionário deve ter permissão "Director"
+    E o funcionário deve ter permissão "Admin"
 
   @hierarquia @criar @sucesso
   Cenário: Director pode criar Leader
@@ -68,12 +68,12 @@ Funcionalidade: Hierarquia de Permissões
     E o funcionário não deve ser atualizado no banco de dados
 
   @hierarquia @atualizar @sucesso
-  Cenário: Director pode alterar qualquer permissão
-    Dado que o usuário está autenticado como "Director"
+  Cenário: Admin pode alterar qualquer permissão
+    Dado que o usuário está autenticado como "Admin"
     E que existe um funcionário com permissão "Employee"
-    Quando o usuário atualiza o funcionário para permissão "Director"
+    Quando o usuário atualiza o funcionário para permissão "Admin"
     Então o sistema deve retornar status 200
-    E o funcionário deve ter permissão "Director"
+    E o funcionário deve ter permissão "Admin"
 
   @hierarquia @excluir @falha
   Cenário: Employee não pode excluir outros funcionários

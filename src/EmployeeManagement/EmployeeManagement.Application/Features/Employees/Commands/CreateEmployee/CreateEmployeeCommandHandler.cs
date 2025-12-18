@@ -5,6 +5,7 @@ using EmployeeManagement.Application.Interfaces;
 using EmployeeManagement.Application.Resources;
 using EmployeeManagement.Domain.Common;
 using EmployeeManagement.Domain.Entities;
+using EmployeeManagement.Domain.Enums;
 using EmployeeManagement.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -40,21 +41,18 @@ public sealed class CreateEmployeeCommandHandler
 
         _logger.LogInformation("Creating employee with email: {Email}", request.Email);
 
-        // Validar se há pelo menos um telefone
         if (request.PhoneNumbers == null || !request.PhoneNumbers.Any())
         {
             return Result<EmployeeResponse>.Failure(
                 Error.Validation("PhoneNumbers", "Funcionário deve possuir pelo menos um telefone"));
         }
 
-        // Validação de autorização
-        if (request.CurrentUserRole <= request.Role)
+        if (request.CurrentUserRole != Role.Admin && request.CurrentUserRole <= request.Role)
         {
             return Result<EmployeeResponse>.Failure(
                 Error.Forbidden(ValidationMessages.CannotCreateHigherRole));
         }
 
-        // Verificar email único usando método otimizado
         if (await _repository.EmailExistsAsync(request.Email, cancellationToken: cancellationToken))
         {
             _logger.LogWarning("Email {Email} already exists", request.Email);
@@ -62,7 +60,6 @@ public sealed class CreateEmployeeCommandHandler
                 Error.Conflict("Email", ValidationMessages.EmailAlreadyExists));
         }
 
-        // Verificar documento único usando método otimizado
         if (await _repository.DocumentExistsAsync(request.DocumentNumber, cancellationToken: cancellationToken))
         {
             _logger.LogWarning("Document {Document} already exists", request.DocumentNumber);
@@ -70,7 +67,6 @@ public sealed class CreateEmployeeCommandHandler
                 Error.Conflict("DocumentNumber", ValidationMessages.DocumentAlreadyExists));
         }
 
-        // Validar manager se fornecido
         if (request.ManagerId.HasValue)
         {
             var managerExists = await _repository.ExistsAsync(request.ManagerId.Value, cancellationToken);
@@ -78,11 +74,10 @@ public sealed class CreateEmployeeCommandHandler
             {
                 _logger.LogWarning("Manager {ManagerId} not found", request.ManagerId.Value);
                 return Result<EmployeeResponse>.Failure(
-                    Error.NotFound("Manager", ValidationMessages.ManagerNotFound));
+                    Error.NotFound("ManagerId", request.ManagerId.Value.ToString()));
             }
         }
 
-        // Criar via Factory Method
         var passwordHash = _passwordHasher.Hash(request.Password);
         var employeeResult = Employee.Create(
             request.FirstName,
@@ -102,16 +97,9 @@ public sealed class CreateEmployeeCommandHandler
 
         var employee = employeeResult.Value;
 
-        // Adicionar telefones
-        foreach (var phone in request.PhoneNumbers)
-        {
-            employee.AddPhone(new PhoneNumber(phone, employee.Id));
-        }
-
         await _repository.AddAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Invalidar cache de listagem
         await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
 
         _logger.LogInformation("Employee created successfully: {Id}", employee.Id);

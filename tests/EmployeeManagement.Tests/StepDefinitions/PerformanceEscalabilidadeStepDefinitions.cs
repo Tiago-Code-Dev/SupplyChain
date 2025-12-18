@@ -402,7 +402,8 @@ public class PerformanceEscalabilidadeStepDefinitions
             TestHelper.GenerateValidCpf(),
             TestHelper.GenerateAdultBirthDate(),
             hashedPassword,
-            Role.Employee);
+            Role.Employee,
+            phoneNumbers: new[] { "(11) 98765-4321" });
         
         _employeeToFind = createResult.Value!;
         

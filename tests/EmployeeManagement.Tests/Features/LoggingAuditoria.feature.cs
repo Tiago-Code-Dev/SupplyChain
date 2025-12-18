@@ -506,21 +506,24 @@ namespace EmployeeManagement.Tests.Features
     testRunner.And("que existe um funcionário cadastrado com ID conhecido", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 96
-    testRunner.When("o usuário atualiza o nome do funcionário de \"João\" para \"Carlos\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
+    testRunner.And("que o sistema de logging está configurado", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 97
-    testRunner.Then("o sistema deve registrar a alteração no histórico de auditoria", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
+    testRunner.When("o usuário atualiza o nome do funcionário de \"João\" para \"Carlos\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
 #line hidden
 #line 98
-    testRunner.And("o histórico deve conter o valor anterior \"João\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.Then("o sistema deve registrar a alteração no histórico de auditoria", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 99
-    testRunner.And("o histórico deve conter o novo valor \"Carlos\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o histórico deve conter o valor anterior \"João\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 100
-    testRunner.And("o histórico deve conter o usuário que fez a alteração", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+    testRunner.And("o histórico deve conter o novo valor \"Carlos\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 101
+    testRunner.And("o histórico deve conter o usuário que fez a alteração", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+#line hidden
+#line 102
     testRunner.And("o histórico deve conter a data da alteração", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
             }

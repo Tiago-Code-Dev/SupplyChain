@@ -5,6 +5,7 @@ using EmployeeManagement.Application.Interfaces;
 using EmployeeManagement.Application.Resources;
 using EmployeeManagement.Domain.Common;
 using EmployeeManagement.Domain.Entities;
+using EmployeeManagement.Domain.Enums;
 using EmployeeManagement.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -43,34 +44,32 @@ public sealed class UpdateEmployeeCommandHandler
                 Error.NotFound("Employee", ValidationMessages.EmployeeNotFound));
         }
 
-        // Guardar email antigo para invalidar cache depois
         var oldEmail = employee.Email;
 
-        // Validação de atualização de Role - hierarquia
         if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
         {
-            // Usuário não pode promover para role igual ou superior à sua
-            if (request.CurrentUserRole <= request.NewRole.Value)
+            if (request.CurrentUserRole != Role.Admin)
             {
-                _logger.LogWarning(
-                    "User with role {CurrentRole} tried to update employee {Id} to role {TargetRole}",
-                    request.CurrentUserRole, request.Id, request.NewRole.Value);
-                return Result<EmployeeResponse>.Failure(
-                    Error.Forbidden(ValidationMessages.CannotUpdateToHigherRole));
-            }
+                if (request.CurrentUserRole <= request.NewRole.Value)
+                {
+                    _logger.LogWarning(
+                        "User with role {CurrentRole} tried to update employee {Id} to role {TargetRole}",
+                        request.CurrentUserRole, request.Id, request.NewRole.Value);
+                    return Result<EmployeeResponse>.Failure(
+                        Error.Forbidden(ValidationMessages.CannotUpdateToHigherRole));
+                }
 
-            // Usuário não pode alterar role de funcionário com role igual ou superior
-            if (request.CurrentUserRole <= employee.Role)
-            {
-                _logger.LogWarning(
-                    "User with role {CurrentRole} tried to update role of employee {Id} with role {EmployeeRole}",
-                    request.CurrentUserRole, request.Id, employee.Role);
-                return Result<EmployeeResponse>.Failure(
-                    Error.Forbidden(ValidationMessages.CannotUpdateHigherRoleEmployee));
+                if (request.CurrentUserRole <= employee.Role)
+                {
+                    _logger.LogWarning(
+                        "User with role {CurrentRole} tried to update role of employee {Id} with role {EmployeeRole}",
+                        request.CurrentUserRole, request.Id, employee.Role);
+                    return Result<EmployeeResponse>.Failure(
+                        Error.Forbidden(ValidationMessages.CannotUpdateHigherRoleEmployee));
+                }
             }
         }
 
-        // Verificar se email está sendo alterado e é único (excluindo o próprio funcionário)
         if (!employee.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase))
         {
             if (await _repository.EmailExistsAsync(request.Email, request.Id, cancellationToken))
@@ -81,7 +80,6 @@ public sealed class UpdateEmployeeCommandHandler
             }
         }
 
-        // Validar manager
         if (request.ManagerId.HasValue)
         {
             if (request.ManagerId.Value == request.Id)
@@ -99,7 +97,6 @@ public sealed class UpdateEmployeeCommandHandler
             }
         }
 
-        // Atualizar usando método do domínio
         var updateResult = employee.Update(
             request.FirstName, 
             request.LastName, 
@@ -112,7 +109,6 @@ public sealed class UpdateEmployeeCommandHandler
             return Result<EmployeeResponse>.Failure(updateResult.Error);
         }
 
-        // Atualizar Role se fornecido
         if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
         {
             var roleUpdateResult = employee.UpdateRole(request.NewRole.Value);
@@ -126,15 +122,12 @@ public sealed class UpdateEmployeeCommandHandler
                 request.Id, employee.Role, request.NewRole.Value);
         }
 
-
-        // Validar se há pelo menos um telefone
         if (request.PhoneNumbers == null || !request.PhoneNumbers.Any())
         {
             return Result<EmployeeResponse>.Failure(
                 Error.Validation("PhoneNumbers", "Funcionário deve possuir pelo menos um telefone"));
         }
 
-        // Atualizar telefones
         employee.ClearPhones();
         foreach (var phone in request.PhoneNumbers)
         {
@@ -144,7 +137,6 @@ public sealed class UpdateEmployeeCommandHandler
         await _repository.UpdateAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // Invalidar cache
         await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
         if (!oldEmail.Equals(employee.Email, StringComparison.OrdinalIgnoreCase))
         {

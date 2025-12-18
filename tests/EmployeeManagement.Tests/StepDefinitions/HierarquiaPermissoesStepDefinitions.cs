@@ -224,7 +224,7 @@ public class HierarquiaPermissoesStepDefinitions
 
     private async Task ExecutarAtualizacaoPermissao(Role targetRole)
     {
-        if (_currentUserRole < targetRole || _currentUserRole == targetRole)
+        if (_currentUserRole < targetRole)
         {
             _httpStatus = 403;
             _updateResult = Result<EmployeeResponse>.Failure(

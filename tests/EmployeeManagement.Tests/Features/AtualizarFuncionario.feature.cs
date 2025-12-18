@@ -507,7 +507,7 @@ namespace EmployeeManagement.Tests.Features
     testRunner.When("o usuário tenta atualizar o funcionário com gestor inexistente", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
 #line hidden
 #line 88
-    testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
+    testRunner.Then("o sistema deve retornar status 404", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 89
     testRunner.And("o sistema deve retornar mensagem \"Gestor não encontrado\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
