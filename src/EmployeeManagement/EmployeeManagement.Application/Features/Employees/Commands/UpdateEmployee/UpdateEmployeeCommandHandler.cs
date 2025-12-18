@@ -95,7 +95,7 @@ public sealed class UpdateEmployeeCommandHandler
             {
                 _logger.LogWarning("Manager {ManagerId} not found", request.ManagerId.Value);
                 return Result<EmployeeResponse>.Failure(
-                    Error.NotFound("Manager", ValidationMessages.ManagerNotFound));
+                    Error.Validation("Manager", ValidationMessages.ManagerNotFound));
             }
         }
 

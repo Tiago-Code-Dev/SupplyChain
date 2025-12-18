@@ -38,8 +38,23 @@ public class Employee : Entity
         if (string.IsNullOrWhiteSpace(firstName))
             return Result<Employee>.Failure(Error.Validation("FirstName", "First name is required"));
 
+        if (firstName.Trim().Length < 2)
+            return Result<Employee>.Failure(Error.Validation("FirstName", "Nome deve ter pelo menos 2 caracteres"));
+
+        if (firstName.Any(char.IsDigit))
+            return Result<Employee>.Failure(Error.Validation("FirstName", "Nome não pode conter números"));
+
         if (string.IsNullOrWhiteSpace(lastName))
             return Result<Employee>.Failure(Error.Validation("LastName", "Last name is required"));
+
+        if (lastName.Trim().Length < 2)
+            return Result<Employee>.Failure(Error.Validation("LastName", "Sobrenome deve ter pelo menos 2 caracteres"));
+
+        if (lastName.Trim().Length > 200)
+            return Result<Employee>.Failure(Error.Validation("LastName", "Sobrenome excede o limite de caracteres"));
+
+        if (lastName.Any(char.IsDigit))
+            return Result<Employee>.Failure(Error.Validation("LastName", "Sobrenome não pode conter números"));
 
         if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
             return Result<Employee>.Failure(Error.Validation("Email", "Invalid email format"));
