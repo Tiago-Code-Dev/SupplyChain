@@ -28,7 +28,7 @@ public static class DbSeeder
             var passwordHasher = serviceProvider.GetRequiredService<IPasswordHasher>();
             var hashedPassword = passwordHasher.Hash("Admin@123");
 
-            // Usar Factory Method ao invés do construtor
+            // Passar telefones no Create para satisfazer a validação do domínio
             var adminResult = Employee.Create(
                 firstName: "Admin",
                 lastName: "System",
@@ -37,7 +37,8 @@ public static class DbSeeder
                 birthDate: DateTime.UtcNow.AddYears(-30),
                 passwordHash: hashedPassword,
                 role: Role.Director,
-                managerId: null);
+                managerId: null,
+                phoneNumbers: ["11999999999"]); // Telefone obrigatório
 
             if (adminResult.IsFailure)
             {
@@ -46,7 +47,6 @@ public static class DbSeeder
             }
 
             var admin = adminResult.Value;
-            admin.AddPhone(new PhoneNumber("11999999999", admin.Id));
 
             await context.Employees.AddAsync(admin);
             await context.SaveChangesAsync();
