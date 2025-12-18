@@ -4,13 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EmployeeManagement.Infrastructure.Persistence.Configurations;
 
-public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
+public class EmployeeConfiguration : EntityBaseConfiguration<Employee>
 {
-    public void Configure(EntityTypeBuilder<Employee> builder)
+    protected override void ConfigureEntity(EntityTypeBuilder<Employee> builder)
     {
         builder.ToTable("Employees");
-
-        builder.HasKey(e => e.Id);
 
         builder.Property(e => e.FirstName)
             .IsRequired()
@@ -34,17 +32,10 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(e => e.Role)
             .IsRequired();
 
-        // Soft Delete columns
-        builder.Property(e => e.IsDeleted)
-            .IsRequired()
-            .HasDefaultValue(false);
-
-        builder.Property(e => e.DeletedAt);
-
         // Indexes
         builder.HasIndex(e => e.Email)
             .IsUnique()
-            .HasFilter("IsDeleted = 0"); // Unique apenas para não deletados
+            .HasFilter("IsDeleted = 0");
 
         builder.HasIndex(e => e.DocumentNumber)
             .IsUnique()
@@ -62,8 +53,5 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .WithOne(p => p.Employee)
             .HasForeignKey(p => p.EmployeeId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // Ignore domain events
-        builder.Ignore(e => e.DomainEvents);
     }
 }
