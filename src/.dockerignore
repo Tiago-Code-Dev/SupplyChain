@@ -1,0 +1,61 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+
+# Test results
+**/TestResults/
+**/*.trx
+
+# NuGet
+**/packages/
+*.nupkg
+
+# Logs
+**/logs/
+**/*.log
+
+# Certificates (gerados localmente)
+certs/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+**/Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+LICENSE
+
+# Temporary files
+**/temp/
+**/tmp/
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets (nunca incluir em imagens)
+**/secrets/
+**/*.pfx
+**/*.pem
+**/*.key
+appsettings.*.json
+!appsettings.json
+!appsettings.Docker.json
