@@ -1,3 +1,4 @@
+using EmployeeManagement.Domain.Common;
 using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Enums;
 using EmployeeManagement.Domain.Interfaces;
@@ -5,18 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeManagement.Infrastructure.Persistence.Repositories;
 
-public class EmployeeRepository : IEmployeeRepository
+public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
 {
-    private readonly AppDbContext _context;
+    public EmployeeRepository(AppDbContext context) : base(context) { }
 
-    public EmployeeRepository(AppDbContext context)
+    // Override para incluir relacionamentos
+    public override async Task<Employee?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        _context = context;
-    }
-
-    public async Task<Employee?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _context.Employees
+        return await DbSet
             .Include(e => e.PhoneNumbers)
             .Include(e => e.Manager)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
@@ -24,7 +21,7 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task<Employee?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
-        return await _context.Employees
+        return await DbSet
             .Include(e => e.PhoneNumbers)
             .Include(e => e.Manager)
             .FirstOrDefaultAsync(e => e.Email.ToLower() == email.ToLower(), cancellationToken);
@@ -32,13 +29,13 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task<Employee?> GetByDocumentAsync(string documentNumber, CancellationToken cancellationToken = default)
     {
-        return await _context.Employees
+        return await DbSet
             .FirstOrDefaultAsync(e => e.DocumentNumber == documentNumber, cancellationToken);
     }
 
     public async Task<bool> EmailExistsAsync(string email, Guid? excludeId = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Employees.Where(e => e.Email.ToLower() == email.ToLower());
+        var query = DbSet.Where(e => e.Email.ToLower() == email.ToLower());
         
         if (excludeId.HasValue)
         {
@@ -50,7 +47,7 @@ public class EmployeeRepository : IEmployeeRepository
 
     public async Task<bool> DocumentExistsAsync(string documentNumber, Guid? excludeId = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Employees.Where(e => e.DocumentNumber == documentNumber);
+        var query = DbSet.Where(e => e.DocumentNumber == documentNumber);
         
         if (excludeId.HasValue)
         {
@@ -58,14 +55,6 @@ public class EmployeeRepository : IEmployeeRepository
         }
         
         return await query.AnyAsync(cancellationToken);
-    }
-
-    public async Task<IEnumerable<Employee>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.Employees
-            .Include(e => e.PhoneNumbers)
-            .Include(e => e.Manager)
-            .ToListAsync(cancellationToken);
     }
 
     public async Task<(IEnumerable<Employee> Employees, int TotalCount)> GetPagedAsync(
@@ -80,126 +69,107 @@ public class EmployeeRepository : IEmployeeRepository
         bool sortDescending = false,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.Employees
-            .Include(e => e.PhoneNumbers)
-            .Include(e => e.Manager)
-            .AsQueryable();
+        // Monta o filtro combinado
+        var filter = BuildFilter(searchTerm, filterByName, filterByEmail, filterByRole, filterByManagerId);
+        
+        // Monta a ordenação
+        var orderBy = BuildOrderBy(sortBy, sortDescending);
 
-        // Filtro de busca genérico (mantém compatibilidade)
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            var term = searchTerm.ToLower();
-            query = query.Where(e =>
-                e.FirstName.ToLower().Contains(term) ||
-                e.LastName.ToLower().Contains(term) ||
-                e.Email.ToLower().Contains(term) ||
-                e.DocumentNumber.Contains(term));
-        }
+        // Usa o método genérico da base
+        var result = await GetPagedAsync(
+            pageNumber, 
+            pageSize, 
+            filter, 
+            orderBy, 
+            "PhoneNumbers,Manager", 
+            cancellationToken);
 
-        // Filtro específico por nome (FirstName ou LastName)
-        if (!string.IsNullOrWhiteSpace(filterByName))
-        {
-            var nameTerm = filterByName.ToLower();
-            query = query.Where(e =>
-                e.FirstName.ToLower().Contains(nameTerm) ||
-                e.LastName.ToLower().Contains(nameTerm));
-        }
-
-        // Filtro específico por email (busca exata ou parcial)
-        if (!string.IsNullOrWhiteSpace(filterByEmail))
-        {
-            var emailTerm = filterByEmail.ToLower();
-            query = query.Where(e => e.Email.ToLower().Contains(emailTerm));
-        }
-
-        // Filtro específico por permissão/role
-        if (filterByRole.HasValue)
-        {
-            query = query.Where(e => e.Role == filterByRole.Value);
-        }
-
-        // Filtro específico por gestor
-        if (filterByManagerId.HasValue)
-        {
-            query = query.Where(e => e.ManagerId == filterByManagerId.Value);
-        }
-
-        // Contagem total (após filtros)
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        // Ordenação
-        query = sortBy?.ToLower() switch
-        {
-            "firstname" => sortDescending 
-                ? query.OrderByDescending(e => e.FirstName) 
-                : query.OrderBy(e => e.FirstName),
-            "lastname" => sortDescending 
-                ? query.OrderByDescending(e => e.LastName) 
-                : query.OrderBy(e => e.LastName),
-            "email" => sortDescending 
-                ? query.OrderByDescending(e => e.Email) 
-                : query.OrderBy(e => e.Email),
-            "role" => sortDescending 
-                ? query.OrderByDescending(e => e.Role) 
-                : query.OrderBy(e => e.Role),
-            "createdat" => sortDescending 
-                ? query.OrderByDescending(e => e.CreatedAt) 
-                : query.OrderBy(e => e.CreatedAt),
-            _ => query.OrderBy(e => e.FirstName)
-        };
-
-        // Paginação
-        var employees = await query
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
-
-        return (employees, totalCount);
+        return (result.Items, result.TotalCount);
     }
 
-    public async Task<Employee> AddAsync(Employee employee, CancellationToken cancellationToken = default)
+    public override Task UpdateAsync(Employee employee, CancellationToken cancellationToken = default)
     {
-        await _context.Employees.AddAsync(employee, cancellationToken);
-        return employee;
-    }
-
-    public Task UpdateAsync(Employee employee, CancellationToken cancellationToken = default)
-    {
-        // Remover telefones existentes (compatível com InMemory e SQL Server)
-        var existingPhones = _context.PhoneNumbers
+        // Remover telefones existentes
+        var existingPhones = Context.PhoneNumbers
             .Where(p => p.EmployeeId == employee.Id)
             .ToList();
         
-        _context.PhoneNumbers.RemoveRange(existingPhones);
+        Context.PhoneNumbers.RemoveRange(existingPhones);
         
         // Adicionar novos telefones
         foreach (var phone in employee.PhoneNumbers)
         {
-            _context.Entry(phone).State = EntityState.Added;
+            Context.Entry(phone).State = EntityState.Added;
         }
         
-        // Update employee
-        _context.Entry(employee).State = EntityState.Modified;
+        Context.Entry(employee).State = EntityState.Modified;
         
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var employee = await _context.Employees.FindAsync(new object[] { id }, cancellationToken);
-        if (employee is not null)
-        {
-            _context.Employees.Remove(employee);
-        }
-    }
-
-    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await _context.Employees.AnyAsync(e => e.Id == id, cancellationToken);
-    }
-
     public async Task<bool> HasSubordinatesAsync(Guid managerId, CancellationToken cancellationToken = default)
     {
-        return await _context.Employees.AnyAsync(e => e.ManagerId == managerId, cancellationToken);
+        return await DbSet.AnyAsync(e => e.ManagerId == managerId, cancellationToken);
     }
+
+    #region Private Methods
+
+    private static System.Linq.Expressions.Expression<Func<Employee, bool>>? BuildFilter(
+        string? searchTerm,
+        string? filterByName,
+        string? filterByEmail,
+        Role? filterByRole,
+        Guid? filterByManagerId)
+    {
+        // Se nenhum filtro, retorna null
+        if (string.IsNullOrWhiteSpace(searchTerm) &&
+            string.IsNullOrWhiteSpace(filterByName) &&
+            string.IsNullOrWhiteSpace(filterByEmail) &&
+            !filterByRole.HasValue &&
+            !filterByManagerId.HasValue)
+        {
+            return null;
+        }
+
+        return e =>
+            (string.IsNullOrWhiteSpace(searchTerm) || 
+                e.FirstName.ToLower().Contains(searchTerm.ToLower()) ||
+                e.LastName.ToLower().Contains(searchTerm.ToLower()) ||
+                e.Email.ToLower().Contains(searchTerm.ToLower()) ||
+                e.DocumentNumber.Contains(searchTerm)) &&
+            (string.IsNullOrWhiteSpace(filterByName) || 
+                e.FirstName.ToLower().Contains(filterByName.ToLower()) ||
+                e.LastName.ToLower().Contains(filterByName.ToLower())) &&
+            (string.IsNullOrWhiteSpace(filterByEmail) || 
+                e.Email.ToLower().Contains(filterByEmail.ToLower())) &&
+            (!filterByRole.HasValue || e.Role == filterByRole.Value) &&
+            (!filterByManagerId.HasValue || e.ManagerId == filterByManagerId.Value);
+    }
+
+    private static Func<IQueryable<Employee>, IOrderedQueryable<Employee>> BuildOrderBy(
+        string? sortBy,
+        bool sortDescending)
+    {
+        return sortBy?.ToLower() switch
+        {
+            "firstname" => sortDescending 
+                ? q => q.OrderByDescending(e => e.FirstName) 
+                : q => q.OrderBy(e => e.FirstName),
+            "lastname" => sortDescending 
+                ? q => q.OrderByDescending(e => e.LastName) 
+                : q => q.OrderBy(e => e.LastName),
+            "email" => sortDescending 
+                ? q => q.OrderByDescending(e => e.Email) 
+                : q => q.OrderBy(e => e.Email),
+            "role" => sortDescending 
+                ? q => q.OrderByDescending(e => e.Role) 
+                : q => q.OrderBy(e => e.Role),
+            "createdat" => sortDescending 
+                ? q => q.OrderByDescending(e => e.CreatedAt) 
+                : q => q.OrderBy(e => e.CreatedAt),
+            _ => q => q.OrderBy(e => e.FirstName)
+        };
+    }
+
+    #endregion
 }
