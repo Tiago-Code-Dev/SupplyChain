@@ -102,6 +102,12 @@ public sealed class CreateEmployeeCommandHandler
 
         var employee = employeeResult.Value;
 
+        // Adicionar telefones
+        foreach (var phone in request.PhoneNumbers)
+        {
+            employee.AddPhone(new PhoneNumber(phone, employee.Id));
+        }
+
         await _repository.AddAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

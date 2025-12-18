@@ -46,7 +46,7 @@ public sealed class ChangePasswordCommandHandler : ICommandHandler<ChangePasswor
 
         if (string.IsNullOrWhiteSpace(request.NewPassword))
         {
-            return Result.Failure(Error.Validation("NewPassword", "Nova senha é obrigatória"));
+            return Result.Failure(Error.Validation("NewPassword", "Nova senha Ã© obrigatÃ³ria"));
         }
 
         var newPasswordHash = _passwordHasher.Hash(request.NewPassword);

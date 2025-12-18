@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 18.1.11304.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmployeeManagement", "EmployeeManagement", "{B2C3D4E5-F6A7-8901-BCDE-F23456789012}"
 EndProject
@@ -136,7 +139,6 @@ Global
 		{D0E1F2A3-B4C5-6789-3456-012345678901} = {C3D4E5F6-A7B8-9012-CDEF-345678901234}
 		{84BC91B1-41CB-44E6-AE94-F6D6EC32CF05} = {EEBCC1AE-1B6B-4C68-8830-66D7AFEEFAEE}
 		{EEBCC1AE-1B6B-4C68-8830-66D7AFEEFAEE} = {25F122F1-FD04-41A8-BCD5-FCCC68C25D36}
-	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A1521C6-7A55-42A9-A899-CE6B66437BCF}
 	EndGlobalSection

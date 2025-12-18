@@ -1,10 +1,10 @@
 using EmployeeManagement.Application.Common;
 using EmployeeManagement.Application.Common.Interfaces;
 using EmployeeManagement.Application.Interfaces;
+using EmployeeManagement.Application.Resources;
 using EmployeeManagement.Domain.Common;
 using EmployeeManagement.Domain.Enums;
 using EmployeeManagement.Domain.Interfaces;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
@@ -28,24 +28,42 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
         _logger = logger;
     }
 
-    public async Task<Result> Handle(DeleteEmployeeCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(
+        DeleteEmployeeCommand request,
+        CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Deleting employee: {Id} by user with role: {Role}", 
+            request.Id, request.CurrentUserRole);
+
+        // Valida��o de autoriza��o - apenas Leader e Director podem excluir
+        if (request.CurrentUserRole < Role.Leader)
+        {
+            _logger.LogWarning("User with role {Role} tried to delete employee {Id} without permission", 
+                request.CurrentUserRole, request.Id);
+            return Result.Failure(
+                Error.Forbidden(ValidationMessages.NoPermissionToDelete));
+        }
+
+        // Buscar funcion�rio para obter email (para invalidar cache)
         var employee = await _repository.GetByIdAsync(request.Id, cancellationToken);
-        if (employee == null)
+        if (employee is null)
         {
-            return Result.Failure(Error.NotFound("Employee", "Funcionário não encontrado"));
+            return Result.Failure(Error.NotFound("Employee", ValidationMessages.EmployeeNotFound));
         }
 
-        if (request.CurrentUserRole == Role.Employee)
+        // Verificar se funcion�rio possui subordinados
+        var hasSubordinates = await _repository.HasSubordinatesAsync(request.Id, cancellationToken);
+        if (hasSubordinates)
         {
-            return Result.Failure(Error.Forbidden("Você não tem permissão para excluir funcionários"));
+            _logger.LogWarning("Cannot delete employee {Id} because they have subordinates", request.Id);
+            return Result.Failure(
+                Error.Validation("Employee", ValidationMessages.CannotDeleteWithSubordinates));
         }
 
-        employee.Delete(); 
-        
-
+        await _repository.DeleteAsync(request.Id, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // Invalidar cache
         await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
