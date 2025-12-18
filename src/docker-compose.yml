@@ -1,12 +1,12 @@
-﻿services:
+version: '3.8'
+
+services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: employeemanagement-db
-    hostname: sqlserver
+    container_name: employee-sqlserver
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=SqlServer@123
-      - MSSQL_PID=Developer
+      - SA_PASSWORD=YourStrong@Passw0rd
     ports:
       - "1433:1433"
     volumes:
@@ -24,28 +24,14 @@
     build:
       context: .
       dockerfile: EmployeeManagement/EmployeeManagement.Api/Dockerfile
-    container_name: employeemanagement-api
+    container_name: employee-api
+    ports:
+      - "5000:80"
+    depends_on:
+      - sqlserver
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=EmployeeManagementDb;User Id=sa;Password=SqlServer@123;TrustServerCertificate=True
-      - Jwt__Secret=YourSuperSecretKeyWithAtLeast32Characters!
-      - Jwt__Issuer=EmployeeManagement.Api
-      - Jwt__Audience=EmployeeManagement.Client
-      - Jwt__AccessTokenExpirationMinutes=15
-      - Jwt__RefreshTokenExpirationDays=7
-    ports:
-      - "8080:8080"
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-    networks:
-      - employeemanagement-network
-    restart: unless-stopped
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=EmployeeManagementDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True
 
 volumes:
   sqlserver_data:
-
-networks:
-  employeemanagement-network:
-    driver: bridge

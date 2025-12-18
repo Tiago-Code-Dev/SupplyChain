@@ -46,10 +46,10 @@ public sealed class UpdateEmployeeCommandHandler
         // Guardar email antigo para invalidar cache depois
         var oldEmail = employee.Email;
 
-        // ValidaÁ„o de atualizaÁ„o de Role - hierarquia
+        // Valida√ß√£o de atualiza√ß√£o de Role - hierarquia
         if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
         {
-            // Usu·rio n„o pode promover para role igual ou superior ‡ sua
+            // Usu√°rio n√£o pode promover para role igual ou superior √† sua
             if (request.CurrentUserRole <= request.NewRole.Value)
             {
                 _logger.LogWarning(
@@ -59,7 +59,7 @@ public sealed class UpdateEmployeeCommandHandler
                     Error.Forbidden(ValidationMessages.CannotUpdateToHigherRole));
             }
 
-            // Usu·rio n„o pode alterar role de funcion·rio com role igual ou superior
+            // Usu√°rio n√£o pode alterar role de funcion√°rio com role igual ou superior
             if (request.CurrentUserRole <= employee.Role)
             {
                 _logger.LogWarning(
@@ -70,7 +70,7 @@ public sealed class UpdateEmployeeCommandHandler
             }
         }
 
-        // Verificar se email est· sendo alterado e È ˙nico (excluindo o prÛprio funcion·rio)
+        // Verificar se email est√° sendo alterado e √© √∫nico (excluindo o pr√≥prio funcion√°rio)
         if (!employee.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase))
         {
             if (await _repository.EmailExistsAsync(request.Email, request.Id, cancellationToken))
@@ -99,7 +99,7 @@ public sealed class UpdateEmployeeCommandHandler
             }
         }
 
-        // Atualizar usando mÈtodo do domÌnio
+        // Atualizar usando m√©todo do dom√≠nio
         var updateResult = employee.Update(
             request.FirstName, 
             request.LastName, 
@@ -124,6 +124,14 @@ public sealed class UpdateEmployeeCommandHandler
             _logger.LogInformation(
                 "Employee {Id} role updated from {OldRole} to {NewRole}",
                 request.Id, employee.Role, request.NewRole.Value);
+        }
+
+
+        // Validar se h√° pelo menos um telefone
+        if (request.PhoneNumbers == null || !request.PhoneNumbers.Any())
+        {
+            return Result<EmployeeResponse>.Failure(
+                Error.Validation("PhoneNumbers", "Funcion√°rio deve possuir pelo menos um telefone"));
         }
 
         // Atualizar telefones

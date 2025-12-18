@@ -49,11 +49,13 @@ public sealed class CreateEmployeeCommandValidator : AbstractValidator<CreateEmp
             .Matches("[0-9]").WithMessage(ValidationMessages.PasswordDigit)
             .Matches("[^a-zA-Z0-9]").WithMessage(ValidationMessages.PasswordSpecialChar);
 
+        // Valida√ß√£o de telefones - deve ter pelo menos um
         RuleFor(x => x.PhoneNumbers)
             .NotNull().WithMessage(ValidationMessages.PhoneNumbersRequired)
             .Must(phones => phones != null && phones.Count > 0)
             .WithMessage(ValidationMessages.AtLeastOnePhoneRequired);
 
+        // Valida√ß√£o de cada telefone na lista - formato brasileiro
         RuleForEach(x => x.PhoneNumbers)
             .NotEmpty().WithMessage(ValidationMessages.PhoneNumberEmpty)
             .Matches(@"^\d{10,11}$").WithMessage(ValidationMessages.PhoneNumberInvalidFormat);
@@ -69,24 +71,24 @@ public sealed class CreateEmployeeCommandValidator : AbstractValidator<CreateEmp
         birthDate <= DateTime.UtcNow.AddYears(-18);
 
     /// <summary>
-    /// Valida se a data de nascimento n„o È anterior ao ano mÌnimo permitido (1900)
+    /// Valida se a data de nascimento n√£o √© anterior ao ano m√≠nimo permitido (1900)
     /// </summary>
     private static bool NotBeTooOld(DateTime birthDate) => 
         birthDate.Year >= MinimumBirthYear;
 
     /// <summary>
-    /// Valida se a data de nascimento n„o est· no futuro
+    /// Valida se a data de nascimento n√£o est√° no futuro
     /// </summary>
     private static bool NotBeInFuture(DateTime birthDate) => 
         birthDate.Date <= DateTime.UtcNow.Date;
 
     /// <summary>
-    /// Valida se o documento n„o possui todos os dÌgitos iguais (ex: 11111111111)
+    /// Valida se o documento n√£o possui todos os d√≠gitos iguais (ex: 11111111111)
     /// </summary>
     private static bool NotHaveAllEqualDigits(string? document)
     {
         if (string.IsNullOrWhiteSpace(document))
-            return true; // Deixa a validaÁ„o de obrigatoriedade para o NotEmpty
+            return true; // Deixa a valida√ß√£o de obrigatoriedade para o NotEmpty
 
         var digits = document.Where(char.IsDigit).ToArray();
         if (digits.Length == 0)
@@ -96,20 +98,20 @@ public sealed class CreateEmployeeCommandValidator : AbstractValidator<CreateEmp
     }
 
     /// <summary>
-    /// Valida se o email n„o contÈm espaÁos
+    /// Valida se o email n√£o cont√©m espa√ßos
     /// </summary>
     private static bool NotContainSpaces(string? email) => 
         string.IsNullOrEmpty(email) || !email.Contains(' ');
 
     /// <summary>
-    /// Valida se o nome/sobrenome contÈm apenas letras, espaÁos e caracteres de acentuaÁ„o
+    /// Valida se o nome/sobrenome cont√©m apenas letras, espa√ßos e caracteres de acentua√ß√£o
     /// </summary>
     private static bool NotContainNumbersOrSpecialChars(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return true; // Deixa a validaÁ„o de obrigatoriedade para o NotEmpty
+            return true; // Deixa a valida√ß√£o de obrigatoriedade para o NotEmpty
 
-        // Permite letras (incluindo acentuadas), espaÁos, hÌfens e apÛstrofos (ex: O'Connor, Anne-Marie)
+        // Permite letras (incluindo acentuadas), espa√ßos, h√≠fens e ap√≥strofos (ex: O'Connor, Anne-Marie)
         return name.All(c => char.IsLetter(c) || c == ' ' || c == '-' || c == '\'');
     }
 }

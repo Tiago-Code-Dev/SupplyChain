@@ -5,19 +5,19 @@ using EmployeeManagement.Application.Interfaces;
 using EmployeeManagement.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace EmployeeManagement.Application.Features.Employees.Queries.GetEmployeeById;
+namespace EmployeeManagement.Application.Features.Employees.Queries.GetEmployeeByEmail;
 
-public sealed class GetEmployeeByIdQueryHandler 
-    : IQueryHandler<GetEmployeeByIdQuery, EmployeeResponse?>
+public sealed class GetEmployeeByEmailQueryHandler 
+    : IQueryHandler<GetEmployeeByEmailQuery, EmployeeResponse?>
 {
     private readonly IEmployeeRepository _repository;
     private readonly ICacheService _cache;
-    private readonly ILogger<GetEmployeeByIdQueryHandler> _logger;
+    private readonly ILogger<GetEmployeeByEmailQueryHandler> _logger;
 
-    public GetEmployeeByIdQueryHandler(
+    public GetEmployeeByEmailQueryHandler(
         IEmployeeRepository repository,
         ICacheService cache,
-        ILogger<GetEmployeeByIdQueryHandler> logger)
+        ILogger<GetEmployeeByEmailQueryHandler> logger)
     {
         _repository = repository;
         _cache = cache;
@@ -25,17 +25,17 @@ public sealed class GetEmployeeByIdQueryHandler
     }
 
     public async Task<EmployeeResponse?> Handle(
-        GetEmployeeByIdQuery request, 
+        GetEmployeeByEmailQuery request, 
         CancellationToken cancellationToken)
     {
-        var cacheKey = CacheKeys.Employee(request.Id);
+        var cacheKey = CacheKeys.EmployeeByEmail(request.Email);
 
         var response = await _cache.GetOrSetAsync(
             cacheKey,
             async () =>
             {
-                _logger.LogInformation("Fetching employee {Id} from database", request.Id);
-                var employee = await _repository.GetByIdAsync(request.Id, cancellationToken);
+                _logger.LogInformation("Fetching employee with email {Email} from database", request.Email);
+                var employee = await _repository.GetByEmailAsync(request.Email, cancellationToken);
                 return employee is null ? null : EmployeeResponse.FromEntity(employee);
             },
             TimeSpan.FromMinutes(5),

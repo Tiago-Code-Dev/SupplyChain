@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
 
-public sealed class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeCommand>
+public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeCommand>
 {
     private readonly IEmployeeRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
@@ -35,7 +35,7 @@ public sealed class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmploye
         _logger.LogInformation("Deleting employee: {Id} by user with role: {Role}", 
             request.Id, request.CurrentUserRole);
 
-        // Validação de autorização - apenas Leader e Director podem excluir
+        // Validaï¿½ï¿½o de autorizaï¿½ï¿½o - apenas Leader e Director podem excluir
         if (request.CurrentUserRole < Role.Leader)
         {
             _logger.LogWarning("User with role {Role} tried to delete employee {Id} without permission", 
@@ -44,14 +44,14 @@ public sealed class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmploye
                 Error.Forbidden(ValidationMessages.NoPermissionToDelete));
         }
 
-        // Buscar funcionário para obter email (para invalidar cache)
+        // Buscar funcionï¿½rio para obter email (para invalidar cache)
         var employee = await _repository.GetByIdAsync(request.Id, cancellationToken);
         if (employee is null)
         {
             return Result.Failure(Error.NotFound("Employee", ValidationMessages.EmployeeNotFound));
         }
 
-        // Verificar se funcionário possui subordinados
+        // Verificar se funcionï¿½rio possui subordinados
         var hasSubordinates = await _repository.HasSubordinatesAsync(request.Id, cancellationToken);
         if (hasSubordinates)
         {
@@ -68,7 +68,7 @@ public sealed class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmploye
         await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
 
-        _logger.LogWarning("Employee deleted: {Id}, Email: {Email}, DeletedBy: {Role}", 
+        _logger.LogInformation("Employee deleted: {Id}, Email: {Email}, DeletedByRole: {Role}", 
             request.Id, employee.Email, request.CurrentUserRole);
 
         return Result.Success();

@@ -33,7 +33,8 @@ public class Employee : Entity
         DateTime birthDate,
         string passwordHash,
         Role role,
-        Guid? managerId = null)
+        Guid? managerId = null,
+        IEnumerable<string>? phoneNumbers = null)
     {
         if (string.IsNullOrWhiteSpace(firstName))
             return Result<Employee>.Failure(Error.Validation("FirstName", "First name is required"));
@@ -47,6 +48,9 @@ public class Employee : Entity
         if (!IsAdultBirthDate(birthDate))
             return Result<Employee>.Failure(Error.Validation("BirthDate", "Employee must be at least 18 years old"));
 
+        if (phoneNumbers == null || !phoneNumbers.Any())
+            return Result<Employee>.Failure(Error.Validation("PhoneNumbers", "Funcionário deve possuir pelo menos um telefone"));
+
         var employee = new Employee
         {
             FirstName = firstName.Trim(),
@@ -58,6 +62,11 @@ public class Employee : Entity
             Role = role,
             ManagerId = managerId
         };
+
+        foreach (var phone in phoneNumbers)
+        {
+            employee.AddPhone(new PhoneNumber(phone, employee.Id));
+        }
 
         // Raise domain event
         employee.RaiseDomainEvent(new EmployeeCreatedEvent(
