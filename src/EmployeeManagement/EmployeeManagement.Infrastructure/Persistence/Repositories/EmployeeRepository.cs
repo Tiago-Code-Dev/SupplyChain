@@ -10,7 +10,6 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
 {
     public EmployeeRepository(AppDbContext context) : base(context) { }
 
-    // Override para incluir relacionamentos
     public override async Task<Employee?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbSet
@@ -69,13 +68,9 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
         bool sortDescending = false,
         CancellationToken cancellationToken = default)
     {
-        // Monta o filtro combinado
         var filter = BuildFilter(searchTerm, filterByName, filterByEmail, filterByRole, filterByManagerId);
-        
-        // Monta a ordenação
         var orderBy = BuildOrderBy(sortBy, sortDescending);
 
-        // Usa o método genérico da base
         var result = await GetPagedAsync(
             pageNumber, 
             pageSize, 
@@ -89,27 +84,38 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
 
     public override Task UpdateAsync(Employee employee, CancellationToken cancellationToken = default)
     {
-        // Remover telefones existentes
-        var existingPhones = Context.PhoneNumbers
-            .Where(p => p.EmployeeId == employee.Id)
+        // Soft delete: apenas marcar employee como modificado, não mexer em telefones
+        if (employee.IsDeleted)
+        {
+            Context.Entry(employee).State = EntityState.Modified;
+            return Task.CompletedTask;
+        }
+
+        // Limpar todos os telefones rastreados do ChangeTracker para este employee
+        var trackedPhones = Context.ChangeTracker.Entries<PhoneNumber>()
+            .Where(e => e.Entity.EmployeeId == employee.Id && e.State == EntityState.Unchanged)
             .ToList();
-        
-        Context.PhoneNumbers.RemoveRange(existingPhones);
-        
+
+        // Remover do banco via DbSet diretamente
+        foreach (var entry in trackedPhones)
+        {
+            Context.Set<PhoneNumber>().Remove(entry.Entity);
+        }
+
         // Adicionar novos telefones
         foreach (var phone in employee.PhoneNumbers)
         {
-            Context.Entry(phone).State = EntityState.Added;
+            Context.Set<PhoneNumber>().Add(phone);
         }
-        
+
         Context.Entry(employee).State = EntityState.Modified;
-        
+
         return Task.CompletedTask;
     }
 
     public async Task<bool> HasSubordinatesAsync(Guid managerId, CancellationToken cancellationToken = default)
     {
-        return await DbSet.AnyAsync(e => e.ManagerId == managerId, cancellationToken);
+        return await DbSet.AnyAsync(e => e.ManagerId == managerId && !e.IsDeleted, cancellationToken);
     }
 
     #region Private Methods
@@ -121,7 +127,6 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
         Role? filterByRole,
         Guid? filterByManagerId)
     {
-        // Se nenhum filtro, retorna null
         if (string.IsNullOrWhiteSpace(searchTerm) &&
             string.IsNullOrWhiteSpace(filterByName) &&
             string.IsNullOrWhiteSpace(filterByEmail) &&

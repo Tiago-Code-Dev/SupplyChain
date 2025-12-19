@@ -1,0 +1,540 @@
+﻿{
+  "info": {
+    "name": "Employee Management API",
+    "description": "API de Gerenciamento de Funcionários - V1 e V2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const tokenExpiry = pm.environment.get('tokenExpiry');",
+          "const now = new Date().getTime();",
+          "",
+          "if (!pm.environment.get('token') || (tokenExpiry && now > tokenExpiry)) {",
+          "    console.log('Token expirado ou inexistente. Fazendo login automatico...');",
+          "    ",
+          "    const loginRequest = {",
+          "        url: pm.environment.get('baseUrl') + '/api/v1/auth/login',",
+          "        method: 'POST',",
+          "        header: { 'Content-Type': 'application/json' },",
+          "        body: {",
+          "            mode: 'raw',",
+          "            raw: JSON.stringify({",
+          "                email: pm.environment.get('adminEmail'),",
+          "                password: pm.environment.get('adminPassword')",
+          "            })",
+          "        }",
+          "    };",
+          "    ",
+          "    pm.sendRequest(loginRequest, (err, res) => {",
+          "        if (err) {",
+          "            console.error('Erro no login:', err);",
+          "            return;",
+          "        }",
+          "        ",
+          "        const json = res.json();",
+          "        if (json.accessToken) {",
+          "            pm.environment.set('token', json.accessToken);",
+          "            pm.environment.set('refreshToken', json.refreshToken);",
+          "            pm.environment.set('tokenExpiry', now + (60 * 60 * 1000));",
+          "            console.log('Login automatico realizado!');",
+          "        } else {",
+          "            console.error('Token nao encontrado na resposta:', JSON.stringify(json));",
+          "        }",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (V1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.accessToken) {",
+                  "        pm.environment.set('token', json.accessToken);",
+                  "        pm.environment.set('refreshToken', json.refreshToken);",
+                  "        pm.environment.set('userId', json.user.id);",
+                  "        pm.environment.set('userRole', json.user.role);",
+                  "        pm.environment.set('tokenExpiry', new Date().getTime() + (60 * 60 * 1000));",
+                  "        console.log('Token salvo! User Role:', json.user.role);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "auth", "login" ]
+            }
+          }
+        },
+        {
+          "name": "Login (V2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login V2 successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.accessToken) {",
+                  "        pm.environment.set('token', json.accessToken);",
+                  "        pm.environment.set('refreshToken', json.refreshToken);",
+                  "        pm.environment.set('tokenExpiry', new Date().getTime() + (60 * 60 * 1000));",
+                  "        console.log('Token V2 salvo!');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/auth/login",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v2", "auth", "login" ]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.accessToken) {",
+                  "        pm.environment.set('token', json.accessToken);",
+                  "        pm.environment.set('refreshToken', json.refreshToken);",
+                  "        pm.environment.set('tokenExpiry', new Date().getTime() + (60 * 60 * 1000));",
+                  "        console.log('Tokens atualizados via refresh!');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "auth", "refresh-token" ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 204) {",
+                  "    pm.environment.unset('token');",
+                  "    pm.environment.unset('refreshToken');",
+                  "    pm.environment.unset('tokenExpiry');",
+                  "    console.log('Logout realizado - tokens removidos');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/revoke-token",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "auth", "revoke-token" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees V1",
+      "item": [
+        {
+          "name": "Get All Employees",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Has items array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.items).to.be.an('array');",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json.items && json.items.length > 0) {",
+                  "    pm.environment.set('employeeId', json.items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees?pageNumber=1&pageSize=10",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "employees" ],
+              "query": [
+                {
+                  "key": "pageNumber",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Employee by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Has employee data', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "    pm.expect(json).to.have.property('email');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees/{{employeeId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "employees", "{{employeeId}}" ]
+            }
+          }
+        },
+        {
+          "name": "Create Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response contains id', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('newEmployeeId', json.id);",
+                  "    pm.environment.set('newEmployeeEmail', json.email);",
+                  "    console.log('Novo funcionario criado:', json.id);",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "pm.environment.set('randomEmail', 'test' + timestamp + '@empresa.com');",
+                  "pm.environment.set('randomDoc', String(timestamp).slice(-11).padStart(11, '0'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"Employee\",\n  \"email\": \"{{randomEmail}}\",\n  \"documentNumber\": \"{{randomDoc}}\",\n  \"birthDate\": \"1990-01-15\",\n  \"password\": \"Test@123\",\n  \"role\": 1,\n  \"managerId\": null,\n  \"phoneNumbers\": [\"11999998888\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "employees" ]
+            }
+          }
+        },
+        {
+          "name": "Update Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    console.log('Funcionario atualizado com sucesso!');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Name\",\n  \"email\": \"{{newEmployeeEmail}}\",\n  \"birthDate\": \"1990-01-15\",\n  \"phoneNumbers\": [\"11999997777\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees/{{newEmployeeId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "employees", "{{newEmployeeId}}" ]
+            }
+          }
+        },
+        {
+          "name": "Delete Employee",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const token = pm.environment.get('token');",
+                  "if (!token) {",
+                  "    console.error('Token is missing! Please authenticate first.');",
+                  "    throw new Error('Authorization token is not set. Run Login first.');",
+                  "}",
+                  "",
+                  "let newEmployeeId = pm.environment.get('newEmployeeId');",
+                  "if (!newEmployeeId) {",
+                  "    newEmployeeId = pm.environment.get('employeeId');",
+                  "    if (newEmployeeId) {",
+                  "        pm.environment.set('newEmployeeId', newEmployeeId);",
+                  "        console.log('Using employeeId as fallback:', newEmployeeId);",
+                  "    } else {",
+                  "        throw new Error('Employee ID is required. Create an employee first.');",
+                  "    }",
+                  "}",
+                  "",
+                  "console.log('Deleting employee:', newEmployeeId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204 or 404', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 204) {",
+                  "    console.log('Employee deleted successfully (204)');",
+                  "    pm.environment.unset('newEmployeeId');",
+                  "    pm.environment.unset('newEmployeeEmail');",
+                  "} else if (pm.response.code === 404) {",
+                  "    console.log('Employee not found - may have been deleted (404)');",
+                  "} else if (pm.response.code === 403) {",
+                  "    console.log('Permission denied - user role must be Leader or higher');",
+                  "} else if (pm.response.code === 500) {",
+                  "    const json = pm.response.json();",
+                  "    console.error('Server Error:', json.detail || json.title);",
+                  "    console.error('Full response:', JSON.stringify(json, null, 2));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/employees/{{newEmployeeId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "employees", "{{newEmployeeId}}" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees V2",
+      "item": [
+        {
+          "name": "Get All (V2 - offset/limit)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/employees?limit=10&offset=0",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v2", "employees" ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get by ID (V2)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v2/employees/{{employeeId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v2", "employees", "{{employeeId}}" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "health" ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
