@@ -28,13 +28,11 @@ public static class ApplicationRoles
     public const string Employee = "Employee";
     public const string Leader = "Leader";
     public const string Director = "Director";
-    public const string Admin = "Admin";
 
     public static readonly IReadOnlyList<string> All = new[]
     {
         Employee,
         Leader,
-        Director,
-        Admin
+        Director
     };
 }

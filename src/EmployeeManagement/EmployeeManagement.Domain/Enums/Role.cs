@@ -4,6 +4,5 @@ public enum Role
 {
     Employee = 1,
     Leader = 2,
-    Director = 3,
-    Admin = 4
+    Director = 3
 }
