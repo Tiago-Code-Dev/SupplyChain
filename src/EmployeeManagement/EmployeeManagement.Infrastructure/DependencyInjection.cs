@@ -167,16 +167,15 @@ public static class DependencyInjection
         });
 
         // Authorization com policies baseadas em roles
-        // Director é o nível máximo (atua como Admin)
         services.AddAuthorizationBuilder()
             .AddPolicy("RequireAdmin", policy => 
-                policy.RequireRole(ApplicationRoles.Director))  // Director = Admin
+                policy.RequireRole(ApplicationRoles.Admin))
             .AddPolicy("RequireDirector", policy => 
-                policy.RequireRole(ApplicationRoles.Director))
+                policy.RequireRole(ApplicationRoles.Director, ApplicationRoles.Admin))
             .AddPolicy("RequireLeader", policy => 
-                policy.RequireRole(ApplicationRoles.Leader, ApplicationRoles.Director))
+                policy.RequireRole(ApplicationRoles.Leader, ApplicationRoles.Director, ApplicationRoles.Admin))
             .AddPolicy("RequireEmployee", policy => 
-                policy.RequireRole(ApplicationRoles.Employee, ApplicationRoles.Leader, ApplicationRoles.Director));
+                policy.RequireRole(ApplicationRoles.Employee, ApplicationRoles.Leader, ApplicationRoles.Director, ApplicationRoles.Admin));
 
         return services;
     }

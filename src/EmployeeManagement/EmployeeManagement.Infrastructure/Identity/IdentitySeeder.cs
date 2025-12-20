@@ -28,20 +28,18 @@ public class IdentitySeeder
 
     public async Task SeedAsync()
     {
-        // As tabelas já foram criadas pelo Program.cs
-        // Apenas fazer seed dos dados
         await SeedRolesAsync();
         await SeedAdminUserAsync();
     }
 
     private async Task SeedRolesAsync()
     {
-        // Apenas 3 roles: Employee, Leader, Director (que atua como Admin)
         var roles = new[]
         {
             new ApplicationRole(ApplicationRoles.Employee, "Funcionário comum"),
             new ApplicationRole(ApplicationRoles.Leader, "Líder de equipe"),
-            new ApplicationRole(ApplicationRoles.Director, "Diretor / Administrador do sistema")
+            new ApplicationRole(ApplicationRoles.Director, "Diretor"),
+            new ApplicationRole(ApplicationRoles.Admin, "Administrador do sistema")
         };
 
         foreach (var role in roles)
@@ -97,10 +95,13 @@ public class IdentitySeeder
             var result = await _userManager.CreateAsync(admin, adminPassword);
             if (result.Succeeded)
             {
-                // Director é o nível máximo (atua como Admin)
-                await _userManager.AddToRoleAsync(admin, ApplicationRoles.Director);
+                await _userManager.AddToRolesAsync(admin, new[] 
+                { 
+                    ApplicationRoles.Admin, 
+                    ApplicationRoles.Director 
+                });
 
-                _logger.LogInformation("Admin user created: {Email} with role Director", adminEmail);
+                _logger.LogInformation("Admin user created: {Email}", adminEmail);
             }
             else
             {
