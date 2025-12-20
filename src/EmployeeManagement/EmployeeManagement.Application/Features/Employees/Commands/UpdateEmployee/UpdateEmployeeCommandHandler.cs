@@ -48,7 +48,8 @@ public sealed class UpdateEmployeeCommandHandler
 
         if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
         {
-            if (request.CurrentUserRole != Role.Admin)
+            // Director é o nível máximo - pode atualizar qualquer role
+            if (request.CurrentUserRole != Role.Director)
             {
                 if (request.CurrentUserRole <= request.NewRole.Value)
                 {
