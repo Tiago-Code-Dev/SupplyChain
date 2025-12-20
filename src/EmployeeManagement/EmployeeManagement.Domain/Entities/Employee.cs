@@ -1,5 +1,4 @@
-﻿using EmployeeManagement.Domain.Common;
-using EmployeeManagement.Domain.Enums;
+﻿using EmployeeManagement.Domain.Enums;
 using EmployeeManagement.Domain.Events;
 
 namespace EmployeeManagement.Domain.Entities;
@@ -33,7 +32,8 @@ public class Employee : Entity
         DateTime birthDate,
         string passwordHash,
         Role role,
-        Guid? managerId = null)
+        Guid? managerId = null,
+        IEnumerable<string>? phoneNumbers = null)
     {
         if (string.IsNullOrWhiteSpace(firstName))
             return Result<Employee>.Failure(Error.Validation("FirstName", "First name is required"));
@@ -59,8 +59,14 @@ public class Employee : Entity
         if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
             return Result<Employee>.Failure(Error.Validation("Email", "Invalid email format"));
 
+        if (string.IsNullOrWhiteSpace(documentNumber))
+            return Result<Employee>.Failure(Error.Validation("DocumentNumber", "Document number is required"));
+
         if (!IsAdultBirthDate(birthDate))
             return Result<Employee>.Failure(Error.Validation("BirthDate", "Employee must be at least 18 years old"));
+
+        if (phoneNumbers == null || !phoneNumbers.Any())
+            return Result<Employee>.Failure(Error.Validation("PhoneNumbers", "Funcionário deve possuir pelo menos um telefone"));
 
         var employee = new Employee
         {
@@ -74,7 +80,11 @@ public class Employee : Entity
             ManagerId = managerId
         };
 
-        // Raise domain event
+        foreach (var phone in phoneNumbers)
+        {
+            employee.AddPhone(new PhoneNumber(phone, employee.Id));
+        }
+
         employee.RaiseDomainEvent(new EmployeeCreatedEvent(
             employee.Id,
             employee.Email,
@@ -115,7 +125,6 @@ public class Employee : Entity
         ManagerId = managerId;
         SetUpdatedAt();
 
-        // Raise domain event
         RaiseDomainEvent(new EmployeeUpdatedEvent(Id, Email));
 
         return Result.Success();
@@ -130,7 +139,6 @@ public class Employee : Entity
         Role = newRole;
         SetUpdatedAt();
 
-        // Raise domain event
         RaiseDomainEvent(new EmployeeRoleChangedEvent(Id, oldRole, newRole));
 
         return Result.Success();
@@ -148,7 +156,6 @@ public class Employee : Entity
         PasswordHash = passwordHash;
         SetUpdatedAt();
 
-        // Raise domain event
         RaiseDomainEvent(new PasswordChangedEvent(Id));
 
         return Result.Success();

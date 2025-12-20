@@ -29,7 +29,7 @@ public sealed class ChangePasswordCommandHandler : ICommandHandler<ChangePasswor
         ChangePasswordCommand request,
         CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Changing password for employee: {Id}", request.EmployeeId);
+        _logger.LogInformation("Updating credentials for employee: {Id}", request.EmployeeId);
 
         var employee = await _repository.GetByIdAsync(request.EmployeeId, cancellationToken);
         
@@ -43,6 +43,12 @@ public sealed class ChangePasswordCommandHandler : ICommandHandler<ChangePasswor
             return Result.Failure(Error.Validation("CurrentPassword", "Current password is incorrect"));
         }
 
+
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
+        {
+            return Result.Failure(Error.Validation("NewPassword", "Nova senha é obrigatória"));
+        }
+
         var newPasswordHash = _passwordHasher.Hash(request.NewPassword);
         var updateResult = employee.UpdatePassword(newPasswordHash);
 
@@ -54,7 +60,7 @@ public sealed class ChangePasswordCommandHandler : ICommandHandler<ChangePasswor
         await _repository.UpdateAsync(employee, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Password changed successfully for employee: {Id}", request.EmployeeId);
+        _logger.LogInformation("Credentials updated successfully for employee: {Id}", request.EmployeeId);
 
         return Result.Success();
     }

@@ -28,8 +28,6 @@ public class IdentitySeeder
 
     public async Task SeedAsync()
     {
-        // As tabelas já foram criadas pelo Program.cs
-        // Apenas fazer seed dos dados
         await SeedRolesAsync();
         await SeedAdminUserAsync();
     }

@@ -30,7 +30,6 @@ public sealed class GetEmployeeByIdQueryHandler
     {
         var cacheKey = CacheKeys.Employee(request.Id);
 
-        // Tentar obter do cache ou buscar do banco
         var response = await _cache.GetOrSetAsync(
             cacheKey,
             async () =>

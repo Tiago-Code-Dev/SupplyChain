@@ -1,61 +1,69 @@
 namespace EmployeeManagement.Application.Resources;
 
 /// <summary>
-/// Mensagens de validaÁ„o localizadas (PT-BR)
+/// Mensagens de valida√ß√£o localizadas (PT-BR)
 /// </summary>
 public static class ValidationMessages
 {
-    // Employee - Campos obrigatÛrios
-    public const string FirstNameRequired = "O nome È obrigatÛrio";
-    public const string FirstNameMaxLength = "O nome n„o pode exceder {MaxLength} caracteres";
-    public const string LastNameRequired = "O sobrenome È obrigatÛrio";
-    public const string LastNameMaxLength = "O sobrenome n„o pode exceder {MaxLength} caracteres";
-    public const string EmailRequired = "O email È obrigatÛrio";
-    public const string EmailInvalid = "Formato de email inv·lido";
-    public const string EmailMaxLength = "O email n„o pode exceder {MaxLength} caracteres";
-    public const string DocumentRequired = "O documento È obrigatÛrio";
-    public const string DocumentMaxLength = "O documento n„o pode exceder {MaxLength} caracteres";
-    public const string DocumentInvalidFormat = "O documento deve ser um CPF (11 dÌgitos) ou CNPJ (14 dÌgitos) v·lido";
-    public const string BirthDateRequired = "A data de nascimento È obrigatÛria";
-    public const string EmployeeMustBeAdult = "O funcion·rio deve ter pelo menos 18 anos";
+    // Employee - Campos obrigat√≥rios
+    public const string FirstNameRequired = "O nome √© obrigat√≥rio";
+    public const string FirstNameMaxLength = "O nome n√£o pode exceder {MaxLength} caracteres";
+    public const string FirstNameMinLength = "O nome deve ter pelo menos {MinLength} caracteres";
+    public const string FirstNameInvalidCharacters = "O nome n√£o pode conter n√∫meros ou caracteres especiais";
+    public const string LastNameRequired = "O sobrenome √© obrigat√≥rio";
+    public const string LastNameMaxLength = "O sobrenome n√£o pode exceder {MaxLength} caracteres";
+    public const string LastNameMinLength = "O sobrenome deve ter pelo menos {MinLength} caracteres";
+    public const string LastNameInvalidCharacters = "O sobrenome n√£o pode conter n√∫meros ou caracteres especiais";
+    public const string EmailRequired = "O email √© obrigat√≥rio";
+    public const string EmailInvalid = "Formato de email inv√°lido";
+    public const string EmailMaxLength = "O email n√£o pode exceder {MaxLength} caracteres";
+    public const string EmailContainsSpaces = "O email n√£o pode conter espa√ßos";
+    public const string DocumentRequired = "O documento √© obrigat√≥rio";
+    public const string DocumentMaxLength = "O documento n√£o pode exceder {MaxLength} caracteres";
+    public const string DocumentInvalidFormat = "O documento deve ser um CPF (11 d√≠gitos) ou CNPJ (14 d√≠gitos) v√°lido";
+    public const string DocumentAllDigitsEqual = "O documento n√£o pode ter todos os d√≠gitos iguais";
+    public const string BirthDateRequired = "A data de nascimento √© obrigat√≥ria";
+    public const string EmployeeMustBeAdult = "O funcion√°rio deve ter pelo menos 18 anos";
+    public const string BirthDateTooOld = "A data de nascimento n√£o pode ser anterior a {MinYear}";
+    public const string BirthDateInFuture = "A data de nascimento n√£o pode ser no futuro";
     
     // Employee - Senha
-    public const string PasswordRequired = "A senha È obrigatÛria";
+    public const string PasswordRequired = "A senha √© obrigat√≥ria";
     public const string PasswordMinLength = "A senha deve ter pelo menos {MinLength} caracteres";
-    public const string PasswordUppercase = "A senha deve conter pelo menos uma letra mai˙scula";
-    public const string PasswordLowercase = "A senha deve conter pelo menos uma letra min˙scula";
-    public const string PasswordDigit = "A senha deve conter pelo menos um n˙mero";
+    public const string PasswordUppercase = "A senha deve conter pelo menos uma letra mai√∫scula";
+    public const string PasswordLowercase = "A senha deve conter pelo menos uma letra min√∫scula";
+    public const string PasswordDigit = "A senha deve conter pelo menos um n√∫mero";
     public const string PasswordSpecialChar = "A senha deve conter pelo menos um caractere especial";
     
     // Employee - Telefones
-    public const string PhoneNumbersRequired = "A lista de telefones È obrigatÛria";
-    public const string AtLeastOnePhoneRequired = "… necess·rio informar pelo menos um telefone";
-    public const string PhoneNumberEmpty = "O n˙mero de telefone n„o pode estar vazio";
-    public const string PhoneNumberInvalidFormat = "O telefone deve ter 10 ou 11 dÌgitos (DDD + n˙mero)";
+    public const string PhoneNumbersRequired = "A lista de telefones √© obrigat√≥ria";
+    public const string AtLeastOnePhoneRequired = "√â necess√°rio informar pelo menos um telefone";
+    public const string PhoneNumberEmpty = "O n√∫mero de telefone n√£o pode estar vazio";
+    public const string PhoneNumberInvalidFormat = "O telefone deve ter 10 ou 11 d√≠gitos (DDD + n√∫mero)";
     
-    // Employee - Role/Permiss„o
-    public const string RoleInvalid = "Permiss„o inv·lida";
-    public const string EmployeeIdRequired = "O ID do funcion·rio È obrigatÛrio";
+    // Employee - Role/Permiss√£o
+    public const string RoleInvalid = "Permiss√£o inv√°lida";
+    public const string EmployeeIdRequired = "O ID do funcion√°rio √© obrigat√≥rio";
     
     // Employee - Manager/Gestor
-    public const string CannotBeSelfManager = "O funcion·rio n„o pode ser seu prÛprio gestor";
-    public const string ManagerNotFound = "Gestor n„o encontrado";
+    public const string CannotBeSelfManager = "O funcion√°rio n√£o pode ser seu pr√≥prio gestor";
+    public const string ManagerNotFound = "Gestor n√£o encontrado";
     
-    // Employee - OperaÁıes
-    public const string EmployeeNotFound = "Funcion·rio n„o encontrado";
-    public const string EmailAlreadyExists = "Email j· cadastrado";
-    public const string DocumentAlreadyExists = "Documento j· cadastrado";
-    public const string CannotCreateHigherRole = "VocÍ n„o pode criar um funcion·rio com permiss„o igual ou superior ‡ sua";
-    public const string CannotUpdateToHigherRole = "VocÍ n„o tem permiss„o para alterar usu·rios para nÌvel de permiss„o superior";
-    public const string CannotUpdateHigherRoleEmployee = "VocÍ n„o tem permiss„o para alterar a role de funcion·rios com permiss„o igual ou superior ‡ sua";
-    public const string CannotDeleteWithSubordinates = "N„o È possÌvel excluir funcion·rio que possui subordinados";
-    public const string NoPermissionToDelete = "VocÍ n„o tem permiss„o para excluir funcion·rios";
+    // Employee - Opera√ß√µes
+    public const string EmployeeNotFound = "Funcion√°rio n√£o encontrado";
+    public const string EmailAlreadyExists = "Email j√° cadastrado";
+    public const string DocumentAlreadyExists = "Documento j√° cadastrado";
+    public const string CannotCreateHigherRole = "Voc√™ n√£o pode criar um funcion√°rio com permiss√£o igual ou superior √† sua";
+    public const string CannotUpdateToHigherRole = "Voc√™ n√£o tem permiss√£o para alterar usu√°rios para n√≠vel de permiss√£o superior";
+    public const string CannotUpdateHigherRoleEmployee = "Voc√™ n√£o tem permiss√£o para alterar a role de funcion√°rios com permiss√£o igual ou superior √† sua";
+    public const string CannotDeleteWithSubordinates = "N√£o √© poss√≠vel excluir funcion√°rio que possui subordinados";
+    public const string NoPermissionToDelete = "Voc√™ n√£o tem permiss√£o para excluir funcion√°rios";
     
     // Auth
-    public const string InvalidCredentials = "Credenciais inv·lidas";
-    public const string UserInactive = "Usu·rio inativo";
+    public const string InvalidCredentials = "Credenciais inv√°lidas";
+    public const string UserInactive = "Usu√°rio inativo";
     public const string AccountLocked = "Conta bloqueada. Tente novamente mais tarde.";
     public const string TokenExpired = "Token expirado";
-    public const string Unauthorized = "N„o autorizado";
-    public const string RefreshTokenInvalid = "Refresh token inv·lido ou expirado";
+    public const string Unauthorized = "N√£o autorizado";
+    public const string RefreshTokenInvalid = "Refresh token inv√°lido ou expirado";
 }
