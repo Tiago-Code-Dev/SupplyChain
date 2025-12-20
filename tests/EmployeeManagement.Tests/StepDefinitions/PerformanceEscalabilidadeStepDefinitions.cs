@@ -403,7 +403,8 @@ public class PerformanceEscalabilidadeStepDefinitions
             TestHelper.GenerateAdultBirthDate(),
             hashedPassword,
             Role.Employee,
-            phoneNumbers: new[] { "(11) 98765-4321" });
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() });
         
         _employeeToFind = createResult.Value!;
         
