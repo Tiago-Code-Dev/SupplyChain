@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EmployeeManagement.Infrastructure.Persistence.Configurations;
 
-public class PhoneNumberConfiguration : IEntityTypeConfiguration<PhoneNumber>
+public class PhoneNumberConfiguration : EntityBaseConfiguration<PhoneNumber>
 {
-    public void Configure(EntityTypeBuilder<PhoneNumber> builder)
+    protected override void ConfigureEntity(EntityTypeBuilder<PhoneNumber> builder)
     {
-        builder.HasKey(p => p.Id);
+        builder.ToTable("PhoneNumbers");
 
         builder.Property(p => p.Number)
             .IsRequired()

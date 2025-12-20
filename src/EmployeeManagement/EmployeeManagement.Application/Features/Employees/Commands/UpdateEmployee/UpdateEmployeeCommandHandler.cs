@@ -48,6 +48,7 @@ public sealed class UpdateEmployeeCommandHandler
 
         if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
         {
+            // Admin é o nível máximo - pode atualizar qualquer role
             if (request.CurrentUserRole != Role.Admin)
             {
                 if (request.CurrentUserRole <= request.NewRole.Value)
@@ -93,7 +94,7 @@ public sealed class UpdateEmployeeCommandHandler
             {
                 _logger.LogWarning("Manager {ManagerId} not found", request.ManagerId.Value);
                 return Result<EmployeeResponse>.Failure(
-                    Error.NotFound("Manager", ValidationMessages.ManagerNotFound));
+                    Error.Validation("Manager", ValidationMessages.ManagerNotFound));
             }
         }
 

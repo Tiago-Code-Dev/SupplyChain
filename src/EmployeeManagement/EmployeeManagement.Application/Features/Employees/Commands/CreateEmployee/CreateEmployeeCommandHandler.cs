@@ -47,6 +47,7 @@ public sealed class CreateEmployeeCommandHandler
                 Error.Validation("PhoneNumbers", "Funcionário deve possuir pelo menos um telefone"));
         }
 
+        // Admin é o nível máximo - pode criar qualquer role
         if (request.CurrentUserRole != Role.Admin && request.CurrentUserRole <= request.Role)
         {
             return Result<EmployeeResponse>.Failure(
