@@ -1,154 +1,375 @@
-# Employee Management API
+# SupplyChain – Sistema de Gerenciamento de Funcionários
+Plataforma backend para **cadastro, autenticação e gestão hierárquica de funcionários**, com **Clean Architecture + DDD**, **CQRS (MediatR)**, **JWT + Refresh Token**, rastreabilidade por **X-Correlation-ID**, e camadas prontas para evoluir com segurança.
 
-Sistema de Gerenciamento de Funcion�rios desenvolvido com **.NET 8**, seguindo princ�pios de **Clean Architecture**, **DDD**, **SOLID** e **CQRS**.
+> Projeto focado em **boas práticas de engenharia** (validações de negócio, observabilidade, testes e deploy com Docker) para ambientes de alta responsabilidade.
 
-## ?? In�cio R�pido
+---
 
-### Pr�-requisitos
+## 🧭 Visão Geral
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- PowerShell (Windows) ou Bash (Linux/Mac)
+O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo completo de **gestão de colaboradores**:
+- **Autenticação segura** (JWT + Refresh Token + revogação)
+- **CRUD de funcionários** com **soft delete**
+- **Hierarquia de permissões** (controle de quem pode criar/alterar/excluir)
+- **Regras de negócio críticas** (documento único, maioridade, gestor, etc.)
+- **Rastreabilidade ponta‑a‑ponta** com Correlation ID e logs estruturados
 
-### Executando com Docker (HTTP + HTTPS)
+---
 
-#### 1. Gerar Certificado de Desenvolvimento
+## 📌 Funcionalidades Incluídas
 
-**Windows (PowerShell):**
-```powershell
-.\scripts\generate-dev-cert.ps1
+- 🔐 **Autenticação & Identity**
+  - Login / Refresh Token / Revogação de tokens
+  - Registro, reset de senha, troca de senha
+  - Endpoint **/me** para dados do usuário autenticado
+  - Gestão de Roles/Claims (para cenários administrativos)
+
+- 👥 **Funcionários (Employees)**
+  - Criar, atualizar, listar (paginação/filtros), buscar por ID
+  - **Soft delete** (exclusão lógica)
+  - Cache e invalidação de cache (quando aplicável)
+
+- 🧠 **Regras de Negócio (Domínio)**
+  - Documento e e-mail **únicos**
+  - Funcionário deve ser **maior de 18 anos**
+  - Deve possuir **pelo menos 1 telefone**
+  - Validação de **gestor existente** e prevenção de inconsistências
+  - Restrições por hierarquia (não criar/alçar permissões acima do nível do usuário)
+
+- 🧾 **Observabilidade & Resiliência**
+  - Logs estruturados (Serilog + pipeline de logging)
+  - **X-Correlation-ID** (propagação e rastreabilidade)
+  - **Health Checks**
+  - **Rate Limiting** (global + políticas)
+
+- 🧪 **Testes Automatizados**
+  - Unit tests (xUnit)
+  - BDD com SpecFlow (cenários em Gherkin/PT-BR)
+  - Integração (quando configurado)
+
+- 🐳 **Docker**
+  - `docker-compose.yml` (API + SQL Server + HTTP/HTTPS)
+  - `docker-compose.http-only.yml` (API + SQL Server somente HTTP)
+
+---
+
+## 🎯 Problemas que resolve
+
+- **Evita ações indevidas por permissão** (hierarquia e RBAC)
+- **Impede inconsistências** (documento duplicado, menoridade, gestor inválido)
+- **Torna auditoria e troubleshooting fáceis** (Correlation-ID + logs)
+- **Acelera onboarding e deploy** (Docker + scripts utilitários)
+- **Evolução sustentável** (DDD / Clean Architecture / CQRS)
+
+---
+
+## 🧱 Arquitetura
+
+```text
+┌──────────────────────────────────────────────────────────┐
+│                      EmployeeManagement.Api              │
+│  Controllers • Versionamento • Auth • Middlewares        │
+└───────────────┬───────────────────────────┬──────────────┘
+                │                           │
+                ▼                           ▼
+┌───────────────────────────────┐   ┌──────────────────────┐
+│     EmployeeManagement.App     │   │   Cross-Cutting      │
+│  CQRS (MediatR) • Validators   │   │ Logs • Cache • Rate  │
+│  Behaviors • Use Cases         │   │ Limiting • Health    │
+└───────────────┬───────────────┘   └──────────────────────┘
+                ▼
+┌──────────────────────────────────────────┐
+│           EmployeeManagement.Domain       │
+│  Entidades • VO • Invariantes • Eventos   │
+└───────────────┬──────────────────────────┘
+                ▼
+┌──────────────────────────────────────────┐
+│       EmployeeManagement.Infrastructure   │
+│ EF Core • Repositórios • Identity • DB    │
+└────────────────┬─────────────────────────┘
+                 ▼
+           ┌─────────────┐
+           │  SQL Server  │
+           └─────────────┘
 ```
 
-**Linux/Mac (Bash):**
+---
+
+## ⚙️ Tecnologias Utilizadas
+
+| Tecnologia | Função |
+|---|---|
+| C# / .NET 8 | API e camadas do backend |
+| ASP.NET Core | Web API + middlewares |
+| MediatR | CQRS (Commands/Queries) |
+| FluentValidation | Validações de request |
+| EF Core | Persistência e migrations |
+| ASP.NET Identity | Usuários/roles/claims + refresh token |
+| Serilog | Logging estruturado |
+| Docker / Docker Compose | Infra local e execução rápida |
+| xUnit + SpecFlow | Testes unitários e BDD |
+
+---
+
+## 📂 Estrutura de Pastas
+
+```text
+/src
+  /EmployeeManagement
+    ├── EmployeeManagement.Api
+    ├── EmployeeManagement.Application
+    ├── EmployeeManagement.Domain
+    └── EmployeeManagement.Infrastructure
+  /Shared
+    └── Shared.CrossCutting   (utilitários, contracts e helpers)
+
+/tests
+  /EmployeeManagement.Tests   (xUnit + SpecFlow)
+
+/scripts
+  ├── generate-dev-cert.ps1
+  ├── generate-dev-cert.sh
+  └── setup-hosts.* (se aplicável)
+
+/certs
+  └── certificados dev (para HTTPS em Docker)
+```
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### ✅ Opção A — Docker (SQL Server + HTTP + HTTPS)
+
 ```bash
-chmod +x ./scripts/generate-dev-cert.sh
-./scripts/generate-dev-cert.sh
+docker compose up --build
 ```
 
-#### 2. Iniciar os Containers
+- API HTTP: `http://localhost:5000`
+- API HTTPS: `https://localhost:5001`
+- SQL Server: `localhost,1433` (sa / `SqlServer@123`)
+
+> Se for usar HTTPS no Docker, utilize os scripts em `/scripts` e a pasta `/certs` para gerar/instalar certificados dev.
+
+### ✅ Opção B — Docker apenas HTTP (mais simples)
 
 ```bash
-docker-compose up --build
+docker compose -f docker-compose.http-only.yml up --build
 ```
 
-#### 3. Acessar a API
+- API HTTP: `http://localhost:5000`
 
-| Protocolo | URL | Descri��o |
-|-----------|-----|-----------|
-| HTTP | http://localhost:5000 | Acesso sem SSL |
-| HTTPS | https://localhost:5001 | Acesso com SSL |
-| Swagger | http://localhost:5000/swagger | Documenta��o da API |
-| Health Check | http://localhost:5000/health | Status da aplica��o |
-
-### Executando apenas com HTTP (Desenvolvimento Simplificado)
-
-Se voc� n�o precisa de HTTPS durante o desenvolvimento:
+### ✅ Opção C — Rodar local (InMemory por padrão no Development)
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.http-only.yml up --build
+dotnet restore
+dotnet run --project src/EmployeeManagement/EmployeeManagement.Api
 ```
 
-### Executando Localmente (sem Docker)
+No ambiente **Development**, o projeto pode usar **InMemoryDatabase** via `appsettings.Development.json` (`UseInMemoryDatabase: true`).
 
-```bash
-cd src/EmployeeManagement/EmployeeManagement.Api
-dotnet run
-```
+---
 
-Acesse: https://localhost:5051/swagger
+## 🔐 Autenticação (JWT + Refresh Token)
 
-## ?? Estrutura do Projeto
+A API mantém rotas versionadas e uma rota “legada” para compatibilidade:
 
-```
-??? src/
-?   ??? EmployeeManagement/
-?   ?   ??? EmployeeManagement.Api/          # Camada de apresenta��o
-?   ?   ??? EmployeeManagement.Application/  # Casos de uso e handlers
-?   ?   ??? EmployeeManagement.Domain/       # Entidades e regras de neg�cio
-?   ?   ??? EmployeeManagement.Infrastructure/ # Persist�ncia e servi�os externos
-?   ??? Shared/
-?       ??? Shared.Contracts/                # DTOs e contratos
-?       ??? Shared.CrossCutting/             # Utilit�rios compartilhados
-??? tests/
-?   ??? EmployeeManagement.Tests/            # Testes unit�rios e integra��o
-??? scripts/
-?   ??? generate-dev-cert.ps1                # Script Windows para certificados
-?   ??? generate-dev-cert.sh                 # Script Linux/Mac para certificados
-??? certs/                                   # Certificados (gerado automaticamente)
-??? docker-compose.yml                       # Orquestra��o Docker (HTTP + HTTPS)
-??? docker-compose.http-only.yml             # Override para apenas HTTP
-??? README.md
-```
+- Versionada: `/api/v1/auth/...` (ou `/api/v1.0/auth/...`)
+- Legada: `/api/auth/...`
 
-## ?? Autentica��o
+> **Usuário admin seed (DEV):** `admin@empresa.com` / `Admin@123`  
+> **Recomendado:** alterar/remover em produção.
 
-A API utiliza **JWT (JSON Web Token)** para autentica��o.
+### Login
 
-### N�veis de Permiss�o
+`POST /api/v1/auth/login`
 
-| N�vel | Permiss�es |
-|-------|------------|
-| Employee | Leitura |
-| Leader | Leitura + Cria��o/Edi��o de Employees |
-| Director | Acesso total |
-
-### Obtendo Token
-
-```bash
-POST /api/auth/login
-Content-Type: application/json
-
+```json
 {
-  "email": "admin@supply.com",
-  "password": "Admin@123456"
+  "email": "admin@empresa.com",
+  "password": "Admin@123"
 }
 ```
 
-## ?? Docker
+### Refresh Token
 
-### Servi�os
+`POST /api/v1/auth/refresh-token`
 
-| Servi�o | Container | Porta | Descri��o |
-|---------|-----------|-------|-----------|
-| API | employee-api | 5000 (HTTP), 5001 (HTTPS) | Aplica��o .NET 8 |
-| SQL Server | employee-sqlserver | 1433 | Banco de dados |
-
-### Comandos �teis
-
-```bash
-# Iniciar containers
-docker-compose up -d
-
-# Reconstruir containers
-docker-compose up --build -d
-
-# Ver logs da API
-docker logs -f employee-api
-
-# Parar containers
-docker-compose down
-
-# Limpar volumes (apaga dados)
-docker-compose down -v
+```json
+{
+  "refreshToken": "..."
+}
 ```
 
-### Vari�veis de Ambiente
+### Revogar token (logout)
 
-| Vari�vel | Descri��o | Padr�o |
-|----------|-----------|--------|
-| ASPNETCORE_ENVIRONMENT | Ambiente de execu��o | Docker |
-| ConnectionStrings__DefaultConnection | String de conex�o SQL Server | - |
-| Jwt__Secret | Chave secreta JWT | - |
-| Jwt__AccessTokenExpirationMinutes | Expira��o do access token | 15 |
-| Jwt__RefreshTokenExpirationDays | Expira��o do refresh token | 7 |
+`POST /api/v1/auth/revoke-token`
 
-## ?? Testes
+```json
+{
+  "refreshToken": "..."
+}
+```
+
+---
+
+## 👥 Funcionários (Employees)
+
+> Todas as rotas exigem **Bearer Token**, exceto quando explicitado.
+
+### Criar funcionário
+
+`POST /api/v1/employees`
+
+```json
+{
+  "firstName": "João",
+  "lastName": "da Silva",
+  "email": "joao@email.com",
+  "documentNumber": "12345678900",
+  "birthDate": "1995-10-01",
+  "phoneNumbers": ["11999999999"],
+  "role": 1,
+  "managerId": null
+}
+```
+
+**Role (enum):**
+- 1 = Employee
+- 2 = Leader
+- 3 = Director
+- 4 = Admin
+
+> Regra crítica: usuário comum não pode criar/alçar alguém com **role >= seu role** (exceto Admin).
+
+### Atualizar funcionário
+
+`PUT /api/v1/employees/{id}`
+
+### Listar com paginação/filtros
+
+`GET /api/v1/employees?pageNumber=1&pageSize=10&searchTerm=joao&sortBy=createdAt&sortDescending=true`
+
+### Buscar por ID
+
+`GET /api/v1/employees/{id}`
+
+### Soft delete
+
+`DELETE /api/v1/employees/{id}`
+
+> Regra de permissão: exclusão exige nível mínimo (ex.: Leader+).  
+> Se existir vínculo/estrutura (ex.: subordinados), a exclusão pode ser bloqueada por regra de negócio.
+
+---
+
+## 📚 Documentação do Projeto (incluída neste repositório)
+
+Para manter o padrão “projeto profissional”, o repositório inclui documentos complementares em `docs/`:
+
+- `docs/DOCUMENTACAO_TECNICA.md` – visão técnica completa, padrões e decisões
+- `docs/BACKLOG.md` – épicos e backlog detalhado
+- `docs/BDD_GHERKIN.md` – cenários BDD (Gherkin) para regressão e especificação
+
+---
+
+## 🧪 BDD (SpecFlow)
+
+O arquivo `docs/BDD_GHERKIN.md` contém **51 cenários** cobrindo:
+- Autenticação e autorização (401/403, token expirado, etc.)
+- Create / Read / Update / Delete de funcionários
+- Validações (idade, documento duplicado, hierarquia, gestor)
+- Observabilidade (logs e rastreabilidade)
+
+---
+
+## 🧾 Rastreabilidade (Correlation ID)
+
+A API aceita e propaga `X-Correlation-ID`:
+- Se o cliente enviar, o valor é reutilizado
+- Se não enviar, o middleware gera automaticamente
+- O Correlation ID aparece nos logs para auditoria e debug
+
+---
+
+## 🧯 Error Contract (padrão de erros)
+
+Endpoint utilitário para padronização de respostas de erro:
+`GET /api/v1/errorcontract`
+
+Retorno típico:
+
+```json
+{
+  "success": false,
+  "messages": ["..."],
+  "errors": [{ "field": "...", "message": "..." }]
+}
+```
+
+---
+
+## 🩺 Health Checks
+
+`GET /health`
+
+---
+
+## 🧯 Rate Limiting
+
+O projeto possui configuração de rate limiting (global/políticas).  
+Ajuste as regras em `EmployeeManagement.Api/Configurations/RateLimitingConfiguration.cs`.
+
+---
+
+## 🗄️ Banco de dados & Migrations (EF Core)
+
+### Rodar migrations (AppDbContext)
+
+> Ajuste a connection string em `appsettings.json` / `appsettings.Docker.json`.
 
 ```bash
-cd tests/EmployeeManagement.Tests
+dotnet ef migrations add NomeDaMigration   --project src/EmployeeManagement/EmployeeManagement.Infrastructure   --startup-project src/EmployeeManagement/EmployeeManagement.Api   --context AppDbContext
+
+dotnet ef database update   --project src/EmployeeManagement/EmployeeManagement.Infrastructure   --startup-project src/EmployeeManagement/EmployeeManagement.Api   --context AppDbContext
+```
+
+### Identity (AppIdentityDbContext)
+
+```bash
+dotnet ef migrations add IdentityMigration   --project src/EmployeeManagement/EmployeeManagement.Infrastructure   --startup-project src/EmployeeManagement/EmployeeManagement.Api   --context AppIdentityDbContext
+```
+
+---
+
+## 🧪 Testes Automatizados
+
+```bash
 dotnet test
 ```
 
-## ?? Licen�a
+- Testes unitários em `/tests/EmployeeManagement.Tests/UnitTests`
+- SpecFlow em `/tests/EmployeeManagement.Tests/StepDefinitions`
 
-Este projeto est� sob a licen�a MIT.
+---
+
+## ✅ Critérios de Aceite (resumo)
+
+- Retorno padrão `{ success, data, messages, errors }`
+- Funcionário deve ser **adulto** (>= 18)
+- Email e documento devem ser **únicos**
+- Hierarquia respeitada (não criar/alçar acima do nível do usuário)
+- Correlation ID presente nos logs
+- Testes e BDD cobrindo cenários críticos
+
+---
+
+## 🧑‍💻 Autoria
+
+Desenvolvido por **Tiago Nogueira**.
+
+---
+
+## 📝 Licença
+
+MIT © 2025 – Livre para modificação e uso.
