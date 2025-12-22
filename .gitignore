@@ -25,3 +25,7 @@ Thumbs.db
 
 # Others
 launchSettings.json
+
+# Credenciais locais
+.git-credentials-local
+.git-credentials-local.txt
