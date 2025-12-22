@@ -12,7 +12,6 @@ namespace EmployeeManagement.Api.V1.Controllers;
 /// Controller para autenticação usando Identity com suporte a Refresh Token
 /// </summary>
 [Route("api/v{version:apiVersion}/[controller]")]
-[Route("api/[controller]")]
 [ApiController]
 [ApiVersion("1.0")]
 [Tags("Auth")]

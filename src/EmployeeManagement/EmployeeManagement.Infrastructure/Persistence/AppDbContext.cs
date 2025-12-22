@@ -24,6 +24,8 @@ public class AppDbContext : DbContext, IUnitOfWork
 
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<PhoneNumber> PhoneNumbers => Set<PhoneNumber>();
+    public DbSet<CustomRole> CustomRoles => Set<CustomRole>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
