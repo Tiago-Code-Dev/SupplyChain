@@ -27,6 +27,25 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeManagement.Tests", "tests\EmployeeManagement.Tests\EmployeeManagement.Tests.csproj", "{84BC91B1-41CB-44E6-AE94-F6D6EC32CF05}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{CBD25187-EB1B-47E6-8CA9-C3EF6BB5E8E1}"
+	ProjectSection(SolutionItems) = preProject
+		docs\01-VISAO-GERAL.md = docs\01-VISAO-GERAL.md
+		docs\02-ARQUITETURA.md = docs\02-ARQUITETURA.md
+		docs\03-DOMINIO.md = docs\03-DOMINIO.md
+		docs\04-APLICACAO.md = docs\04-APLICACAO.md
+		docs\05-INFRAESTRUTURA.md = docs\05-INFRAESTRUTURA.md
+		docs\06-API.md = docs\06-API.md
+		docs\07-AUTENTICACAO.md = docs\07-AUTENTICACAO.md
+		docs\08-BANCO-DE-DADOS.md = docs\08-BANCO-DE-DADOS.md
+		docs\09-TESTES.md = docs\09-TESTES.md
+		docs\10-DOCKER-DEPLOY.md = docs\10-DOCKER-DEPLOY.md
+		docs\11-CONFIGURACAO.md = docs\11-CONFIGURACAO.md
+		docs\12-API-REFERENCE.md = docs\12-API-REFERENCE.md
+		docs\13-GUIA-DESENVOLVIMENTO.md = docs\13-GUIA-DESENVOLVIMENTO.md
+		docs\14-BOAS-PRATICAS.md = docs\14-BOAS-PRATICAS.md
+		docs\15-TROUBLESHOOTING.md = docs\15-TROUBLESHOOTING.md
+		docs\16-ROADMAP.md = docs\16-ROADMAP.md
+		docs\README.md = docs\README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "postman", "postman", "{C2E0FC14-52A0-4EA2-BBCB-F65111C50CC9}"
 EndProject

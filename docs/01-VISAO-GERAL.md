@@ -225,8 +225,8 @@ O sistema foi construído seguindo princípios sólidos de engenharia de softwar
 
 | Ambiente | HTTP | HTTPS | Swagger |
 |----------|------|-------|---------|
-| **Docker** | http://localhost:5000 | https://localhost:5001 | http://localhost:5000/swagger |
-| **Local** | http://localhost:5050 | https://localhost:5051 | http://localhost:5050/swagger |
+| **Docker** | http://localhost:59687 | https://localhost:59687 | http://localhost:59687/swagger |
+| **Local** | http://localhost:59687 | https://localhost:59687 | http://localhost:59687/swagger |
 
 ## Credenciais Padrão
 
