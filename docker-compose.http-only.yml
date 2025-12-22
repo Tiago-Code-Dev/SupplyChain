@@ -1,15 +1,12 @@
 # Docker Compose Override - Para desenvolvimento local apenas com HTTP
-# Use com: docker-compose -f docker-compose.yml -f docker-compose.override.yml up --build
+# Use com: docker-compose -f docker-compose.yml -f docker-compose.http-only.yml up --build
 
 services:
   api:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
-      - ASPNETCORE_HTTP_PORTS=8080
-      # Desabilita HTTPS para desenvolvimento local simples
+      # Remove variáveis de ambiente relacionadas ao HTTPS
     ports:
       - "5000:8080"   # Apenas HTTP
-    volumes:
-      # Remove o volume de certificados
-      - /dev/null:/https/aspnetapp.pfx:ro
+    volumes: []  # Remove o volume de certificados
