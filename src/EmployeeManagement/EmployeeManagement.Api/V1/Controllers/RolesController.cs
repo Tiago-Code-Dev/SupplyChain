@@ -15,6 +15,7 @@ namespace EmployeeManagement.Api.V1.Controllers;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [Authorize(Policy = "RequireAdmin")]
+[Tags("Roles")]
 public class RolesController : MainController
 {
     private readonly IRoleService _roleService;

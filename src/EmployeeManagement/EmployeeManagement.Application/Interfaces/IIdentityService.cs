@@ -84,6 +84,11 @@ public interface IIdentityService
     Task<IDictionary<string, string>> GetUserClaimsAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Remove claim do usuário
+    /// </summary>
+    Task<Result> RemoveClaimAsync(Guid userId, string claimType, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Altera senha do usuário
     /// </summary>
     Task<Result> ChangePasswordAsync(

@@ -445,6 +445,34 @@ public class IdentityService : IIdentityService
         return claims.ToDictionary(c => c.Type, c => c.Value);
     }
 
+    public async Task<Result> RemoveClaimAsync(Guid userId, string claimType, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return Result.Failure(Error.NotFound("User", userId));
+        }
+
+        var claims = await _userManager.GetClaimsAsync(user);
+        var claimToRemove = claims.FirstOrDefault(c => c.Type == claimType);
+
+        if (claimToRemove == null)
+        {
+            return Result.Failure(Error.NotFound("Claim", $"Claim '{claimType}' not found"));
+        }
+
+        var result = await _userManager.RemoveClaimAsync(user, claimToRemove);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            return Result.Failure(Error.Validation("Claim", errors));
+        }
+
+        _logger.LogInformation("Claim {ClaimType} removed from user {UserId}", claimType, userId);
+        return Result.Success();
+    }
+
     #endregion
 
     #region Private Methods
