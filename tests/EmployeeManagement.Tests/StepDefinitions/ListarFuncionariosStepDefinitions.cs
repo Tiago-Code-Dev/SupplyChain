@@ -18,12 +18,33 @@ public class ListarFuncionariosStepDefinitions
     private int _httpStatus = 200;
     private bool _cacheWasUsed;
 
+    // Lista de nomes para evitar números nos nomes de teste
+    private static readonly string[] FirstNames =
+    {
+        "Ana", "Bruno", "Carlos", "Diana", "Eduardo",
+        "Fernanda", "Gabriel", "Helena", "Igor", "Julia",
+        "Lucas", "Maria", "Nuno", "Olivia", "Pedro",
+        "Quenia", "Rafael", "Sofia", "Tiago", "Ursula",
+        "Victor", "Wanda", "Xavier", "Yara", "Zilda"
+    };
+
+    private static readonly string[] LastNames =
+    {
+        "Silva", "Santos", "Oliveira", "Souza", "Rodrigues",
+        "Ferreira", "Alves", "Pereira", "Lima", "Gomes",
+        "Costa", "Ribeiro", "Martins", "Carvalho", "Almeida",
+        "Lopes", "Soares", "Fernandes", "Vieira", "Barbosa",
+        "Rocha", "Dias", "Nascimento", "Andrade", "Moreira"
+    };
+
     public ListarFuncionariosStepDefinitions(ScenarioContext scenarioContext)
     {
         _scenarioContext = scenarioContext;
         _repositoryMock = Fixtures.MockFactory.CreateEmployeeRepositoryMock();
         _cacheServiceMock = Fixtures.MockFactory.CreateCacheServiceMock();
     }
+
+    #region Given Steps
 
     [Given(@"que o usuário está autenticado como ""(.*)""")]
     public void DadoQueOUsuarioEstaAutenticadoComo(string role)
@@ -44,10 +65,14 @@ public class ListarFuncionariosStepDefinitions
         _employees = new List<Employee>();
         for (int i = 0; i < quantidade; i++)
         {
+            // Usa nomes da lista para evitar números
+            var firstName = FirstNames[i % FirstNames.Length];
+            var lastName = LastNames[i % LastNames.Length];
+
             var employee = TestHelper.CreateValidEmployee(
-                firstName: $"Funcionario{i}",
-                lastName: $"Teste{i}",
-                email: $"funcionario{i}@supply.com");
+                firstName: firstName,
+                lastName: lastName,
+                email: $"funcionario.{firstName.ToLower()}.{i}@supply.com");
             _employees.Add(employee);
         }
 
@@ -57,16 +82,16 @@ public class ListarFuncionariosStepDefinitions
 
         _repositoryMock
             .Setup(x => x.GetPagedAsync(
-                It.IsAny<int>(),                  
-                It.IsAny<int>(),                  
-                It.IsAny<string?>(),              
-                It.IsAny<string?>(),              
-                It.IsAny<string?>(),            
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
                 It.IsAny<Role?>(),
-                It.IsAny<Guid?>(),               
-                It.IsAny<string?>(),              
-                It.IsAny<bool>(),                 
-                It.IsAny<CancellationToken>()))   
+                It.IsAny<Guid?>(),
+                It.IsAny<string?>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync((int page, int size, string? search, string? filterName, string? filterEmail,
                            Role? filterRole, Guid? filterMgr, string? sort, bool desc, CancellationToken ct) =>
             {
@@ -80,11 +105,12 @@ public class ListarFuncionariosStepDefinitions
     public void DadoQueExistemFuncionariosCadastrados(Table table)
     {
         _employees = new List<Employee>();
+        int index = 0;
         foreach (var row in table.Rows)
         {
-            var firstName = row.ContainsKey("Nome") ? row["Nome"] : "Test";
-            var lastName = row.ContainsKey("Sobrenome") ? row["Sobrenome"] : "User";
-            var email = row.ContainsKey("Email") ? row["Email"] : $"{firstName.ToLower()}@supply.com";
+            var firstName = row.ContainsKey("Nome") ? row["Nome"] : FirstNames[index % FirstNames.Length];
+            var lastName = row.ContainsKey("Sobrenome") ? row["Sobrenome"] : LastNames[index % LastNames.Length];
+            var email = row.ContainsKey("Email") ? row["Email"] : $"{firstName.ToLower()}.{index}@supply.com";
             var roleStr = row.ContainsKey("Permissao") ? row["Permissao"] : "Employee";
             var role = Enum.Parse<Role>(roleStr);
 
@@ -94,6 +120,7 @@ public class ListarFuncionariosStepDefinitions
                 email: email,
                 role: role);
             _employees.Add(employee);
+            index++;
         }
 
         _repositoryMock
@@ -136,7 +163,7 @@ public class ListarFuncionariosStepDefinitions
                 It.IsAny<Func<Task<EmployeeResponse?>>>(),
                 It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct) 
+            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct)
                 => factory().Result);
 
         _scenarioContext.Set(_employeeToFind.Id, "EmployeeId");
@@ -157,22 +184,21 @@ public class ListarFuncionariosStepDefinitions
                 It.IsAny<Func<Task<EmployeeResponse?>>>(),
                 It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct) 
+            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct)
                 => factory().Result);
 
         _scenarioContext.Set(_employeeToFind.Id, "EmployeeId");
     }
 
     [Given(@"que os dados do funcionário estão em cache")]
-    [Given(@"que os dados estão em cache")]
     public void DadoQueOsDadosDoFuncionarioEstaoEmCache()
     {
         var response = EmployeeResponse.FromEntity(_employeeToFind!);
         _cacheServiceMock
             .Setup(x => x.GetOrSetAsync<EmployeeResponse>(
-                It.IsAny<string>(), 
-                It.IsAny<Func<Task<EmployeeResponse?>>>(), 
-                It.IsAny<TimeSpan?>(), 
+                It.IsAny<string>(),
+                It.IsAny<Func<Task<EmployeeResponse?>>>(),
+                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(response)
             .Callback(() => _cacheWasUsed = true);
@@ -188,6 +214,9 @@ public class ListarFuncionariosStepDefinitions
         _scenarioContext.Set(guid, "NonExistentId");
     }
 
+    #endregion
+
+    #region When Steps
 
     [When(@"o usuário solicita a listagem de funcionários através do endpoint GET /api/employees")]
     public async Task QuandoOUsuarioSolicitaAListagemDeFuncionarios()
@@ -212,9 +241,15 @@ public class ListarFuncionariosStepDefinitions
     [When(@"o usuário solicita a listagem de funcionários com:")]
     public async Task QuandoOUsuarioSolicitaAListagemDeFuncionariosCom(Table table)
     {
-        var data = table.Rows[0];
-        var page = int.Parse(data["Page"]);
-        var pageSize = int.Parse(data["PageSize"]);
+        if (!_scenarioContext.TryGetValue<Role>("CurrentUserRole", out _))
+        {
+            _httpStatus = 401;
+            return;
+        }
+
+        var row = table.Rows[0];
+        var page = row.ContainsKey("Page") ? int.Parse(row["Page"]) : 1;
+        var pageSize = row.ContainsKey("PageSize") ? int.Parse(row["PageSize"]) : 10;
 
         var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
         var handler = new GetAllEmployeesQueryHandler(
@@ -222,38 +257,63 @@ public class ListarFuncionariosStepDefinitions
             _cacheServiceMock.Object,
             loggerMock.Object);
 
-        var query = new GetAllEmployeesQuery(page, pageSize);
+        var query = new GetAllEmployeesQuery(PageNumber: page, PageSize: pageSize);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
     }
 
-    [When(@"o usuário solicita a listagem de funcionários com paginação de (.*) por página")]
-    public async Task QuandoOUsuarioSolicitaAListagemDeFuncionariosComPaginacao(int pageSize)
+    [When(@"o usuário solicita os dados do funcionário através do endpoint GET /api/employees/\{id\}")]
+    public async Task QuandoOUsuarioSolicitaOsDadosDoFuncionarioAtravesDoEndpoint()
     {
-        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
-        var handler = new GetAllEmployeesQueryHandler(
+        if (!_scenarioContext.TryGetValue<Role>("CurrentUserRole", out _))
+        {
+            _httpStatus = 401;
+            return;
+        }
+
+        Guid employeeId;
+        if (_scenarioContext.TryGetValue<Guid>("EmployeeId", out var id))
+        {
+            employeeId = id;
+        }
+        else if (_scenarioContext.TryGetValue<Guid>("NonExistentId", out var nonExistentId))
+        {
+            employeeId = nonExistentId;
+        }
+        else
+        {
+            employeeId = Guid.NewGuid();
+        }
+
+        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetEmployeeByIdQueryHandler>();
+        var handler = new GetEmployeeByIdQueryHandler(
             _repositoryMock.Object,
             _cacheServiceMock.Object,
             loggerMock.Object);
 
-        var query = new GetAllEmployeesQuery(1, pageSize);
-        _pagedResult = await handler.Handle(query, CancellationToken.None);
-        _httpStatus = 200;
+        var query = new GetEmployeeByIdQuery(employeeId);
+        _employeeResult = await handler.Handle(query, CancellationToken.None);
+        _httpStatus = _employeeResult != null ? 200 : 404;
     }
 
     [When(@"o usuário solicita a listagem de funcionários com filtro por nome ""(.*)""")]
-    public async Task QuandoOUsuarioFiltraFuncionariosPeloNome(string nome)
+    public async Task QuandoOUsuarioSolicitaAListagemComFiltroDeNome(string nome)
     {
+        if (!_scenarioContext.TryGetValue<Role>("CurrentUserRole", out _))
+        {
+            _httpStatus = 401;
+            return;
+        }
+
         var filteredEmployees = _employees.Where(e =>
-            e.FirstName.Contains(nome, StringComparison.OrdinalIgnoreCase) ||
-            e.LastName.Contains(nome, StringComparison.OrdinalIgnoreCase)).ToList();
+            e.FirstName.Contains(nome, StringComparison.OrdinalIgnoreCase)).ToList();
 
         _repositoryMock
             .Setup(x => x.GetPagedAsync(
                 It.IsAny<int>(),
                 It.IsAny<int>(),
-                nome,
                 It.IsAny<string?>(),
+                nome,
                 It.IsAny<string?>(),
                 It.IsAny<Role?>(),
                 It.IsAny<Guid?>(),
@@ -268,14 +328,20 @@ public class ListarFuncionariosStepDefinitions
             _cacheServiceMock.Object,
             loggerMock.Object);
 
-        var query = new GetAllEmployeesQuery(SearchTerm: nome);
+        var query = new GetAllEmployeesQuery(FilterByName: nome);
         _pagedResult = await handler.Handle(query, CancellationToken.None);
         _httpStatus = 200;
     }
 
     [When(@"o usuário solicita a listagem de funcionários com filtro por email ""(.*)""")]
-    public async Task QuandoOUsuarioFiltraFuncionariosPeloEmail(string email)
+    public async Task QuandoOUsuarioSolicitaAListagemComFiltroDeEmail(string email)
     {
+        if (!_scenarioContext.TryGetValue<Role>("CurrentUserRole", out _))
+        {
+            _httpStatus = 401;
+            return;
+        }
+
         var filteredEmployees = _employees.Where(e =>
             e.Email.Equals(email, StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -305,8 +371,14 @@ public class ListarFuncionariosStepDefinitions
     }
 
     [When(@"o usuário solicita a listagem de funcionários com filtro por permissão ""(.*)""")]
-    public async Task QuandoOUsuarioSolicitaAListagemDeFuncionariosComFiltroPorPermissao(string permissao)
+    public async Task QuandoOUsuarioSolicitaAListagemComFiltroDePermissao(string permissao)
     {
+        if (!_scenarioContext.TryGetValue<Role>("CurrentUserRole", out _))
+        {
+            _httpStatus = 401;
+            return;
+        }
+
         var role = Enum.Parse<Role>(permissao);
         var filteredEmployees = _employees.Where(e => e.Role == role).ToList();
 
@@ -335,68 +407,15 @@ public class ListarFuncionariosStepDefinitions
         _httpStatus = 200;
     }
 
-    [When(@"o usuário solicita a segunda página de funcionários")]
-    public async Task QuandoOUsuarioSolicitaASegundaPaginaDeFuncionarios()
-    {
-        var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
-        var handler = new GetAllEmployeesQueryHandler(
-            _repositoryMock.Object,
-            _cacheServiceMock.Object,
-            loggerMock.Object);
-
-        var query = new GetAllEmployeesQuery(PageNumber: 2, PageSize: 10);
-        _pagedResult = await handler.Handle(query, CancellationToken.None);
-        _httpStatus = 200;
-    }
-
-    [When(@"o usuário solicita os dados do funcionário")]
-    public async Task QuandoOUsuarioSolicitaOsDadosDoFuncionario()
-    {
-        if (_employeeToFind != null)
-        {
-            var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetEmployeeByIdQueryHandler>();
-            var handler = new GetEmployeeByIdQueryHandler(
-                _repositoryMock.Object,
-                _cacheServiceMock.Object,
-                loggerMock.Object);
-
-            var query = new GetEmployeeByIdQuery(_employeeToFind.Id);
-            _employeeResult = await handler.Handle(query, CancellationToken.None);
-            _httpStatus = _employeeResult != null ? 200 : 404;
-        }
-        else if (_scenarioContext.TryGetValue<Guid>("NonExistentId", out var nonExistentId))
-        {
-            _repositoryMock
-                .Setup(x => x.GetByIdAsync(nonExistentId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Employee?)null);
-
-            var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetEmployeeByIdQueryHandler>();
-            var handler = new GetEmployeeByIdQueryHandler(
-                _repositoryMock.Object,
-                _cacheServiceMock.Object,
-                loggerMock.Object);
-
-            var query = new GetEmployeeByIdQuery(nonExistentId);
-            _employeeResult = await handler.Handle(query, CancellationToken.None);
-            _httpStatus = 404;
-        }
-    }
-
-    [When(@"o usuário solicita os dados do funcionário por ID")]
-    public async Task QuandoOUsuarioSolicitaOsDadosDoFuncionarioPorId()
-    {
-        await QuandoOUsuarioSolicitaOsDadosDoFuncionario();
-    }
-
-    [When(@"o usuário solicita os dados do funcionário através do endpoint GET /api/employees/\{id\}")]
-    public async Task QuandoOUsuarioSolicitaOsDadosDoFuncionarioAtravesDoEndpoint()
-    {
-        await QuandoOUsuarioSolicitaOsDadosDoFuncionario();
-    }
-
     [When(@"o usuário solicita a listagem de funcionários ordenada por nome ascendente")]
     public async Task QuandoOUsuarioSolicitaAListagemDeFuncionariosOrdenadaPorNomeAscendente()
     {
+        if (!_scenarioContext.TryGetValue<Role>("CurrentUserRole", out _))
+        {
+            _httpStatus = 401;
+            return;
+        }
+
         var sortedEmployees = _employees.OrderBy(e => e.FirstName).ToList();
 
         _repositoryMock
@@ -431,6 +450,10 @@ public class ListarFuncionariosStepDefinitions
         _scenarioContext.Set("Não autorizado", "ErrorMessage");
     }
 
+    #endregion
+
+    #region Then Steps
+
     [Then(@"o sistema deve retornar status (.*)")]
     public void EntaoOSistemaDeveRetornarStatus(int status)
     {
@@ -446,13 +469,6 @@ public class ListarFuncionariosStepDefinitions
 
     [Then(@"o sistema deve retornar (.*) funcionários")]
     public void EntaoOSistemaDeveRetornarFuncionarios(int quantidade)
-    {
-        _pagedResult.Should().NotBeNull();
-        _pagedResult!.Items.Should().HaveCount(quantidade);
-    }
-
-    [Then(@"o sistema deve retornar apenas (.*) funcionários")]
-    public void EntaoOSistemaDeveRetornarApenasFuncionarios(int quantidade)
     {
         _pagedResult.Should().NotBeNull();
         _pagedResult!.Items.Should().HaveCount(quantidade);
@@ -474,24 +490,19 @@ public class ListarFuncionariosStepDefinitions
     [Then(@"a senha não deve estar presente na resposta")]
     public void EntaoASenhaNaoDeveEstarPresenteNaResposta()
     {
-        // Para listagem (pagedResult)
         if (_pagedResult != null)
         {
-            // EmployeeResponse não expõe PasswordHash, então apenas verificamos que temos dados válidos
             _pagedResult.Items.Should().NotBeNull();
         }
-        
-        // Para busca por ID (employeeResult)
+
         if (_employeeResult != null)
         {
-            // EmployeeResponse não expõe PasswordHash, então apenas verificamos que temos dados válidos
             _employeeResult.Should().NotBeNull();
             _employeeResult.Id.Should().NotBe(Guid.Empty);
         }
     }
 
     [Then(@"a resposta deve conter informações de paginação")]
-    [Then(@"a resposta deve incluir informações de paginação")]
     public void EntaoARespostaDeveConterInformacoesDePaginacao()
     {
         _pagedResult!.TotalCount.Should().BeGreaterThan(0);
@@ -507,7 +518,6 @@ public class ListarFuncionariosStepDefinitions
             e.FirstName.Contains(nome, StringComparison.OrdinalIgnoreCase));
     }
 
-    [Then(@"a lista deve conter pelo menos (.*) funcionário")]
     [Then(@"a lista deve conter pelo menos (.*) funcionários")]
     public void EntaoAListaDeveConterPeloMenosFuncionarios(int quantidade)
     {
@@ -555,7 +565,6 @@ public class ListarFuncionariosStepDefinitions
     }
 
     [Then(@"os dados devem ser recuperados do cache")]
-    [Then(@"os dados devem vir do cache")]
     public void EntaoOsDadosDevemSerRecuperadosDoCache()
     {
         _cacheWasUsed.Should().BeTrue();
@@ -593,8 +602,9 @@ public class ListarFuncionariosStepDefinitions
         }
         else if (_employeeResult == null)
         {
-            // Para o caso de funcionário não encontrado
             _httpStatus.Should().Be(404);
         }
     }
+
+    #endregion
 }
