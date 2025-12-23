@@ -1,4 +1,5 @@
 using System.Text;
+using EmployeeManagement.Application.Features.Roles;
 using EmployeeManagement.Application.Interfaces;
 using EmployeeManagement.Domain.Interfaces;
 using EmployeeManagement.Infrastructure.Caching;
@@ -125,6 +126,10 @@ public static class DependencyInjection
 
         // Repositories
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+        services.AddScoped<ICustomRoleRepository, CustomRoleRepository>();
+
+        // Services
+        services.AddScoped<IRoleService, RoleService>();
 
         // Security Services
         services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -149,10 +154,9 @@ public static class DependencyInjection
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(jwtSettings.Secret)),
                 RoleClaimType = System.Security.Claims.ClaimTypes.Role,
-                ClockSkew = TimeSpan.Zero // Remove tolerância de 5 minutos padrão
+                ClockSkew = TimeSpan.Zero
             };
 
-            // Eventos de autenticação
             options.Events = new JwtBearerEvents
             {
                 OnAuthenticationFailed = context =>

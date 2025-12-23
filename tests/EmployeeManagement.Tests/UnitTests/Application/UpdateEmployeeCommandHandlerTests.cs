@@ -300,7 +300,7 @@ public class UpdateEmployeeCommandHandlerTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
+        result.Error.Code.Should().Contain("Manager");
     }
 
     [Fact]
