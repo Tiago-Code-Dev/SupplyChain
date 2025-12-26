@@ -123,6 +123,12 @@ O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo comple
   /Shared
     └── Shared.CrossCutting   (utilitários, contracts e helpers)
 
+/frontend
+  └── React + TypeScript (Vite)
+
+/docs
+  └── Documentação técnica do projeto (fonte da verdade)
+
 /tests
   /EmployeeManagement.Tests   (xUnit + SpecFlow)
 
@@ -166,7 +172,51 @@ dotnet restore
 dotnet run --project src/EmployeeManagement/EmployeeManagement.Api
 ```
 
-No ambiente **Development**, o projeto pode usar **InMemoryDatabase** via `appsettings.Development.json` (`UseInMemoryDatabase: true`).
+- API HTTP (launchSettings): `http://localhost:59688`
+- API HTTPS (launchSettings): `https://localhost:59687`
+
+> Se quiser fixar URLs/portas manualmente:
+```bash
+dotnet run --project src/EmployeeManagement/EmployeeManagement.Api --urls "http://localhost:59688;https://localhost:59687"
+```
+
+No ambiente **Development**, o projeto pode usar **InMemoryDatabase** por padrão. Para usar **SQL Server**, ajuste a `ConnectionStrings:DefaultConnection` e altere a flag em `appsettings.Development.json` (`UseInMemoryDatabase: true`).
+
+---
+
+---
+
+### ✅ Opção D — Rodar o Frontend (React + Vite)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+- Front: `http://localhost:5173`
+
+#### Configurar URL da API no Front
+
+Crie um arquivo `frontend/.env.local` com a base da API.
+
+**Se a API estiver no Docker:**
+```env
+VITE_API_BASE_URL=http://localhost:5000
+# ou https://localhost:5001
+```
+
+**Se a API estiver rodando local (launchSettings do projeto):**
+```env
+VITE_API_BASE_URL=http://localhost:59688
+# ou https://localhost:59687
+```
+
+#### CORS (se bater)
+
+Se o navegador bloquear por CORS:
+- Garanta que a API permite `http://localhost:5173` em `Cors:AllowedOrigins` (`appsettings.Development.json`)
+- Ou rode o Vite em outra porta que já esteja liberada.
 
 ---
 
@@ -265,14 +315,29 @@ A API mantém rotas versionadas e uma rota “legada” para compatibilidade:
 
 ## 📚 Documentação do Projeto (incluída neste repositório)
 
-Para manter o padrão “projeto profissional”, o repositório inclui documentos complementares em `docs/`:
+A documentação oficial está em `docs/` (**fonte da verdade**):
 
-- `docs/DOCUMENTACAO_TECNICA.md` – visão técnica completa, padrões e decisões
-- `docs/BACKLOG.md` – épicos e backlog detalhado
-- `docs/BDD_GHERKIN.md` – cenários BDD (Gherkin) para regressão e especificação
+- `docs/README.md` (índice)
+- `docs/01-VISAO-GERAL.md`
+- `docs/02-ARQUITETURA.md`
+- `docs/03-DOMINIO.md`
+- `docs/04-APLICACAO.md`
+- `docs/05-INFRAESTRUTURA.md`
+- `docs/06-API.md`
+- `docs/07-AUTENTICACAO.md`
+- `docs/08-BANCO-DE-DADOS.md`
+- `docs/09-TESTES.md`
+- `docs/10-DOCKER-DEPLOY.md`
+- `docs/11-CONFIGURACAO.md`
+- `docs/12-API-REFERENCE.md`
+- `docs/13-GUIA-DESENVOLVIMENTO.md`
+- `docs/14-BOAS-PRATICAS.md`
+- `docs/15-TROUBLESHOOTING.md`
+- `docs/16-ROADMAP.md`
+
+📦 **Postman**: coleções e environments em `docs/postman/`.
 
 ---
-
 ## 🧪 BDD (SpecFlow)
 
 O arquivo `docs/BDD_GHERKIN.md` contém **51 cenários** cobrindo:
