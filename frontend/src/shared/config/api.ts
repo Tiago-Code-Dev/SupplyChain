@@ -4,25 +4,28 @@ export const API_CONFIG = {
   timeout: 30000,
 } as const;
 
+// Helper para construir URLs com versionamento
+const apiUrl = (path: string) => `/api/${API_CONFIG.apiVersion}${path}`;
+
 export const API_ENDPOINTS = {
   auth: {
-    login: '/api/auth/login',
-    refreshToken: '/api/auth/refresh-token',
-    revokeToken: '/api/auth/revoke-token',
-    revokeAllTokens: '/api/auth/revoke-all-tokens',
-    me: '/api/auth/me',
-    changePassword: '/api/auth/change-password',
-    forgotPassword: '/api/auth/forgot-password',
-    resetPassword: '/api/auth/reset-password',
-    register: '/api/auth/register',
-    roles: '/api/auth/roles',
+    login: apiUrl('/auth/login'),
+    refreshToken: apiUrl('/auth/refresh-token'),
+    revokeToken: apiUrl('/auth/revoke-token'),
+    revokeAllTokens: apiUrl('/auth/revoke-all-tokens'),
+    me: apiUrl('/auth/me'),
+    changePassword: apiUrl('/auth/change-password'),
+    forgotPassword: apiUrl('/auth/forgot-password'),
+    resetPassword: apiUrl('/auth/reset-password'),
+    register: apiUrl('/auth/register'),
+    roles: apiUrl('/auth/roles'),
   },
   employees: {
-    list: '/api/employees',
-    detail: (id: string) => `/api/employees/${id}`,
-    create: '/api/employees',
-    update: (id: string) => `/api/employees/${id}`,
-    delete: (id: string) => `/api/employees/${id}`,
+    list: apiUrl('/employees'),
+    detail: (id: string) => apiUrl(`/employees/${id}`),
+    create: apiUrl('/employees'),
+    update: (id: string) => apiUrl(`/employees/${id}`),
+    delete: (id: string) => apiUrl(`/employees/${id}`),
   },
 } as const;
 

@@ -6,6 +6,8 @@ import {
   UserInfo,
   RefreshTokenRequest,
   ChangePasswordRequest,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
 } from '../../../shared/types/api';
 
 export const authService = {
@@ -32,6 +34,14 @@ export const authService = {
 
   async changePassword(data: ChangePasswordRequest): Promise<void> {
     await apiClient.post(API_ENDPOINTS.auth.changePassword, data);
+  },
+
+  async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
+    await apiClient.post(API_ENDPOINTS.auth.forgotPassword, data);
+  },
+
+  async resetPassword(data: ResetPasswordRequest): Promise<void> {
+    await apiClient.post(API_ENDPOINTS.auth.resetPassword, data);
   },
 
   async revokeToken(refreshToken: string): Promise<void> {

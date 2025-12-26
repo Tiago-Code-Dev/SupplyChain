@@ -14,8 +14,28 @@ export const roleColors: Record<Role, string> = {
   [Role.Admin]: 'bg-red-100 text-red-800',
 };
 
-export const getRoleLabel = (role: Role): string => {
-  return roleLabels[role] || 'Desconhecido';
+export const getRoleLabel = (role: Role | string | number): string => {
+  // Se for string, tentar converter para Role enum
+  if (typeof role === 'string') {
+    const roleMap: Record<string, Role> = {
+      'Employee': Role.Employee,
+      'Leader': Role.Leader,
+      'Director': Role.Director,
+      'Admin': Role.Admin,
+      'employee': Role.Employee,
+      'leader': Role.Leader,
+      'director': Role.Director,
+      'admin': Role.Admin,
+    };
+    role = roleMap[role] || Role.Employee;
+  }
+  
+  // Se for número, usar diretamente
+  if (typeof role === 'number') {
+    return roleLabels[role as Role] || 'Desconhecido';
+  }
+  
+  return roleLabels[role as Role] || 'Desconhecido';
 };
 
 export const getRoleColor = (role: Role): string => {
