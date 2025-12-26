@@ -43,9 +43,21 @@ export const useAuthStore = create<AuthState>()(
             error: null,
           });
         } catch (error: any) {
+          let errorMessage = 'Login failed';
+          
+          // Tratar erro 429 (Rate Limiting) especificamente
+          if (error.response?.status === 429) {
+            const retryAfter = error.response?.data?.tentarNovamenteEm || '60 segundos';
+            errorMessage = `Muitas tentativas de login. ${error.response?.data?.detalhe || 'Por favor, aguarde ' + retryAfter + ' antes de tentar novamente.'}`;
+          } else if (error.response?.data?.error) {
+            errorMessage = error.response.data.error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
           set({
             isLoading: false,
-            error: error.response?.data?.error || error.message || 'Login failed',
+            error: errorMessage,
             isAuthenticated: false,
           });
           throw error;
