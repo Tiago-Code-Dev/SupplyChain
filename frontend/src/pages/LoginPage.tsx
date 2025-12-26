@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -40,8 +40,15 @@ export const LoginPage = () => {
     try {
       await login(data.email, data.password);
       navigate('/employees');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      // Tratar erro 429 (Rate Limiting) especificamente
+      if (error?.response?.status === 429) {
+        const retryAfter = error.response?.data?.tentarNovamenteEm || '60 segundos';
+        const errorMessage = error.response?.data?.detalhe || 'Muitas tentativas de login. Por favor, aguarde antes de tentar novamente.';
+        // Não definir erro aqui, pois o auth.store já trata
+        // Mas podemos melhorar a mensagem se necessário
+      }
     } finally {
       setIsLoading(false);
     }
@@ -83,9 +90,19 @@ export const LoginPage = () => {
               Entrar
             </Button>
           </div>
-          <div className="text-sm text-gray-600 text-center">
-            <p>Credenciais padrão:</p>
-            <p className="font-mono text-xs mt-1">admin@empresa.com / Admin@123</p>
+          <div className="text-sm text-center space-y-2">
+            <div>
+              <Link
+                to="/forgot-password"
+                className="text-primary-600 hover:text-primary-900 font-medium"
+              >
+                Esqueci minha senha
+              </Link>
+            </div>
+            <div className="text-gray-600">
+              <p>Credenciais padrão:</p>
+              <p className="font-mono text-xs mt-1">admin@empresa.com / Admin@123</p>
+            </div>
           </div>
         </form>
       </div>
