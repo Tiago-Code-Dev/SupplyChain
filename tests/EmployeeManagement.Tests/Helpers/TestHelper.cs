@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using System.Text.RegularExpressions;
 
 namespace EmployeeManagement.Tests.Helpers;
 
@@ -8,6 +9,31 @@ namespace EmployeeManagement.Tests.Helpers;
 public static class TestHelper
 {
     private static readonly Faker Faker = new("pt_BR");
+
+    /// <summary>
+    /// Remove números de uma string (nomes não podem conter números na validação do Employee)
+    /// </summary>
+    private static string RemoveDigits(string input) =>
+        Regex.Replace(input, @"\d", "").Trim();
+
+    /// <summary>
+    /// Gera um primeiro nome válido sem números
+    /// </summary>
+    private static string GenerateValidFirstName()
+    {
+        var name = RemoveDigits(Faker.Name.FirstName());
+        // Garante que o nome tenha pelo menos 2 caracteres
+        return name.Length >= 2 ? name : "Maria";
+    }
+
+    /// <summary>
+    /// Gera um sobrenome válido sem números
+    /// </summary>
+    private static string GenerateValidLastName()
+    {
+        var name = RemoveDigits(Faker.Name.LastName());
+        return name.Length >= 2 ? name : "Silva";
+    }
 
     /// <summary>
     /// Cria um Employee válido para testes
@@ -26,8 +52,8 @@ public static class TestHelper
         var phones = phoneNumbers ?? new List<string> { GenerateValidPhoneNumber() };
 
         var result = Employee.Create(
-            firstName ?? Faker.Name.FirstName(),
-            lastName ?? Faker.Name.LastName(),
+            firstName ?? GenerateValidFirstName(),
+            lastName ?? GenerateValidLastName(),
             email ?? Faker.Internet.Email(),
             documentNumber ?? GenerateValidCpf(),
             birthDate ?? GenerateAdultBirthDate(),

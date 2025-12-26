@@ -19,7 +19,6 @@ namespace EmployeeManagement.Api.V1.Controllers;
 /// Controller para gerenciamento de funcionários
 /// </summary>
 [Route("api/v{version:apiVersion}/[controller]")]
-[Route("api/[controller]")]
 [ApiVersion("1.0")]
 [Authorize]
 [Tags("Employees")]

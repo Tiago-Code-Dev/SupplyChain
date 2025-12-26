@@ -1,6 +1,7 @@
-using System.Security.Claims;
+Ôªøusing System.Security.Claims;
 using Asp.Versioning;
 using EmployeeManagement.Api.Configurations;
+using EmployeeManagement.Application.Features.Roles;
 using EmployeeManagement.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,9 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace EmployeeManagement.Api.V1.Controllers;
 
 /// <summary>
-/// Controller para autenticaÁ„o usando Identity com suporte a Refresh Token
+/// Controller para autentica√ß√£o usando Identity com suporte a Refresh Token
 /// </summary>
 [Route("api/v{version:apiVersion}/[controller]")]
-[Route("api/[controller]")]
 [ApiController]
 [ApiVersion("1.0")]
 [Tags("Auth")]
@@ -31,18 +31,18 @@ public class AuthController : ControllerBase
     /// Realiza login no sistema
     /// </summary>
     /// <remarks>
-    /// Autentica o usu·rio e retorna access token + refresh token.
+    /// Autentica o usu√°rio e retorna access token + refresh token.
     /// 
-    /// **Credenciais padr„o:**
+    /// **Credenciais padr√£o:**
     /// - Email: admin@empresa.com
     /// - Senha: Admin@123
     /// 
     /// **Tokens:**
-    /// - Access Token: v·lido por 15 minutos
-    /// - Refresh Token: v·lido por 7 dias
+    /// - Access Token: v√°lido por 15 minutos
+    /// - Refresh Token: v√°lido por 7 dias
     /// 
     /// **Rate Limiting:**
-    /// - M·ximo 5 tentativas por minuto por IP
+    /// - M√°ximo 5 tentativas por minuto por IP
     /// </remarks>
     [HttpPost("login")]
     [AllowAnonymous]
@@ -81,10 +81,10 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <remarks>
     /// Usa o refresh token para obter novos tokens.
-    /// O refresh token antigo È revogado e um novo È gerado (rotation).
+    /// O refresh token antigo √© revogado e um novo √© gerado (rotation).
     /// 
     /// **Rate Limiting:**
-    /// - M·ximo 5 tentativas por minuto por IP
+    /// - M√°ximo 5 tentativas por minuto por IP
     /// </remarks>
     [HttpPost("refresh-token")]
     [AllowAnonymous]
@@ -120,7 +120,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <remarks>
     /// Invalida o refresh token fornecido.
-    /// Use para implementar logout ou invalidar sessıes especÌficas.
+    /// Use para implementar logout ou invalidar sess√µes espec√≠ficas.
     /// </remarks>
     [HttpPost("revoke-token")]
     [Authorize]
@@ -141,7 +141,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Revoga todos os tokens do usu·rio atual (logout de todas sessıes)
+    /// Revoga todos os tokens do usu√°rio atual (logout de todas sess√µes)
     /// </summary>
     [HttpPost("revoke-all-tokens")]
     [Authorize]
@@ -166,8 +166,8 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <remarks>
     /// Gera um token para reset de senha.
-    /// Em produÁ„o, esse token deve ser enviado por email.
-    /// Por seguranÁa, sempre retorna sucesso mesmo se o email n„o existir.
+    /// Em produ√ß√£o, esse token deve ser enviado por email.
+    /// Por seguran√ßa, sempre retorna sucesso mesmo se o email n√£o existir.
     /// </remarks>
     [HttpPost("forgot-password")]
     [AllowAnonymous]
@@ -205,7 +205,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Registra um novo usu·rio (Admin only)
+    /// Registra um novo usu√°rio (Admin only)
     /// </summary>
     [HttpPost("register")]
     [Authorize(Policy = "RequireAdmin")]
@@ -236,7 +236,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// ObtÈm informaÁıes do usu·rio atual
+    /// Obt√©m informa√ß√µes do usu√°rio atual
     /// </summary>
     [HttpGet("me")]
     [Authorize]
@@ -271,7 +271,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Altera a senha do usu·rio atual
+    /// Altera a senha do usu√°rio atual
     /// </summary>
     [HttpPost("change-password")]
     [Authorize]
@@ -303,7 +303,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Adiciona role a um usu·rio (Admin only)
+    /// Adiciona role a um usu√°rio (Admin only)
     /// </summary>
     [HttpPost("users/{userId:guid}/roles")]
     [Authorize(Policy = "RequireAdmin")]
@@ -327,7 +327,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Remove role de um usu·rio (Admin only)
+    /// Remove role de um usu√°rio (Admin only)
     /// </summary>
     [HttpDelete("users/{userId:guid}/roles/{role}")]
     [Authorize(Policy = "RequireAdmin")]
@@ -351,13 +351,23 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Adiciona claim a um usu·rio (Admin only)
+    /// Adiciona claim a um usu√°rio (Admin only)
     /// </summary>
+    /// <remarks>
+    /// Claims s√£o pares chave-valor que representam permiss√µes ou atributos do usu√°rio.
+    /// 
+    /// **Exemplos de claims:**
+    /// - department: Financeiro
+    /// - can_approve_expenses: true
+    /// - max_approval_limit: 10000
+    /// </remarks>
     [HttpPost("users/{userId:guid}/claims")]
     [Authorize(Policy = "RequireAdmin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddClaim(
         Guid userId,
         [FromBody] AddClaimRequest request,
@@ -375,26 +385,71 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// ObtÈm roles de um usu·rio (Admin only)
+    /// Obt√©m claims de um usu√°rio (Admin only)
     /// </summary>
-    [HttpGet("users/{userId:guid}/roles")]
+    /// <remarks>
+    /// Retorna todas as claims customizadas associadas ao usu√°rio.
+    /// Claims de sistema (como roles) n√£o s√£o inclu√≠das nesta lista.
+    /// </remarks>
+    /// <param name="userId">ID do usu√°rio</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    /// <returns>Dicion√°rio de claims (tipo ‚Üí valor)</returns>
+    [HttpGet("users/{userId:guid}/claims")]
     [Authorize(Policy = "RequireAdmin")]
-    [ProducesResponseType(typeof(IList<string>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetUserRoles(Guid userId, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUserClaims(Guid userId, CancellationToken cancellationToken)
     {
-        var roles = await _identityService.GetUserRolesAsync(userId, cancellationToken);
-        return Ok(roles);
+        var claims = await _identityService.GetUserClaimsAsync(userId, cancellationToken);
+        return Ok(claims.ToDictionary(c => c.Key, c => c.Value));
     }
 
     /// <summary>
-    /// Lista todas as roles disponÌveis
+    /// Remove claim de um usu√°rio (Admin only)
+    /// </summary>
+    /// <remarks>
+    /// Remove uma claim espec√≠fica do usu√°rio pelo tipo.
+    /// </remarks>
+    /// <param name="userId">ID do usu√°rio</param>
+    /// <param name="claimType">Tipo da claim a ser removida</param>
+    /// <param name="cancellationToken">Token de cancelamento</param>
+    [HttpDelete("users/{userId:guid}/claims/{claimType}")]
+    [Authorize(Policy = "RequireAdmin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveClaim(
+        Guid userId,
+        string claimType,
+        CancellationToken cancellationToken)
+    {
+        var result = await _identityService.RemoveClaimAsync(userId, claimType, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return BadRequest(new { error = result.Error.Description });
+        }
+
+        _logger.LogInformation("Claim {Type} removed from user {UserId}", claimType, userId);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Lista todas as roles dispon√≠veis (sistema + customizadas)
     /// </summary>
     [HttpGet("roles")]
     [Authorize]
-    [ProducesResponseType(typeof(IList<string>), StatusCodes.Status200OK)]
-    public IActionResult GetAvailableRoles()
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAvailableRoles(
+        [FromServices] IRoleService roleService,
+        CancellationToken cancellationToken)
     {
-        return Ok(new[] { "Employee", "Leader", "Director", "Admin" });
+        var roles = await roleService.GetAllRolesAsync(cancellationToken);
+        return Ok(roles.Select(r => r.Name));
     }
 
     #region Private Methods
