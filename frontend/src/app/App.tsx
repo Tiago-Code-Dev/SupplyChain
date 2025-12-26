@@ -5,6 +5,10 @@ import { LoginPage } from '../pages/LoginPage';
 import { EmployeesPage } from '../pages/EmployeesPage';
 import { EmployeeFormPage } from '../pages/EmployeeFormPage';
 import { EmployeeDetailPage } from '../pages/EmployeeDetailPage';
+import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '../pages/ResetPasswordPage';
+import { ChangePasswordPage } from '../pages/ChangePasswordPage';
+import { ProfilePage } from '../pages/ProfilePage';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -30,6 +34,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
           path="/employees"
           element={
@@ -59,6 +65,22 @@ function App() {
           element={
             <ProtectedRoute>
               <EmployeeFormPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/change-password"
+          element={
+            <ProtectedRoute>
+              <ChangePasswordPage />
             </ProtectedRoute>
           }
         />
