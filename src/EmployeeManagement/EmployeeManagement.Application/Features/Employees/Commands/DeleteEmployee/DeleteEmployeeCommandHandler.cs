@@ -12,18 +12,15 @@ namespace EmployeeManagement.Application.Features.Employees.Commands.DeleteEmplo
 public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeCommand>
 {
     private readonly IEmployeeRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cache;
     private readonly ILogger<DeleteEmployeeCommandHandler> _logger;
 
     public DeleteEmployeeCommandHandler(
         IEmployeeRepository repository,
-        IUnitOfWork unitOfWork,
         ICacheService cache,
         ILogger<DeleteEmployeeCommandHandler> logger)
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
         _cache = cache;
         _logger = logger;
     }
@@ -43,7 +40,8 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
                 Error.Forbidden(ValidationMessages.NoPermissionToDelete));
         }
 
-        var employee = await _repository.GetByIdAsync(request.Id, cancellationToken);
+        // Buscar para validações (AsNoTracking seria ideal mas precisamos do email para cache)
+        var employee = await _repository.GetByIdForDeleteAsync(request.Id, cancellationToken);
         if (employee is null)
         {
             return Result.Failure(Error.NotFound("Employee", ValidationMessages.EmployeeNotFound));
@@ -57,11 +55,10 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
                 Error.Validation("Employee", ValidationMessages.CannotDeleteWithSubordinates));
         }
 
-        employee.Delete();
+        // Soft delete direto no banco - evita problemas de tracking
+        await _repository.SoftDeleteAsync(request.Id, cancellationToken);
 
-        await _repository.UpdateAsync(employee, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
+        // Limpar cache
         await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);

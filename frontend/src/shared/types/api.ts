@@ -20,13 +20,15 @@ export type ApiError = {
   statusCode?: number;
 };
 
-// Employee Types
-export enum Role {
-  Employee = 1,
-  Leader = 2,
-  Director = 3,
-  Admin = 4,
-}
+// Employee Types - Usando const object em vez de enum
+export const Role = {
+  Employee: 1,
+  Leader: 2,
+  Director: 3,
+  Admin: 4,
+} as const;
+
+export type Role = (typeof Role)[keyof typeof Role];
 
 export interface Employee {
   id: string;

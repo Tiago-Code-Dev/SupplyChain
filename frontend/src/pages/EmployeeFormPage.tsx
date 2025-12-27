@@ -12,7 +12,7 @@ import { Select } from '../shared/components/Select';
 import { ErrorAlert } from '../shared/components/ErrorAlert';
 import { SuccessAlert } from '../shared/components/SuccessAlert';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
-import { formatCPF, unformatCPF, formatPhoneList, unformatPhoneList } from '../shared/utils/format.utils';
+import { unformatCPF, formatPhone, unformatPhoneList } from '../shared/utils/format.utils';
 
 const createEmployeeSchema = z.object({
   firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -83,12 +83,11 @@ export const EmployeeFormPage = () => {
     handleSubmit,
     formState: { errors },
     setValue,
-    watch,
-  } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  } = useForm<CreateEmployeeFormData>({
+    resolver: zodResolver(isEdit ? updateEmployeeSchema : createEmployeeSchema) as any,
     defaultValues: {
       role: Role.Employee,
-    } as Partial<FormData>,
+    },
   });
 
   useEffect(() => {
@@ -114,8 +113,20 @@ export const EmployeeFormPage = () => {
           .join(', ');
         setValue('phoneNumbers', formattedPhones);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar funcionário');
+    } catch (err: unknown) {
+      let message = 'Erro ao carregar funcionário';
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as { response?: unknown }).response === 'object' &&
+        (err as { response?: { data?: { error?: string } } }).response &&
+        (err as { response: { data?: { error?: string } } }).response.data &&
+        typeof (err as { response: { data: { error?: string } } }).response.data.error === 'string'
+      ) {
+        message = (err as { response: { data: { error: string } } }).response.data.error;
+      }
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -166,8 +177,20 @@ export const EmployeeFormPage = () => {
       setTimeout(() => {
         navigate('/employees');
       }, 1500);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao salvar funcionário');
+    } catch (err: unknown) {
+      let message = 'Erro ao salvar funcionário';
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as { response?: unknown }).response === 'object' &&
+        (err as { response?: { data?: { error?: string } } }).response &&
+        (err as { response: { data?: { error?: string } } }).response.data &&
+        typeof (err as { response: { data: { error?: string } } }).response.data.error === 'string'
+      ) {
+        message = (err as { response: { data: { error: string } } }).response.data.error;
+      }
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -227,14 +250,14 @@ export const EmployeeFormPage = () => {
               error={errors.email?.message}
             />
 
+            {/* Campo documentNumber - só aparece no create */}
             {!isEdit && (
               <MaskedInput
-                {...register('documentNumber')}
-                mask="cpf"
                 label="CPF"
-                placeholder="000.000.000-00"
-                error={errors.documentNumber?.message}
-                maxLength={14}
+                mask="cpf"
+                {...register('documentNumber')}
+                error={(errors as any).documentNumber?.message}
+                required
               />
             )}
 
@@ -251,19 +274,15 @@ export const EmployeeFormPage = () => {
               </p>
             </div>
 
+            {/* Campo password - só aparece no create */}
             {!isEdit && (
-              <div>
-                <Input
-                  {...register('password')}
-                  type="password"
-                  label="Senha"
-                  placeholder="Mínimo 8 caracteres, com maiúscula, minúscula, número e especial"
-                  error={errors.password?.message}
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  A senha deve conter: mínimo 8 caracteres, letra maiúscula, minúscula, número e caractere especial
-                </p>
-              </div>
+              <Input
+                label="Senha"
+                type="password"
+                {...register('password')}
+                error={(errors as any).password?.message}
+                required
+              />
             )}
 
             <Select
