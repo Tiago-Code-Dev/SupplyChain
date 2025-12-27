@@ -10,7 +10,7 @@ import { Select } from '../shared/components/Select';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { ErrorAlert } from '../shared/components/ErrorAlert';
 import { formatDate, calculateAge } from '../shared/utils/date.utils';
-import { getRoleLabel, getRoleColor } from '../shared/utils/role.utils';
+import { getRoleLabel, getRoleColor, getHighestRole } from '../shared/utils/role.utils';
 import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, ChevronUpIcon, ChevronDownIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { exportToCSV, exportToExcel, fetchAllEmployeesForExport } from '../shared/utils/export.utils';
 
@@ -208,7 +208,7 @@ export const EmployeesPage = () => {
           <h1 className="text-2xl font-bold text-gray-900">Funcionários</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
-              {user?.fullName} ({user?.roles?.[0] || 'N/A'})
+              {user?.fullName} ({getHighestRole(user?.roles || [])})
             </span>
             <Button
               variant="secondary"

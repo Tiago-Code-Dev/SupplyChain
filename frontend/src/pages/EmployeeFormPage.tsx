@@ -13,6 +13,8 @@ import { ErrorAlert } from '../shared/components/ErrorAlert';
 import { SuccessAlert } from '../shared/components/SuccessAlert';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { unformatCPF, formatPhone, unformatPhoneList } from '../shared/utils/format.utils';
+import { useAuthStore } from '../features/auth/store/auth.store';
+import { getHighestRole } from '../shared/utils/role.utils';  // ✅ Adicionar esta linha
 
 const createEmployeeSchema = z.object({
   firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -75,9 +77,6 @@ export const EmployeeFormPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const formSchema = isEdit ? updateEmployeeSchema : createEmployeeSchema;
-  type FormData = z.infer<typeof formSchema>;
-
   const {
     register,
     handleSubmit,
@@ -89,6 +88,8 @@ export const EmployeeFormPage = () => {
       role: Role.Employee,
     },
   });
+
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (isEdit && id) {
@@ -132,7 +133,7 @@ export const EmployeeFormPage = () => {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: CreateEmployeeFormData | UpdateEmployeeFormData) => {
     setIsLoading(true);
     setError(null);
     setSuccess(false);
@@ -196,11 +197,37 @@ export const EmployeeFormPage = () => {
     }
   };
 
-  const roleOptions = [
-    { value: Role.Employee, label: 'Funcionário' },
-    { value: Role.Leader, label: 'Líder' },
-    { value: Role.Director, label: 'Diretor' },
-  ];
+  // Filtrar opções baseado no role do usuário
+  const getRoleOptions = () => {
+    const allRoles = [
+      { value: Role.Employee, label: 'Funcionário' },
+      { value: Role.Leader, label: 'Líder' },
+      { value: Role.Director, label: 'Diretor' },
+      { value: Role.Admin, label: 'Administrador' },
+    ];
+    
+    const userRoleString = getHighestRole(user?.roles || []);
+    
+    // Admin pode criar qualquer role
+    if (userRoleString === 'Admin') {
+      return allRoles;
+    }
+    
+    // Director pode criar Director, Leader, Employee
+    if (userRoleString === 'Director') {
+      return allRoles.filter(r => r.value <= Role.Director);
+    }
+    
+    // Leader só pode criar Employee
+    if (userRoleString === 'Leader') {
+      return allRoles.filter(r => r.value === Role.Employee);
+    }
+    
+    // Employee não pode criar ninguém
+    return [];
+  };
+
+  const roleOptions = getRoleOptions();
 
   if (isLoading && isEdit) {
     return (

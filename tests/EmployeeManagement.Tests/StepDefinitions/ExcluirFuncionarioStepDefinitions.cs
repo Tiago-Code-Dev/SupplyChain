@@ -121,7 +121,6 @@ public class ExcluirFuncionarioStepDefinitions
         var command = new DeleteEmployeeCommand(nonExistentId, currentRole);
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
-            _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
             _loggerMock.Object);
 
@@ -291,7 +290,6 @@ public class ExcluirFuncionarioStepDefinitions
         var command = new DeleteEmployeeCommand(_employeeToDelete!.Id, currentRole);
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
-            _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
             _loggerMock.Object);
 

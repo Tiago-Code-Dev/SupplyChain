@@ -18,13 +18,11 @@ public class DeleteEmployeeCommandHandlerTests
     public DeleteEmployeeCommandHandlerTests()
     {
         _repositoryMock = Fixtures.MockFactory.CreateEmployeeRepositoryMock();
-        _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _cacheServiceMock = Fixtures.MockFactory.CreateCacheServiceMock();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<DeleteEmployeeCommandHandler>();
 
         _handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
-            _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
             _loggerMock.Object);
     }

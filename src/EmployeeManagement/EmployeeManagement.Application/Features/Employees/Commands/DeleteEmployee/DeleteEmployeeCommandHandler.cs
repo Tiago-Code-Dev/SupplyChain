@@ -32,6 +32,7 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
         _logger.LogInformation("Deleting employee: {Id} by user with role: {Role}", 
             request.Id, request.CurrentUserRole);
 
+        // Employee não pode deletar ninguém
         if (request.CurrentUserRole < Role.Leader)
         {
             _logger.LogWarning("User with role {Role} tried to delete employee {Id} without permission", 
@@ -40,11 +41,31 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
                 Error.Forbidden(ValidationMessages.NoPermissionToDelete));
         }
 
-        // Buscar para validações (AsNoTracking seria ideal mas precisamos do email para cache)
+        // Buscar para validações
         var employee = await _repository.GetByIdForDeleteAsync(request.Id, cancellationToken);
         if (employee is null)
         {
             return Result.Failure(Error.NotFound("Employee", ValidationMessages.EmployeeNotFound));
+        }
+
+        // Validação de permissões para exclusão baseada na hierarquia
+        // Leader (2): Só pode deletar Employee (1)
+        // Director (3): Pode deletar Leader (2), Employee (1) - NÃO pode deletar Director
+        // Admin (4): Pode deletar qualquer role
+        var canDelete = request.CurrentUserRole switch
+        {
+            Role.Admin => true, // Admin pode deletar qualquer role
+            Role.Director => employee.Role < Role.Director, // Director pode deletar Leader e Employee
+            Role.Leader => employee.Role == Role.Employee, // Leader só pode deletar Employee
+            _ => false // Employee não pode deletar ninguém
+        };
+
+        if (!canDelete)
+        {
+            _logger.LogWarning("User with role {UserRole} tried to delete employee with role {TargetRole}", 
+                request.CurrentUserRole, employee.Role);
+            return Result.Failure(
+                Error.Forbidden(ValidationMessages.NoPermissionToDelete));
         }
 
         var hasSubordinates = await _repository.HasSubordinatesAsync(request.Id, cancellationToken);

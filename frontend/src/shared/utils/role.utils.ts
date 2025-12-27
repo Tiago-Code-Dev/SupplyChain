@@ -54,4 +54,22 @@ export const canDeleteEmployee = (userRole: Role): boolean => {
   return userRole >= Role.Leader;
 };
 
+export const getHighestRole = (roles: string[]): string => {
+  const roleHierarchy: Record<string, number> = {
+    'Admin': 4,
+    'Director': 3,
+    'Leader': 2,
+    'Employee': 1,
+  };
+
+  if (!roles || roles.length === 0) return 'N/A';
+  
+  // Retorna a role com maior prioridade
+  return roles.reduce((highest, current) => {
+    const currentPriority = roleHierarchy[current] || 0;
+    const highestPriority = roleHierarchy[highest] || 0;
+    return currentPriority > highestPriority ? current : highest;
+  }, roles[0]);
+};
+
 

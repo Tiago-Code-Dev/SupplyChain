@@ -174,7 +174,6 @@ public class LoggingAuditoriaStepDefinitions
 
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
-            _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
             _deleteLoggerMock.Object);
 
