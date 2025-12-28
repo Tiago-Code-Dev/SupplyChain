@@ -4,6 +4,7 @@ using EmployeeManagement.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeManagement.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251228221018_FixCustomRoleUniqueIndex")]
+    partial class FixCustomRoleUniqueIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,7 +87,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 12, 28, 22, 33, 0, 799, DateTimeKind.Utc).AddTicks(8494),
+                            CreatedAt = new DateTime(2025, 12, 28, 22, 10, 16, 954, DateTimeKind.Utc).AddTicks(5043),
                             DisplayName = "Funcionário",
                             HierarchyLevel = 10,
                             IsDeleted = false,
@@ -95,7 +98,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2025, 12, 28, 22, 33, 0, 799, DateTimeKind.Utc).AddTicks(8507),
+                            CreatedAt = new DateTime(2025, 12, 28, 22, 10, 16, 954, DateTimeKind.Utc).AddTicks(5055),
                             DisplayName = "Líder",
                             HierarchyLevel = 20,
                             IsDeleted = false,
@@ -106,7 +109,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2025, 12, 28, 22, 33, 0, 799, DateTimeKind.Utc).AddTicks(8511),
+                            CreatedAt = new DateTime(2025, 12, 28, 22, 10, 16, 954, DateTimeKind.Utc).AddTicks(5058),
                             DisplayName = "Diretor",
                             HierarchyLevel = 30,
                             IsDeleted = false,
@@ -117,7 +120,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2025, 12, 28, 22, 33, 0, 799, DateTimeKind.Utc).AddTicks(8514),
+                            CreatedAt = new DateTime(2025, 12, 28, 22, 10, 16, 954, DateTimeKind.Utc).AddTicks(5061),
                             DisplayName = "Administrador",
                             HierarchyLevel = 100,
                             IsDeleted = false,

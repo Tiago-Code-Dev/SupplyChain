@@ -9,6 +9,7 @@ import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { ChangePasswordPage } from '../pages/ChangePasswordPage';
 import { ProfilePage } from '../pages/ProfilePage';
+import { RolesPage } from '../pages/RolesPage';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -65,6 +66,14 @@ function App() {
           element={
             <ProtectedRoute>
               <EmployeeFormPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/roles"
+          element={
+            <ProtectedRoute>
+              <RolesPage />
             </ProtectedRoute>
           }
         />

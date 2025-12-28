@@ -239,6 +239,21 @@ public class PerformanceEscalabilidadeStepDefinitions
 
         _stopwatch.Restart();
 
+        var identityServiceMock = new Mock<IIdentityService>();
+        identityServiceMock
+            .Setup(x => x.CreateUserAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+
+        var handler = new CreateEmployeeCommandHandler(
+            _repositoryMock.Object,
+            _unitOfWorkMock.Object,
+            _passwordHasherMock.Object,
+            _cacheServiceMock.Object,
+            identityServiceMock.Object,
+            _createLoggerMock.Object);
+
         var command = new CreateEmployeeCommand(
             "João",
             "Silva",
@@ -250,13 +265,6 @@ public class PerformanceEscalabilidadeStepDefinitions
             null,
             new List<string> { "11999999999" },
             _currentUserRole);
-
-        var handler = new CreateEmployeeCommandHandler(
-            _repositoryMock.Object,
-            _unitOfWorkMock.Object,
-            _passwordHasherMock.Object,
-            _cacheServiceMock.Object,
-            _createLoggerMock.Object);
 
         _createResult = await handler.Handle(command, CancellationToken.None);
 

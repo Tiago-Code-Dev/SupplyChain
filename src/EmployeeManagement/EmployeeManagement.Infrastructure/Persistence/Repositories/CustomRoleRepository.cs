@@ -23,10 +23,10 @@ public class CustomRoleRepository : ICustomRoleRepository
 
     public async Task<CustomRole?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
-        var normalizedName = name.Trim().ToUpperInvariant();
+        var normalizedName = name.Trim();
         return await _context.CustomRoles
             .Include(r => r.Permissions)
-            .FirstOrDefaultAsync(r => r.Name == normalizedName, cancellationToken);
+            .FirstOrDefaultAsync(r => r.Name.ToLower() == normalizedName.ToLower(), cancellationToken);
     }
 
     public async Task<CustomRole?> GetByLegacyRoleAsync(Role role, CancellationToken cancellationToken = default)
@@ -47,8 +47,10 @@ public class CustomRoleRepository : ICustomRoleRepository
 
     public async Task<bool> NameExistsAsync(string name, Guid? excludeId = null, CancellationToken cancellationToken = default)
     {
-        var normalizedName = name.Trim().ToUpperInvariant();
-        var query = _context.CustomRoles.Where(r => r.Name == normalizedName);
+        var normalizedName = name.Trim();
+        // Filtro explícito para IsDeleted para garantir que não considera registros soft-deleted
+        var query = _context.CustomRoles
+            .Where(r => !r.IsDeleted && r.Name.ToLower() == normalizedName.ToLower());
 
         if (excludeId.HasValue)
             query = query.Where(r => r.Id != excludeId.Value);
@@ -68,12 +70,17 @@ public class CustomRoleRepository : ICustomRoleRepository
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        var role = await _context.CustomRoles.FindAsync([id], cancellationToken);
-        if (role is not null)
-        {
-            _context.CustomRoles.Remove(role);
+            public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+            {
+                // Usar FirstOrDefaultAsync para respeitar a Query Filter (não deletar registros já deletados)
+                var role = await _context.CustomRoles
+                    .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+
+                if (role is not null)
+                {
+                    // Fazer soft delete diretamente em vez de usar Remove()
+                    // Isso evita problemas com o interceptor de SaveChangesAsync
+                    role.Delete();
+                }
+            }
         }
-    }
-}

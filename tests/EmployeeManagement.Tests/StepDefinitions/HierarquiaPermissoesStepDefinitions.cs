@@ -197,6 +197,13 @@ public class HierarquiaPermissoesStepDefinitions
 
     private async Task ExecutarCriacao(Role targetRole)
     {
+        var identityServiceMock = new Mock<IIdentityService>();
+        identityServiceMock
+            .Setup(x => x.CreateUserAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+
         var command = new CreateEmployeeCommand(
             "Test",
             "User",
@@ -214,6 +221,7 @@ public class HierarquiaPermissoesStepDefinitions
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
             _cacheServiceMock.Object,
+            identityServiceMock.Object,
             _createLoggerMock.Object);
 
         _createResult = await handler.Handle(command, CancellationToken.None);

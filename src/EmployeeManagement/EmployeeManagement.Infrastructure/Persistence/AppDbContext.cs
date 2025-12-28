@@ -37,6 +37,7 @@ public class AppDbContext : DbContext, IUnitOfWork
 
         // Global Query Filter para Soft Delete
         modelBuilder.Entity<Employee>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<CustomRole>().HasQueryFilter(r => !r.IsDeleted);
 
         base.OnModelCreating(modelBuilder);
     }

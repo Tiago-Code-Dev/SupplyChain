@@ -57,6 +57,7 @@ export const ChangePasswordPage = () => {
       await authService.changePassword({
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
       });
       setSuccess(true);
       setTimeout(() => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/store/auth.store';
 import { employeesService } from '../features/employees/services/employees.service';
 import { Employee, EmployeeQueryParams, Role } from '../shared/types/api';
@@ -9,7 +9,7 @@ import { Input } from '../shared/components/Input';
 import { Select } from '../shared/components/Select';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { ErrorAlert } from '../shared/components/ErrorAlert';
-import { formatDate, calculateAge } from '../shared/utils/date.utils';
+import { calculateAge } from '../shared/utils/date.utils';
 import { getRoleLabel, getRoleColor, getHighestRole } from '../shared/utils/role.utils';
 import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, ChevronUpIcon, ChevronDownIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { exportToCSV, exportToExcel, fetchAllEmployeesForExport } from '../shared/utils/export.utils';
@@ -205,7 +205,18 @@ export const EmployeesPage = () => {
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Funcionários</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-2xl font-bold text-gray-900">Funcionários</h1>
+            {/* Link para Cargos - apenas para Admin */}
+            {user?.roles?.some(r => r.toLowerCase() === 'admin') && (
+              <Link
+                to="/roles"
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+              >
+                Gerenciar Cargos
+              </Link>
+            )}
+          </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
               {user?.fullName} ({getHighestRole(user?.roles || [])})

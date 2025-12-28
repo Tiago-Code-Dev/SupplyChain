@@ -125,11 +125,19 @@ public class LoggingAuditoriaStepDefinitions
             new List<string> { "11999999999" },
             Role.Director);
 
+        var identityServiceMock = new Mock<IIdentityService>();
+        identityServiceMock
+            .Setup(x => x.CreateUserAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+
         var handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
             _cacheServiceMock.Object,
+            identityServiceMock.Object,
             _createLoggerMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -168,7 +176,7 @@ public class LoggingAuditoriaStepDefinitions
     }
 
     [When(@"o usuário exclui o funcionário com sucesso")]
-    public async Task QuandoOUsuarioExcluiOFuncionarioComSucesso()
+    public async Task QuandOUsuarioExcluiOFuncionarioComSucesso()
     {
         var command = new DeleteEmployeeCommand(_employee!.Id, Role.Director);
 

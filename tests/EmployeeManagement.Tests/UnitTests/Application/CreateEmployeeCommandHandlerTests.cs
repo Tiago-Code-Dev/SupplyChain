@@ -1,4 +1,5 @@
 ﻿using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
+using EmployeeManagement.Application.Interfaces;
 using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Tests.Helpers;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ public class CreateEmployeeCommandHandlerTests
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _loggerMock;
     private readonly Mock<ICacheService> _cacheMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly CreateEmployeeCommandHandler _handler;
 
     public CreateEmployeeCommandHandlerTests()
@@ -23,17 +25,29 @@ public class CreateEmployeeCommandHandlerTests
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _cacheMock = new Mock<ICacheService>();
+        _identityServiceMock = new Mock<IIdentityService>();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<CreateEmployeeCommandHandler>();
 
         _passwordHasherMock
             .Setup(x => x.Hash(It.IsAny<string>()))
             .Returns("hashed_password");
 
+        _identityServiceMock
+            .Setup(x => x.CreateUserAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+
+        _identityServiceMock
+            .Setup(x => x.AddToRoleAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+
         _handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
             _cacheMock.Object,
+            _identityServiceMock.Object,
             _loggerMock.Object);
     }
 

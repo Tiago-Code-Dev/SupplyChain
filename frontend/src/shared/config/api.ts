@@ -27,6 +27,15 @@ export const API_ENDPOINTS = {
     update: (id: string) => apiUrl(`/employees/${id}`),
     delete: (id: string) => apiUrl(`/employees/${id}`),
   },
+  roles: {
+    list: apiUrl('/roles'),
+    detail: (id: string) => apiUrl(`/roles/${id}`),
+    parents: apiUrl('/roles/parents'),
+    hierarchy: apiUrl('/roles/hierarchy'),
+    create: apiUrl('/roles'),
+    update: (id: string) => apiUrl(`/roles/${id}`),
+    delete: (id: string) => apiUrl(`/roles/${id}`),
+  },
 } as const;
 
 

@@ -31,7 +31,8 @@ public class CustomRoleConfiguration : IEntityTypeConfiguration<CustomRole>
             .HasConversion<int?>();
 
         builder.HasIndex(r => r.Name)
-            .IsUnique();
+            .IsUnique()
+            .HasFilter("[IsDeleted] = 0");
 
         builder.HasIndex(r => r.LegacyRole)
             .IsUnique()
