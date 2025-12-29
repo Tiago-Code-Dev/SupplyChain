@@ -107,21 +107,23 @@ public sealed class UpdateEmployeeCommandHandler
 
         if (updateResult.IsFailure)
         {
-            return Result<EmployeeResponse>.Failure(updateResult.Error);
-        }
-
-        if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
-        {
-            var roleUpdateResult = employee.UpdateRole(request.NewRole.Value);
-            if (roleUpdateResult.IsFailure)
-            {
-                return Result<EmployeeResponse>.Failure(roleUpdateResult.Error);
+                return Result<EmployeeResponse>.Failure(updateResult.Error);
             }
-            
-            _logger.LogInformation(
-                "Employee {Id} role updated from {OldRole} to {NewRole}",
-                request.Id, employee.Role, request.NewRole.Value);
-        }
+
+            // Atualizar CustomRole se fornecido
+            if (request.CustomRoleId.HasValue || request.NewRole.HasValue)
+            {
+                var newRole = request.NewRole ?? employee.Role;
+                var customRoleUpdateResult = employee.UpdateCustomRole(request.CustomRoleId, newRole);
+                if (customRoleUpdateResult.IsFailure)
+                {
+                    return Result<EmployeeResponse>.Failure(customRoleUpdateResult.Error);
+                }
+
+                _logger.LogInformation(
+                    "Employee {Id} role updated to {NewRole} with CustomRoleId {CustomRoleId}",
+                    request.Id, newRole, request.CustomRoleId);
+            }
 
         if (request.PhoneNumbers == null || !request.PhoneNumbers.Any())
         {

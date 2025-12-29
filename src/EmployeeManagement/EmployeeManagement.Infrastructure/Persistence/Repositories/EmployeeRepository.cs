@@ -15,6 +15,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
         return await DbSet
             .Include(e => e.PhoneNumbers)
             .Include(e => e.Manager)
+            .Include(e => e.CustomRole)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
@@ -23,6 +24,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
         return await DbSet
             .Include(e => e.PhoneNumbers)
             .Include(e => e.Manager)
+            .Include(e => e.CustomRole)
             .FirstOrDefaultAsync(e => e.Email.ToLower() == email.ToLower(), cancellationToken);
     }
 
@@ -76,7 +78,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
             pageSize, 
             filter, 
             orderBy, 
-            "PhoneNumbers,Manager", 
+            "PhoneNumbers,Manager,CustomRole", 
             cancellationToken);
 
         return (result.Items, result.TotalCount);

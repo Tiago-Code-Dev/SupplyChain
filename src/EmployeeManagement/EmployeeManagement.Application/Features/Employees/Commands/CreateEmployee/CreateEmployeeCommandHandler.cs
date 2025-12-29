@@ -106,7 +106,8 @@ public sealed class CreateEmployeeCommandHandler
             passwordHash,
             request.Role,
             request.ManagerId,
-            request.PhoneNumbers);
+            request.PhoneNumbers,
+            request.CustomRoleId);
 
         if (employeeResult.IsFailure)
         {

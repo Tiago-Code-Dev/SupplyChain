@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { employeesService } from '../features/employees/services/employees.service';
-import { CreateEmployeeRequest, UpdateEmployeeRequest, Role } from '../shared/types/api';
+import { rolesService } from '../features/roles/services/roles.service';
+import { CreateEmployeeRequest, UpdateEmployeeRequest, Role, CustomRole } from '../shared/types/api';
 import { Button } from '../shared/components/Button';
 import { Input } from '../shared/components/Input';
 import { MaskedInput } from '../shared/components/MaskedInput';
@@ -14,7 +15,7 @@ import { SuccessAlert } from '../shared/components/SuccessAlert';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { unformatCPF, formatPhone, unformatPhoneList } from '../shared/utils/format.utils';
 import { useAuthStore } from '../features/auth/store/auth.store';
-import { getHighestRole } from '../shared/utils/role.utils';  // ✅ Adicionar esta linha
+import { getHighestRole } from '../shared/utils/role.utils';
 
 const createEmployeeSchema = z.object({
   firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -51,7 +52,7 @@ const createEmployeeSchema = z.object({
     .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
     .regex(/[0-9]/, 'Senha deve conter pelo menos um número')
     .regex(/[^A-Za-z0-9]/, 'Senha deve conter pelo menos um caractere especial'),
-  role: z.nativeEnum(Role),
+  customRoleId: z.string().min(1, 'Função é obrigatória'),
   managerId: z.string().optional().nullable(),
   phoneNumbers: z.string().optional(),
 });
@@ -61,7 +62,7 @@ const updateEmployeeSchema = z.object({
   lastName: z.string().min(2, 'Sobrenome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Email inválido'),
   birthDate: z.string().min(1, 'Data de nascimento é obrigatória'),
-  role: z.nativeEnum(Role),
+  customRoleId: z.string().min(1, 'Função é obrigatória'),
   managerId: z.string().optional().nullable(),
   phoneNumbers: z.string().optional(),
 });
@@ -76,6 +77,7 @@ export const EmployeeFormPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [customRoles, setCustomRoles] = useState<CustomRole[]>([]);
 
   const {
     register,
@@ -85,11 +87,24 @@ export const EmployeeFormPage = () => {
   } = useForm<CreateEmployeeFormData>({
     resolver: zodResolver(isEdit ? updateEmployeeSchema : createEmployeeSchema) as any,
     defaultValues: {
-      role: Role.Employee,
+      customRoleId: '',
     },
   });
 
   const { user } = useAuthStore();
+
+  // Carregar roles customizados
+  useEffect(() => {
+    const loadRoles = async () => {
+      try {
+        const roles = await rolesService.getAllRoles();
+        setCustomRoles(roles);
+      } catch (err) {
+        console.error('Erro ao carregar roles:', err);
+      }
+    };
+    loadRoles();
+  }, []);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -105,7 +120,7 @@ export const EmployeeFormPage = () => {
       setValue('lastName', employee.lastName);
       setValue('email', employee.email);
       setValue('birthDate', employee.birthDate.split('T')[0]);
-      setValue('role', employee.role);
+      setValue('customRoleId', employee.customRoleId || '');
       setValue('managerId', employee.managerId || '');
       // Formatar telefones ao carregar
       if (employee.phoneNumbers && employee.phoneNumbers.length > 0) {
@@ -133,6 +148,21 @@ export const EmployeeFormPage = () => {
     }
   };
 
+  // Converter hierarchyLevel para o enum Role correspondente
+  const hierarchyToRole = (hierarchyLevel: number): Role => {
+    if (hierarchyLevel >= 100) return Role.Admin;
+    if (hierarchyLevel >= 30) return Role.Director;
+    if (hierarchyLevel >= 20) return Role.Leader;
+    return Role.Employee;
+  };
+
+  // Obter o role legado baseado no customRoleId selecionado
+  const getRoleFromCustomRoleId = (customRoleId: string): Role => {
+    const selectedRole = customRoles.find(r => r.id === customRoleId);
+    if (!selectedRole) return Role.Employee;
+    return hierarchyToRole(selectedRole.hierarchyLevel);
+  };
+
   const onSubmit = async (data: CreateEmployeeFormData | UpdateEmployeeFormData) => {
     setIsLoading(true);
     setError(null);
@@ -144,22 +174,26 @@ export const EmployeeFormPage = () => {
         ? unformatPhoneList(data.phoneNumbers)
         : [];
 
+      // Obter o role legado baseado no customRoleId selecionado
+      const legacyRole = getRoleFromCustomRoleId(data.customRoleId);
+
       if (isEdit && id) {
         const updateData: UpdateEmployeeRequest = {
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
           birthDate: data.birthDate,
-          role: data.role,
+          role: legacyRole,
           managerId: data.managerId || null,
           phoneNumbers: phoneNumbers.length > 0 ? phoneNumbers : undefined,
+          customRoleId: data.customRoleId,
         };
         await employeesService.updateEmployee(id, updateData);
       } else {
         const createData = data as CreateEmployeeFormData;
         // Remover formatação do CPF
         const documentNumber = unformatCPF(createData.documentNumber);
-        
+
         const createRequest: CreateEmployeeRequest = {
           firstName: createData.firstName,
           lastName: createData.lastName,
@@ -167,9 +201,10 @@ export const EmployeeFormPage = () => {
           documentNumber: documentNumber,
           birthDate: createData.birthDate,
           password: createData.password,
-          role: createData.role,
+          role: legacyRole,
           managerId: createData.managerId || null,
           phoneNumbers: phoneNumbers.length > 0 ? phoneNumbers : undefined,
+          customRoleId: createData.customRoleId,
         };
         await employeesService.createEmployee(createRequest);
       }
@@ -197,32 +232,39 @@ export const EmployeeFormPage = () => {
     }
   };
 
-  // Filtrar opções baseado no role do usuário
+  // Filtrar opções baseado no role do usuário, usando CustomRoles da API
   const getRoleOptions = () => {
-    const allRoles = [
-      { value: Role.Employee, label: 'Funcionário' },
-      { value: Role.Leader, label: 'Líder' },
-      { value: Role.Director, label: 'Diretor' },
-      { value: Role.Admin, label: 'Administrador' },
-    ];
-    
+    // Converter customRoles para opções de select usando o ID como value
+    const allRoles = customRoles
+      .sort((a, b) => b.hierarchyLevel - a.hierarchyLevel)
+      .map(role => ({
+        value: role.id,
+        label: role.displayName,
+        hierarchyLevel: role.hierarchyLevel
+      }));
+
+    // Se não há customRoles carregados ainda, retornar vazio
+    if (allRoles.length === 0) {
+      return [];
+    }
+
     const userRoleString = getHighestRole(user?.roles || []);
-    
+
     // Admin pode criar qualquer role
     if (userRoleString === 'Admin') {
       return allRoles;
     }
-    
-    // Director pode criar Director, Leader, Employee
+
+    // Director pode criar roles com hierarchyLevel <= 30
     if (userRoleString === 'Director') {
-      return allRoles.filter(r => r.value <= Role.Director);
+      return allRoles.filter(r => r.hierarchyLevel <= 30);
     }
-    
-    // Leader só pode criar Employee
+
+    // Leader só pode criar roles com hierarchyLevel <= 10
     if (userRoleString === 'Leader') {
-      return allRoles.filter(r => r.value === Role.Employee);
+      return allRoles.filter(r => r.hierarchyLevel <= 10);
     }
-    
+
     // Employee não pode criar ninguém
     return [];
   };
@@ -313,10 +355,10 @@ export const EmployeeFormPage = () => {
             )}
 
             <Select
-              {...register('role', { valueAsNumber: true })}
+              {...register('customRoleId')}
               label="Função"
               options={roleOptions}
-              error={errors.role?.message}
+              error={(errors as any).customRoleId?.message}
             />
 
             <div>

@@ -13,6 +13,10 @@ public class Employee : Entity
     public string PasswordHash { get; private set; } = string.Empty;
     public Role Role { get; private set; }
 
+    // CustomRole para suportar cargos customizados
+    public Guid? CustomRoleId { get; private set; }
+    public CustomRole? CustomRole { get; private set; }
+
     public Guid? ManagerId { get; private set; }
     public Employee? Manager { get; private set; }
 
@@ -33,7 +37,8 @@ public class Employee : Entity
         string passwordHash,
         Role role,
         Guid? managerId = null,
-        IEnumerable<string>? phoneNumbers = null)
+        IEnumerable<string>? phoneNumbers = null,
+        Guid? customRoleId = null)
     {
         if (string.IsNullOrWhiteSpace(firstName))
             return Result<Employee>.Failure(Error.Validation("FirstName", "First name is required"));
@@ -77,7 +82,8 @@ public class Employee : Entity
             BirthDate = birthDate.Date,
             PasswordHash = passwordHash,
             Role = role,
-            ManagerId = managerId
+            ManagerId = managerId,
+            CustomRoleId = customRoleId
         };
 
         foreach (var phone in phoneNumbers)
@@ -141,6 +147,14 @@ public class Employee : Entity
 
         RaiseDomainEvent(new EmployeeRoleChangedEvent(Id, oldRole, newRole));
 
+        return Result.Success();
+    }
+
+    public Result UpdateCustomRole(Guid? customRoleId, Role legacyRole)
+    {
+        CustomRoleId = customRoleId;
+        Role = legacyRole;
+        SetUpdatedAt();
         return Result.Success();
     }
 

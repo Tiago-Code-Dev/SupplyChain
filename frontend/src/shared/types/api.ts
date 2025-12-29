@@ -125,6 +125,9 @@ export interface Employee {
   documentNumber: string;
   birthDate: string;
   role: Role;
+  roleName: string;
+  roleDisplayName: string;
+  customRoleId: string | null;
   managerId: string | null;
   managerName: string | null;
   phoneNumbers: string[];
@@ -144,6 +147,7 @@ export interface CreateEmployeeRequest {
   role: Role;
   managerId?: string | null;
   phoneNumbers?: string[];
+  customRoleId?: string | null;
 }
 
 export interface UpdateEmployeeRequest {
@@ -154,6 +158,7 @@ export interface UpdateEmployeeRequest {
   managerId?: string | null;
   phoneNumbers?: string[];
   role?: Role;
+  customRoleId?: string | null;
 }
 
 export interface EmployeeQueryParams {
