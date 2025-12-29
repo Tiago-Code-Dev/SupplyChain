@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.DeleteEmployee;
-using EmployeeManagement.Tests.Helpers;
 
 namespace EmployeeManagement.Tests.UnitTests.Application;
 
@@ -10,7 +9,6 @@ namespace EmployeeManagement.Tests.UnitTests.Application;
 public class DeleteEmployeeCommandHandlerTests
 {
     private readonly Mock<IEmployeeRepository> _repositoryMock;
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<ILogger<DeleteEmployeeCommandHandler>> _loggerMock;
     private readonly DeleteEmployeeCommandHandler _handler;
@@ -27,6 +25,28 @@ public class DeleteEmployeeCommandHandlerTests
             _loggerMock.Object);
     }
 
+    /// <summary>
+    /// Configura os mocks necessários para uma exclusão bem-sucedida
+    /// </summary>
+    private void SetupSuccessfulDeletion(Employee employee)
+    {
+        _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(employee);
+
+        _repositoryMock
+            .Setup(x => x.HasSubordinatesAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _repositoryMock
+            .Setup(x => x.SoftDeleteAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .Callback(() =>
+            {
+                employee.Delete();
+            })
+            .Returns(Task.CompletedTask);
+    }
+
     #region Success Cases
 
     [Fact]
@@ -35,10 +55,7 @@ public class DeleteEmployeeCommandHandlerTests
     {
         // Arrange
         var employee = TestHelper.CreateValidEmployee();
-
-        _repositoryMock
-            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(employee);
+        SetupSuccessfulDeletion(employee);
 
         var command = new DeleteEmployeeCommand(employee.Id, Role.Admin);
 
@@ -50,7 +67,9 @@ public class DeleteEmployeeCommandHandlerTests
         employee.IsDeleted.Should().BeTrue();
         employee.DeletedAt.Should().NotBeNull();
 
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(
+            x => x.SoftDeleteAsync(employee.Id, It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact]
@@ -59,20 +78,17 @@ public class DeleteEmployeeCommandHandlerTests
     {
         // Arrange
         var employee = TestHelper.CreateValidEmployee();
-
-        _repositoryMock
-            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(employee);
+        SetupSuccessfulDeletion(employee);
 
         var command = new DeleteEmployeeCommand(employee.Id, Role.Admin);
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
+        // Assert 
         _cacheServiceMock.Verify(
             x => x.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
-            Times.AtLeast(2)); 
+            Times.AtLeast(2));
     }
 
     [Fact]
@@ -81,10 +97,7 @@ public class DeleteEmployeeCommandHandlerTests
     {
         // Arrange
         var employee = TestHelper.CreateValidEmployee();
-
-        _repositoryMock
-            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(employee);
+        SetupSuccessfulDeletion(employee);
 
         var command = new DeleteEmployeeCommand(employee.Id, Role.Admin);
 
@@ -108,7 +121,7 @@ public class DeleteEmployeeCommandHandlerTests
         var nonExistentId = Guid.NewGuid();
 
         _repositoryMock
-            .Setup(x => x.GetByIdAsync(nonExistentId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdForDeleteAsync(nonExistentId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
 
         var command = new DeleteEmployeeCommand(nonExistentId, Role.Admin);
@@ -120,7 +133,10 @@ public class DeleteEmployeeCommandHandlerTests
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("NotFound");
 
-        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        // Verifica que SoftDeleteAsync NÃO foi chamado
+        _repositoryMock.Verify(
+            x => x.SoftDeleteAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -131,7 +147,7 @@ public class DeleteEmployeeCommandHandlerTests
         var emptyId = Guid.Empty;
 
         _repositoryMock
-            .Setup(x => x.GetByIdAsync(emptyId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdForDeleteAsync(emptyId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Employee?)null);
 
         var command = new DeleteEmployeeCommand(emptyId, Role.Admin);

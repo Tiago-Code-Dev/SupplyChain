@@ -82,7 +82,7 @@ public class PerformanceEscalabilidadeStepDefinitions
                 It.IsAny<Func<Task<EmployeeResponse?>>>(),
                 It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct) 
+            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct)
                 => factory().Result);
 
         _scenarioContext.Set(_employeeToFind.Id, "EmployeeId");
@@ -103,16 +103,16 @@ public class PerformanceEscalabilidadeStepDefinitions
 
         _repositoryMock
             .Setup(x => x.GetPagedAsync(
-                It.IsAny<int>(),                  
-                It.IsAny<int>(),                
-                It.IsAny<string?>(),             
-                It.IsAny<string?>(),              
-                It.IsAny<string?>(),              
-                It.IsAny<Role?>(),                
-                It.IsAny<Guid?>(),                
-                It.IsAny<string?>(),              
-                It.IsAny<bool>(),                
-                It.IsAny<CancellationToken>()))   
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<Role?>(),
+                It.IsAny<Guid?>(),
+                It.IsAny<string?>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync((int page, int size, string? search, string? filterName, string? filterEmail,
                            Role? filterRole, Guid? filterMgr, string? sort, bool desc, CancellationToken ct) =>
             {
@@ -137,9 +137,9 @@ public class PerformanceEscalabilidadeStepDefinitions
         var response = EmployeeResponse.FromEntity(_employeeToFind!);
         _cacheServiceMock
             .Setup(x => x.GetOrSetAsync<EmployeeResponse>(
-                It.IsAny<string>(), 
-                It.IsAny<Func<Task<EmployeeResponse?>>>(), 
-                It.IsAny<TimeSpan?>(), 
+                It.IsAny<string>(),
+                It.IsAny<Func<Task<EmployeeResponse?>>>(),
+                It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(response)
             .Callback(() => _cacheWasUsed = true);
@@ -242,7 +242,7 @@ public class PerformanceEscalabilidadeStepDefinitions
         var identityServiceMock = new Mock<IIdentityService>();
         identityServiceMock
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
 
@@ -277,7 +277,7 @@ public class PerformanceEscalabilidadeStepDefinitions
     public async Task QuandoOUsuarioAtualizaOFuncionarioComDadosValidos()
     {
         var employeeId = _scenarioContext.Get<Guid>("EmployeeId");
-        
+
         _repositoryMock
             .Setup(x => x.EmailExistsAsync(It.IsAny<string>(), employeeId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
@@ -321,7 +321,7 @@ public class PerformanceEscalabilidadeStepDefinitions
     {
 
         var employeeToFind = _employees.FirstOrDefault() ?? TestHelper.CreateValidEmployee();
-        
+
         _repositoryMock
             .Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(employeeToFind);
@@ -332,7 +332,7 @@ public class PerformanceEscalabilidadeStepDefinitions
                 It.IsAny<Func<Task<EmployeeResponse?>>>(),
                 It.IsAny<TimeSpan?>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct) 
+            .ReturnsAsync((string key, Func<Task<EmployeeResponse?>> factory, TimeSpan? expiration, CancellationToken ct)
                 => factory().Result);
 
         _stopwatch.Restart();
@@ -349,7 +349,7 @@ public class PerformanceEscalabilidadeStepDefinitions
         _stopwatch.Stop();
         _responseTimeMs = _stopwatch.ElapsedMilliseconds;
         _httpStatus = _employeeResult != null ? 200 : 404;
-        
+
         _scenarioContext.Set(email, "SearchEmail");
     }
 
@@ -363,11 +363,19 @@ public class PerformanceEscalabilidadeStepDefinitions
             .ReturnsAsync(_employeeToDelete);
 
         _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(_employeeToDelete.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_employeeToDelete);
+
+        _repositoryMock
             .Setup(x => x.HasSubordinatesAsync(_employeeToDelete.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         _repositoryMock
-            .Setup(x => x.DeleteAsync(_employeeToDelete.Id, It.IsAny<CancellationToken>()))
+            .Setup(x => x.SoftDeleteAsync(_employeeToDelete.Id, It.IsAny<CancellationToken>()))
+            .Callback(() =>
+            {
+                _employeeToDelete.Delete();
+            })
             .Returns(Task.CompletedTask);
 
         _scenarioContext.Set(_employeeToDelete.Id, "EmployeeToDeleteId");
@@ -399,7 +407,7 @@ public class PerformanceEscalabilidadeStepDefinitions
     {
         _loginEmail = email;
         _loginPassword = senha;
-        
+
         var hashedPassword = "hashed_password_securely";
 
         var createResult = Employee.Create(
@@ -412,17 +420,17 @@ public class PerformanceEscalabilidadeStepDefinitions
             Role.Employee,
             null,
             new List<string> { TestHelper.GenerateValidPhoneNumber() });
-        
+
         _employeeToFind = createResult.Value!;
-        
+
         _repositoryMock
             .Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(_employeeToFind);
-        
+
         _passwordHasherMock
             .Setup(x => x.Verify(senha, hashedPassword))
             .Returns(true);
-        
+
         _scenarioContext.Set(email, "LoginEmail");
         _scenarioContext.Set(senha, "LoginPassword");
     }
@@ -432,7 +440,7 @@ public class PerformanceEscalabilidadeStepDefinitions
     {
         var email = _scenarioContext.Get<string>("LoginEmail");
         var password = _scenarioContext.Get<string>("LoginPassword");
-        
+
         _stopwatch.Restart();
 
         var command = new LoginCommand(email, password);
@@ -523,7 +531,7 @@ public class PerformanceEscalabilidadeStepDefinitions
         _pagedResult!.Items.Should().NotBeNull();
 
         var pageSize = _pagedResult.Items.Count();
-        pageSize.Should().BeLessThanOrEqualTo(100, 
+        pageSize.Should().BeLessThanOrEqualTo(100,
             "A paginação deve limitar o número de registros carregados em memória");
 
         if (_pagedResult.TotalCount > pageSize)
@@ -537,7 +545,7 @@ public class PerformanceEscalabilidadeStepDefinitions
     public void EntaoAVerificacaoDeSenhaDeveUsarAlgoritmoSeguro()
     {
         _passwordHasherMock.Verify(
-            x => x.Verify(It.IsAny<string>(), It.IsAny<string>()), 
+            x => x.Verify(It.IsAny<string>(), It.IsAny<string>()),
             Times.Once,
             "A verificação de senha deve usar o algoritmo seguro do PasswordHasher");
     }
@@ -555,7 +563,7 @@ public class PerformanceEscalabilidadeStepDefinitions
             tasks.Add(Task.Run(async () =>
             {
                 var stopwatch = Stopwatch.StartNew();
-                
+
                 try
                 {
                     var loggerMock = Fixtures.MockFactory.CreateLoggerMock<GetAllEmployeesQueryHandler>();
@@ -568,7 +576,7 @@ public class PerformanceEscalabilidadeStepDefinitions
                     var result = await handler.Handle(query, CancellationToken.None);
 
                     stopwatch.Stop();
-                    
+
                     lock (_concurrentResults)
                     {
                         _concurrentResults.Add((200, stopwatch.ElapsedMilliseconds));

@@ -85,6 +85,22 @@ public class HierarquiaPermissoesStepDefinitions
             .Setup(x => x.GetByIdAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(_targetEmployee);
 
+        _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_targetEmployee);
+
+        _repositoryMock
+            .Setup(x => x.HasSubordinatesAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _repositoryMock
+            .Setup(x => x.SoftDeleteAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
+            .Callback(() =>
+            {
+                _targetEmployee.Delete();
+            })
+            .Returns(Task.CompletedTask);
+
         _scenarioContext.Set(_targetEmployee, "TargetEmployee");
     }
 
@@ -200,7 +216,7 @@ public class HierarquiaPermissoesStepDefinitions
         var identityServiceMock = new Mock<IIdentityService>();
         identityServiceMock
             .Setup(x => x.CreateUserAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
 
