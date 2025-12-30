@@ -15,7 +15,7 @@ import { SuccessAlert } from '../shared/components/SuccessAlert';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { unformatCPF, formatPhone, unformatPhoneList } from '../shared/utils/format.utils';
 import { useAuthStore } from '../features/auth/store/auth.store';
-import { getHighestRole } from '../shared/utils/role.utils';
+import { getHighestRoleKey } from '../shared/utils/role.utils';
 
 const createEmployeeSchema = z.object({
   firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -253,7 +253,7 @@ export const EmployeeFormPage = () => {
       return [];
     }
 
-    const userRoleString = getHighestRole(user?.roles || []);
+    const userRoleString = getHighestRoleKey(user?.roles || []);
 
     // Admin pode criar qualquer role
     if (userRoleString === 'Admin') {
