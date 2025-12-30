@@ -91,9 +91,9 @@ export const EmployeeFormPage = () => {
     },
   });
 
-  const { user } = useAuthStore();
+  const { user, checkAuth } = useAuthStore();
 
-  // Carregar roles customizados
+    // Carregar roles customizados
   useEffect(() => {
     const loadRoles = async () => {
       try {
@@ -189,6 +189,11 @@ export const EmployeeFormPage = () => {
           customRoleId: data.customRoleId,
         };
         await employeesService.updateEmployee(id, updateData);
+
+        // Se o funcionário editado é o próprio usuário logado, atualizar o estado de autenticação
+        if (user?.employeeId === id) {
+          await checkAuth();
+        }
       } else {
         const createData = data as CreateEmployeeFormData;
         // Remover formatação do CPF

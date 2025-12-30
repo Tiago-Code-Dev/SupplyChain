@@ -96,7 +96,7 @@ export const EmployeeDetailPage = () => {
                       employee.role
                     )}`}
                   >
-                    {getRoleLabel(employee.role)}
+                    {employee.roleDisplayName || getRoleLabel(employee.role)}
                   </span>
                 </p>
               </div>

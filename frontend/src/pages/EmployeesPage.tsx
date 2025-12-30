@@ -17,13 +17,13 @@ import { exportToCSV, exportToExcel, fetchAllEmployeesForExport } from '../share
 
 export const EmployeesPage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, logout, checkAuth } = useAuthStore();
   const [employees, setEmployees] = useState<PagedResult<Employee> | null>(null);
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
   const [customRoles, setCustomRoles] = useState<CustomRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [filterName, setFilterName] = useState('');
@@ -33,7 +33,7 @@ export const EmployeesPage = () => {
   const [sortBy, setSortBy] = useState<string>('');
   const [sortDescending, setSortDescending] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
   const pageSize = 10;

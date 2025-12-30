@@ -62,14 +62,24 @@ export const getHighestRole = (roles: string[]): string => {
     'Employee': 1,
   };
 
+  const roleTranslations: Record<string, string> = {
+    'Admin': 'Administrador',
+    'Director': 'Diretor',
+    'Leader': 'Líder',
+    'Employee': 'Funcionário',
+  };
+
   if (!roles || roles.length === 0) return 'N/A';
-  
-  // Retorna a role com maior prioridade
-  return roles.reduce((highest, current) => {
+
+  // Encontra a role com maior prioridade
+  const highestRole = roles.reduce((highest, current) => {
     const currentPriority = roleHierarchy[current] || 0;
     const highestPriority = roleHierarchy[highest] || 0;
     return currentPriority > highestPriority ? current : highest;
   }, roles[0]);
+
+  // Retorna o nome traduzido
+  return roleTranslations[highestRole] || highestRole;
 };
 
 
