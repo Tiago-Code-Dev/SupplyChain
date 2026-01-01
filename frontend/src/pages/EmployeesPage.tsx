@@ -158,10 +158,18 @@ export const EmployeesPage = () => {
     { value: 'createdat', label: 'Data de criação' },
   ];
 
+  // Coletar IDs únicos de gerentes que existem como managerId de outros funcionários
+  const uniqueManagerIds = [...new Set(
+    allEmployees
+      .filter(emp => emp.managerId !== null)
+      .map(emp => emp.managerId)
+  )];
+
+  // Filtrar apenas funcionários que são gerentes de alguém E que existem na lista (não deletados)
   const managerOptions = [
-    { value: '', label: 'Todos os gerentes' },
+    { value: '', label: 'Todos os superiores' },
     ...allEmployees
-      .filter(emp => emp.managerId === null)
+      .filter(emp => uniqueManagerIds.includes(emp.id))
       .map(emp => ({ value: emp.id, label: emp.fullName })),
   ];
 
@@ -380,7 +388,7 @@ export const EmployeesPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Filtrar por Gerente
+                    Filtrar por Superior
                   </label>
                   <Select
                     options={managerOptions}

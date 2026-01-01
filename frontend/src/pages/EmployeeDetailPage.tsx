@@ -12,6 +12,7 @@ export const EmployeeDetailPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [employee, setEmployee] = useState<Employee | null>(null);
+  const [manager, setManager] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +27,17 @@ export const EmployeeDetailPage = () => {
     try {
       const data = await employeesService.getEmployeeById(employeeId);
       setEmployee(data);
+
+      // Se tiver um superior hierárquico, buscar os dados dele
+      if (data.managerId) {
+        try {
+          const managerData = await employeesService.getEmployeeById(data.managerId);
+          setManager(managerData);
+        } catch {
+          // Se não conseguir buscar o manager, não é erro crítico
+          console.log('Não foi possível carregar dados do superior');
+        }
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao carregar funcionário');
     } finally {
@@ -101,9 +113,20 @@ export const EmployeeDetailPage = () => {
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">Gerente</label>
+                <label className="text-sm font-medium text-gray-500">Superior Hierárquico</label>
                 <p className="mt-1 text-lg text-gray-900">
-                  {employee.managerName || '-'}
+                  {manager ? (
+                    <span>
+                      {manager.fullName}
+                      <span className={`ml-2 px-2 py-0.5 text-xs font-semibold rounded-full ${getRoleColor(manager.role)}`}>
+                        {manager.roleDisplayName || getRoleLabel(manager.role)}
+                      </span>
+                    </span>
+                  ) : employee.managerName ? (
+                    employee.managerName
+                  ) : (
+                    '-'
+                  )}
                 </p>
               </div>
               <div>

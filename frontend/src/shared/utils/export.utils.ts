@@ -79,7 +79,7 @@ export const exportToExcel = (data: Employee[], filename: string = 'funcionarios
     'Data de Nascimento',
     'Idade',
     'Função',
-    'Gerente',
+    'Superior Hierárquico',
     'Telefones',
     'Data de Criação',
   ];
