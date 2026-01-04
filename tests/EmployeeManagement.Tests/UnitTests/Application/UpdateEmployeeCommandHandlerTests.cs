@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using EmployeeManagement.Application.Features.Employees.Commands.UpdateEmployee;
-using EmployeeManagement.Tests.Helpers;
 
 namespace EmployeeManagement.Tests.UnitTests.Application;
 
@@ -13,6 +12,7 @@ public class UpdateEmployeeCommandHandlerTests
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _loggerMock;
     private readonly Mock<ICacheService> _cacheMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly UpdateEmployeeCommandHandler _handler;
 
     public UpdateEmployeeCommandHandlerTests()
@@ -20,12 +20,14 @@ public class UpdateEmployeeCommandHandlerTests
         _repositoryMock = Fixtures.MockFactory.CreateEmployeeRepositoryMock();
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _cacheMock = new Mock<ICacheService>();
+        _identityServiceMock = new Mock<IIdentityService>();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<UpdateEmployeeCommandHandler>();
 
         _handler = new UpdateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _cacheMock.Object,
+            _identityServiceMock.Object,
             _loggerMock.Object);
     }
 
@@ -61,8 +63,8 @@ public class UpdateEmployeeCommandHandlerTests
             TestHelper.GenerateAdultBirthDate(),
             null,
             new List<string> { TestHelper.GenerateValidPhoneNumber() },
-            null, 
-            Role.Employee 
+            null,
+            Role.Employee
         );
 
         // Act
@@ -102,7 +104,7 @@ public class UpdateEmployeeCommandHandlerTests
             null,
             new List<string> { TestHelper.GenerateValidPhoneNumber() },
             null,
-            Role.Employee 
+            Role.Employee
         );
 
         // Act
@@ -143,8 +145,8 @@ public class UpdateEmployeeCommandHandlerTests
             TestHelper.GenerateAdultBirthDate(),
             null,
             newPhones,
-            null, 
-            Role.Employee 
+            null,
+            Role.Employee
         );
 
         // Act
@@ -178,8 +180,8 @@ public class UpdateEmployeeCommandHandlerTests
             TestHelper.GenerateAdultBirthDate(),
             null,
             new List<string> { TestHelper.GenerateValidPhoneNumber() },
-            null, 
-            Role.Employee 
+            null,
+            Role.Employee
         );
 
         // Act
@@ -214,8 +216,8 @@ public class UpdateEmployeeCommandHandlerTests
             TestHelper.GenerateAdultBirthDate(),
             null,
             new List<string> { TestHelper.GenerateValidPhoneNumber() },
-            null, 
-            Role.Employee 
+            null,
+            Role.Employee
         );
 
         // Act
@@ -248,10 +250,10 @@ public class UpdateEmployeeCommandHandlerTests
             "User",
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
-            employee.Id, 
+            employee.Id,
             new List<string> { TestHelper.GenerateValidPhoneNumber() },
-            null, 
-            Role.Employee 
+            null,
+            Role.Employee
         );
 
         // Act
@@ -291,7 +293,7 @@ public class UpdateEmployeeCommandHandlerTests
             TestHelper.GenerateAdultBirthDate(),
             nonExistentManagerId,
             new List<string> { TestHelper.GenerateValidPhoneNumber() },
-            null, 
+            null,
             Role.Employee
         );
 
@@ -360,7 +362,7 @@ public class UpdateEmployeeCommandHandlerTests
             "test@test.com",
             TestHelper.GenerateAdultBirthDate(),
             null,
-            new List<string>(), // Lista vazia - deve falhar
+            new List<string>(), 
             null,
             Role.Employee
         );
@@ -372,6 +374,252 @@ public class UpdateEmployeeCommandHandlerTests
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("Validation");
         result.Error.Description.Should().Contain("pelo menos um telefone");
+    }
+
+    #endregion
+    #region Permission Cases - Role Update Hierarchy
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_AdminAtualizandoParaAdmin_DeveRetornarSucesso()
+    {
+        // Arrange
+        var employee = TestHelper.CreateValidEmployee(role: Role.Employee);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(employee);
+
+        _repositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var command = new UpdateEmployeeCommand(
+            employee.Id,
+            "Novo",
+            "Nome",
+            employee.Email,
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
+            Role.Admin,     
+            Role.Admin       
+        );
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DirectorAtualizandoParaAdmin_DeveRetornarForbidden()
+    {
+        // Arrange
+        var employee = TestHelper.CreateValidEmployee(role: Role.Employee);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(employee);
+
+        var command = new UpdateEmployeeCommand(
+            employee.Id,
+            "Novo",
+            "Nome",
+            employee.Email,
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
+            Role.Admin,    
+            Role.Director  
+        );
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_LeaderAtualizandoRoleDeDirector_DeveRetornarForbidden()
+    {
+        // Arrange
+        var director = TestHelper.CreateValidEmployee(role: Role.Director);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(director.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(director);
+
+        var command = new UpdateEmployeeCommand(
+            director.Id,
+            "Novo",
+            "Nome",
+            director.Email,
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
+            Role.Employee,  
+            Role.Leader    
+        );
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DirectorAtualizandoRoleDeAdmin_DeveRetornarForbidden()
+    {
+        // Arrange
+        var admin = TestHelper.CreateValidEmployee(role: Role.Admin);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(admin.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(admin);
+
+        var command = new UpdateEmployeeCommand(
+            admin.Id,
+            "Novo",
+            "Nome",
+            admin.Email,
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
+            Role.Employee,  
+            Role.Director    
+        );
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DirectorPromoteEmployeeToLeader_DeveRetornarSucesso()
+    {
+        // Arrange
+        var employee = TestHelper.CreateValidEmployee(role: Role.Employee);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(employee);
+
+        _repositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var command = new UpdateEmployeeCommand(
+            employee.Id,
+            "Novo",
+            "Nome",
+            employee.Email,
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
+            Role.Leader,     
+            Role.Director    
+        );
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    #endregion
+
+    #region Cache Invalidation
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DeveInvalidarCacheDoFuncionario()
+    {
+        // Arrange
+        var employee = TestHelper.CreateValidEmployee();
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(employee);
+
+        _repositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var command = new UpdateEmployeeCommand(
+            employee.Id,
+            "Novo",
+            "Nome",
+            employee.Email,
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
+            null,
+            Role.Admin
+        );
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert 
+        _cacheMock.Verify(
+            x => x.RemoveAsync(It.Is<string>(s => s.Contains(employee.Id.ToString())), It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_ComMudancaDeEmail_DeveInvalidarCacheDosEmailsAntigoENovo()
+    {
+        // Arrange
+        var oldEmail = "antigo@empresa.com";
+        var newEmail = "novo@empresa.com";
+        var employee = TestHelper.CreateValidEmployee(email: oldEmail);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdAsync(employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(employee);
+
+        _repositoryMock
+            .Setup(x => x.EmailExistsAsync(newEmail, employee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _repositoryMock
+            .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var command = new UpdateEmployeeCommand(
+            employee.Id,
+            "Novo",
+            "Nome",
+            newEmail,
+            TestHelper.GenerateAdultBirthDate(),
+            null,
+            new List<string> { TestHelper.GenerateValidPhoneNumber() },
+            null,
+            Role.Admin
+        );
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert 
+        _cacheMock.Verify(
+            x => x.RemoveAsync(It.Is<string>(s => s.Contains("email")), It.IsAny<CancellationToken>()),
+            Times.AtLeast(2));
     }
 
     #endregion

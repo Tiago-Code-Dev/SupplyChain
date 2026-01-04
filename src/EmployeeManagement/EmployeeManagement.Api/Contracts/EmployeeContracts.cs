@@ -14,7 +14,8 @@ public sealed record CreateEmployeeRequest(
     string Password,
     Role Role,
     Guid? ManagerId,
-    List<string> PhoneNumbers);
+    List<string> PhoneNumbers,
+    Guid? CustomRoleId = null);
 
 /// <summary>
 /// Request para atualização de funcionário
@@ -26,4 +27,5 @@ public sealed record UpdateEmployeeRequest(
     DateTime BirthDate,
     Guid? ManagerId,
     List<string> PhoneNumbers,
-    Role? Role = null);
+    Role? Role = null,
+    Guid? CustomRoleId = null);

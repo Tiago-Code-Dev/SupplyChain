@@ -75,7 +75,8 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         .HasFilter("[LegacyRole] IS NOT NULL");
 
                     b.HasIndex("Name")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("CustomRoles", (string)null);
 
@@ -83,7 +84,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 12, 22, 20, 55, 24, 734, DateTimeKind.Utc).AddTicks(6778),
+                            CreatedAt = new DateTime(2025, 12, 29, 0, 24, 40, 830, DateTimeKind.Utc).AddTicks(2710),
                             DisplayName = "Funcionário",
                             HierarchyLevel = 10,
                             IsDeleted = false,
@@ -94,7 +95,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2025, 12, 22, 20, 55, 24, 734, DateTimeKind.Utc).AddTicks(6789),
+                            CreatedAt = new DateTime(2025, 12, 29, 0, 24, 40, 830, DateTimeKind.Utc).AddTicks(2726),
                             DisplayName = "Líder",
                             HierarchyLevel = 20,
                             IsDeleted = false,
@@ -105,7 +106,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2025, 12, 22, 20, 55, 24, 734, DateTimeKind.Utc).AddTicks(6792),
+                            CreatedAt = new DateTime(2025, 12, 29, 0, 24, 40, 830, DateTimeKind.Utc).AddTicks(2770),
                             DisplayName = "Diretor",
                             HierarchyLevel = 30,
                             IsDeleted = false,
@@ -116,7 +117,7 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         new
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2025, 12, 22, 20, 55, 24, 734, DateTimeKind.Utc).AddTicks(6796),
+                            CreatedAt = new DateTime(2025, 12, 29, 0, 24, 40, 830, DateTimeKind.Utc).AddTicks(2773),
                             DisplayName = "Administrador",
                             HierarchyLevel = 100,
                             IsDeleted = false,
@@ -139,6 +140,9 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CustomRoleId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -189,6 +193,8 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CustomRoleId");
 
                     b.HasIndex("DocumentNumber")
                         .IsUnique()
@@ -299,10 +305,17 @@ namespace EmployeeManagement.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("EmployeeManagement.Domain.Entities.Employee", b =>
                 {
+                    b.HasOne("EmployeeManagement.Domain.Entities.CustomRole", "CustomRole")
+                        .WithMany()
+                        .HasForeignKey("CustomRoleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("EmployeeManagement.Domain.Entities.Employee", "Manager")
                         .WithMany("Subordinates")
                         .HasForeignKey("ManagerId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CustomRole");
 
                     b.Navigation("Manager");
                 });

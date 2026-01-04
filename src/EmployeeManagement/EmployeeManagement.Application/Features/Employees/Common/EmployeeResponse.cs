@@ -12,6 +12,9 @@ public sealed record EmployeeResponse(
     string DocumentNumber,
     DateTime BirthDate,
     Role Role,
+    Guid? CustomRoleId,
+    string RoleName,
+    string RoleDisplayName,
     Guid? ManagerId,
     string? ManagerName,
     IReadOnlyList<string> PhoneNumbers,
@@ -30,6 +33,9 @@ public sealed record EmployeeResponse(
         employee.DocumentNumber,
         employee.BirthDate,
         employee.Role,
+        employee.CustomRoleId,
+        employee.CustomRole?.Name ?? employee.Role.ToString(),
+        employee.CustomRole?.DisplayName ?? GetRoleDisplayName(employee.Role),
         employee.ManagerId,
         employee.Manager?.FullName,
         employee.PhoneNumbers.Select(p => p.Number).ToList(),
@@ -38,4 +44,13 @@ public sealed record EmployeeResponse(
         employee.CreatedBy,
         employee.UpdatedAt,
         employee.UpdatedBy);
+
+    private static string GetRoleDisplayName(Role role) => role switch
+    {
+        Role.Employee => "Funcionário",
+        Role.Leader => "Líder",
+        Role.Director => "Diretor",
+        Role.Admin => "Administrador",
+        _ => "Desconhecido"
+    };
 }

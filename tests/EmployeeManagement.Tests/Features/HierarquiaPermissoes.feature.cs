@@ -550,22 +550,22 @@ namespace EmployeeManagement.Tests.Features
             this.ScenarioCleanup();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Director pode excluir qualquer funcionário")]
+        [Xunit.SkippableFactAttribute(DisplayName="Director não pode excluir outro Director")]
         [Xunit.TraitAttribute("FeatureTitle", "Hierarquia de Permissões")]
-        [Xunit.TraitAttribute("Description", "Director pode excluir qualquer funcionário")]
+        [Xunit.TraitAttribute("Description", "Director não pode excluir outro Director")]
         [Xunit.TraitAttribute("Category", "hierarquia")]
         [Xunit.TraitAttribute("Category", "excluir")]
-        [Xunit.TraitAttribute("Category", "sucesso")]
-        public void DirectorPodeExcluirQualquerFuncionario()
+        [Xunit.TraitAttribute("Category", "falha")]
+        public void DirectorNaoPodeExcluirOutroDirector()
         {
             string[] tagsOfScenario = new string[] {
                     "hierarquia",
                     "excluir",
-                    "sucesso"};
+                    "falha"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Director pode excluir qualquer funcionário", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Director não pode excluir outro Director", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 95
-  this.ScenarioInitialize(scenarioInfo);
+this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -575,19 +575,20 @@ namespace EmployeeManagement.Tests.Features
             {
                 this.ScenarioStart();
 #line 96
-    testRunner.Given("que o usuário está autenticado como \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
+  testRunner.Given("que o usuário está autenticado como \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
 #line 97
-    testRunner.And("que existe um funcionário com permissão \"Director\" para exclusão", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+  testRunner.And("que existe um funcionário com permissão \"Director\" para exclusão", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
 #line 98
-    testRunner.When("o usuário exclui o funcionário", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
+  testRunner.When("o usuário tenta excluir o funcionário", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
 #line hidden
 #line 99
-    testRunner.Then("o sistema deve retornar status 204", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
+  testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
 #line 100
-    testRunner.And("o funcionário deve ser marcado como excluído", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
+  testRunner.And("o sistema deve retornar mensagem \"Você não tem permissão para excluir funcionário" +
+                        "s\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
             }
             this.ScenarioCleanup();

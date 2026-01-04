@@ -1,6 +1,4 @@
 ﻿using EmployeeManagement.Application.Features.Employees.Commands.CreateEmployee;
-using EmployeeManagement.Domain.Entities;
-using EmployeeManagement.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace EmployeeManagement.Tests.UnitTests.Application;
@@ -15,6 +13,7 @@ public class CreateEmployeeCommandHandlerTests
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _loggerMock;
     private readonly Mock<ICacheService> _cacheMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly CreateEmployeeCommandHandler _handler;
 
     public CreateEmployeeCommandHandlerTests()
@@ -23,17 +22,29 @@ public class CreateEmployeeCommandHandlerTests
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _cacheMock = new Mock<ICacheService>();
+        _identityServiceMock = new Mock<IIdentityService>();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<CreateEmployeeCommandHandler>();
 
         _passwordHasherMock
             .Setup(x => x.Hash(It.IsAny<string>()))
             .Returns("hashed_password");
 
+        _identityServiceMock
+            .Setup(x => x.CreateUserAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+
+        _identityServiceMock
+            .Setup(x => x.AddToRoleAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
+
         _handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
             _cacheMock.Object,
+            _identityServiceMock.Object,
             _loggerMock.Object);
     }
 
@@ -184,10 +195,10 @@ public class CreateEmployeeCommandHandlerTests
             TestHelper.GenerateValidCpf(),
             TestHelper.GenerateAdultBirthDate(),
             "Password123",
-            Role.Director,      
+            Role.Director,
             null,
             new List<string> { "11999999999" },
-            Role.Leader);    
+            Role.Leader);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -210,10 +221,10 @@ public class CreateEmployeeCommandHandlerTests
             TestHelper.GenerateValidCpf(),
             TestHelper.GenerateAdultBirthDate(),
             "Password123",
-            Role.Leader,    
+            Role.Leader,
             null,
             new List<string> { "11999999999" },
-            Role.Leader);    
+            Role.Leader);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -221,38 +232,6 @@ public class CreateEmployeeCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("Forbidden");
-    }
-
-    [Fact]
-    [Trait("Category", "Application")]
-    public async Task Handle_ComManagerIdInvalido_DeveRetornarErroDeNaoEncontrado()
-    {
-        // Arrange
-        var managerId = Guid.NewGuid();
-        var command = new CreateEmployeeCommand(
-            "Test",
-            "User",
-            "test@test.com",
-            TestHelper.GenerateValidCpf(),
-            TestHelper.GenerateAdultBirthDate(),
-            "Password123",
-            Role.Employee,
-            managerId,
-            new List<string> { "11999999999" },
-            Role.Director);
-
-        SetupRepositoryForNewEmployee();
-
-        _repositoryMock
-            .Setup(x => x.ExistsAsync(managerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
     }
 
     [Theory]
@@ -357,6 +336,194 @@ public class CreateEmployeeCommandHandlerTests
         _repositoryMock
             .Setup(x => x.AddAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
             .Returns((Employee e, CancellationToken _) => Task.FromResult(e));
+    }
+
+    #endregion
+    #region Permission Cases - Hierarchy
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_AdminCriandoAdmin_DeveRetornarSucesso()
+    {
+        // Arrange
+        var command = new CreateEmployeeCommand(
+            "Novo",
+            "Admin",
+            "novoadmin@empresa.com",
+            TestHelper.GenerateValidCpf(),
+            TestHelper.GenerateAdultBirthDate(),
+            "Password123",
+            Role.Admin,        
+            null,
+            new List<string> { "11999999999" },
+            Role.Admin);       
+
+        SetupRepositoryForNewEmployee();
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Role.Should().Be(Role.Admin);
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DirectorCriandoDirector_DeveRetornarSucesso()
+    {
+        // Arrange
+        var command = new CreateEmployeeCommand(
+            "Novo",
+            "Director",
+            "novodirector@empresa.com",
+            TestHelper.GenerateValidCpf(),
+            TestHelper.GenerateAdultBirthDate(),
+            "Password123",
+            Role.Director,     
+            null,
+            new List<string> { "11999999999" },
+            Role.Director);    
+
+        SetupRepositoryForNewEmployee();
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Role.Should().Be(Role.Director);
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_LeaderCriandoEmployee_DeveRetornarSucesso()
+    {
+        // Arrange
+        var command = new CreateEmployeeCommand(
+            "Novo",
+            "Employee",
+            "novoemployee@empresa.com",
+            TestHelper.GenerateValidCpf(),
+            TestHelper.GenerateAdultBirthDate(),
+            "Password123",
+            Role.Employee,      
+            null,
+            new List<string> { "11999999999" },
+            Role.Leader);       
+
+        SetupRepositoryForNewEmployee();
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Role.Should().Be(Role.Employee);
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_EmployeeCriandoQualquerRole_DeveRetornarForbidden()
+    {
+        // Arrange
+        var command = new CreateEmployeeCommand(
+            "Novo",
+            "Funcionario",
+            "novo@empresa.com",
+            TestHelper.GenerateValidCpf(),
+            TestHelper.GenerateAdultBirthDate(),
+            "Password123",
+            Role.Employee,    
+            null,
+            new List<string> { "11999999999" },
+            Role.Employee);     
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+    }
+
+    #endregion
+
+    #region Cache Invalidation
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DeveInvalidarCacheDeListaDeEmployees()
+    {
+        // Arrange
+        var command = CreateValidCommand(new List<string> { "11999999999" });
+        SetupRepositoryForNewEmployee();
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert 
+        _cacheMock.Verify(
+            x => x.RemoveAsync(It.Is<string>(s => s.Contains("employees")), It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce);
+    }
+
+    #endregion
+
+    #region Identity Service Integration
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DeveCriarUsuarioNoIdentity()
+    {
+        // Arrange
+        var command = CreateValidCommand(new List<string> { "11999999999" });
+        SetupRepositoryForNewEmployee();
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        _identityServiceMock.Verify(
+            x => x.CreateUserAsync(
+                command.Email,
+                command.Password,
+                command.FirstName,
+                command.LastName,
+                It.IsAny<Guid?>(),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DeveAdicionarRoleNoIdentity()
+    {
+        // Arrange
+        var command = new CreateEmployeeCommand(
+            "Test",
+            "User",
+            "test@test.com",
+            TestHelper.GenerateValidCpf(),
+            TestHelper.GenerateAdultBirthDate(),
+            "Password123",
+            Role.Leader,
+            null,
+            new List<string> { "11999999999" },
+            Role.Director);
+
+        SetupRepositoryForNewEmployee();
+
+        // Act
+        await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        _identityServiceMock.Verify(
+            x => x.AddToRoleAsync(
+                It.IsAny<Guid>(),
+                "Leader",
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     #endregion

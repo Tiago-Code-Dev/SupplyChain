@@ -1,53 +1,70 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/store/auth.store';
 import { employeesService } from '../features/employees/services/employees.service';
-import { Employee, EmployeeQueryParams, Role } from '../shared/types/api';
+import { rolesService } from '../features/roles/services/roles.service';
+import { Employee, EmployeeQueryParams, Role, CustomRole } from '../shared/types/api';
 import { PagedResult } from '../shared/types/api';
 import { Button } from '../shared/components/Button';
 import { Input } from '../shared/components/Input';
 import { Select } from '../shared/components/Select';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { ErrorAlert } from '../shared/components/ErrorAlert';
-import { formatDate, calculateAge } from '../shared/utils/date.utils';
-import { getRoleLabel, getRoleColor } from '../shared/utils/role.utils';
+import { calculateAge } from '../shared/utils/date.utils';
+import { getRoleLabel, getRoleColor, getHighestRole } from '../shared/utils/role.utils';
 import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, ChevronUpIcon, ChevronDownIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { exportToCSV, exportToExcel, fetchAllEmployeesForExport } from '../shared/utils/export.utils';
 
 export const EmployeesPage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user, logout, checkAuth } = useAuthStore();
   const [employees, setEmployees] = useState<PagedResult<Employee> | null>(null);
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
+  const [customRoles, setCustomRoles] = useState<CustomRole[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [filterName, setFilterName] = useState('');
   const [filterEmail, setFilterEmail] = useState('');
-  const [filterRole, setFilterRole] = useState<Role | ''>('');
+  const [filterRoleId, setFilterRoleId] = useState<string>('');
   const [filterManagerId, setFilterManagerId] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('');
   const [sortDescending, setSortDescending] = useState(false);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isExporting, setIsExporting] = useState(false);
   const pageSize = 10;
 
-  // Carregar lista de funcionários para filtro de gerente
+  // Carregar lista de funcionários para filtro de gerente e roles customizados
   useEffect(() => {
-    const loadAllEmployees = async () => {
+    const loadInitialData = async () => {
       try {
-        const data = await employeesService.getEmployees({ pageSize: 1000 });
-        setAllEmployees(data.items);
+        const [employeesData, rolesData] = await Promise.all([
+          employeesService.getEmployees({ pageSize: 1000 }),
+          rolesService.getAllRoles()
+        ]);
+        setAllEmployees(employeesData.items);
+        setCustomRoles(rolesData);
       } catch (err) {
-        console.error('Erro ao carregar lista de funcionários:', err);
+        console.error('Erro ao carregar dados iniciais:', err);
       }
     };
-    loadAllEmployees();
+    loadInitialData();
   }, []);
+
+  // Converter customRoleId para Role enum baseado no hierarchyLevel
+  const getFilterRole = (): Role | undefined => {
+    if (!filterRoleId) return undefined;
+    const selectedRole = customRoles.find(r => r.id === filterRoleId);
+    if (!selectedRole) return undefined;
+    if (selectedRole.hierarchyLevel >= 100) return Role.Admin;
+    if (selectedRole.hierarchyLevel >= 30) return Role.Director;
+    if (selectedRole.hierarchyLevel >= 20) return Role.Leader;
+    return Role.Employee;
+  };
 
   const loadEmployees = async () => {
     setIsLoading(true);
@@ -59,7 +76,7 @@ export const EmployeesPage = () => {
         searchTerm: searchTerm || undefined,
         filterByName: filterName || undefined,
         filterByEmail: filterEmail || undefined,
-        filterByRole: filterRole || undefined,
+        filterByRole: getFilterRole(),
         filterByManagerId: filterManagerId || undefined,
         sortBy: sortBy || undefined,
         sortDescending: sortDescending || undefined,
@@ -87,7 +104,7 @@ export const EmployeesPage = () => {
     setSearchTerm('');
     setFilterName('');
     setFilterEmail('');
-    setFilterRole('');
+    setFilterRoleId('');
     setFilterManagerId('');
     setSortBy('');
     setSortDescending(false);
@@ -121,12 +138,15 @@ export const EmployeesPage = () => {
     }
   };
 
+  // Gerar opções de roles dinamicamente a partir dos CustomRoles usando ID único
   const roleOptions = [
     { value: '', label: 'Todas as funções' },
-    { value: Role.Employee, label: 'Funcionário' },
-    { value: Role.Leader, label: 'Líder' },
-    { value: Role.Director, label: 'Diretor' },
-    { value: Role.Admin, label: 'Administrador' },
+    ...customRoles
+      .sort((a, b) => b.hierarchyLevel - a.hierarchyLevel)
+      .map(role => ({
+        value: role.id,
+        label: role.displayName
+      }))
   ];
 
   const sortOptions = [
@@ -138,10 +158,18 @@ export const EmployeesPage = () => {
     { value: 'createdat', label: 'Data de criação' },
   ];
 
+  // Coletar IDs únicos de gerentes que existem como managerId de outros funcionários
+  const uniqueManagerIds = [...new Set(
+    allEmployees
+      .filter(emp => emp.managerId !== null)
+      .map(emp => emp.managerId)
+  )];
+
+  // Filtrar apenas funcionários que são gerentes de alguém E que existem na lista (não deletados)
   const managerOptions = [
-    { value: '', label: 'Todos os gerentes' },
+    { value: '', label: 'Todos os superiores' },
     ...allEmployees
-      .filter(emp => emp.managerId === null)
+      .filter(emp => uniqueManagerIds.includes(emp.id))
       .map(emp => ({ value: emp.id, label: emp.fullName })),
   ];
 
@@ -162,12 +190,12 @@ export const EmployeesPage = () => {
         searchTerm: searchTerm || undefined,
         filterByName: filterName || undefined,
         filterByEmail: filterEmail || undefined,
-        filterByRole: filterRole || undefined,
+        filterByRole: getFilterRole(),
         filterByManagerId: filterManagerId || undefined,
         sortBy: sortBy || undefined,
         sortDescending: sortDescending || undefined,
       };
-      
+
       const allEmployees = await fetchAllEmployeesForExport(employeesService, params);
       exportToCSV(allEmployees, 'funcionarios');
     } catch (err: any) {
@@ -185,12 +213,12 @@ export const EmployeesPage = () => {
         searchTerm: searchTerm || undefined,
         filterByName: filterName || undefined,
         filterByEmail: filterEmail || undefined,
-        filterByRole: filterRole || undefined,
+        filterByRole: getFilterRole(),
         filterByManagerId: filterManagerId || undefined,
         sortBy: sortBy || undefined,
         sortDescending: sortDescending || undefined,
       };
-      
+
       const allEmployees = await fetchAllEmployeesForExport(employeesService, params);
       exportToExcel(allEmployees, 'funcionarios');
     } catch (err: any) {
@@ -205,10 +233,21 @@ export const EmployeesPage = () => {
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Funcionários</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-2xl font-bold text-gray-900">Funcionários</h1>
+            {/* Link para Cargos - apenas para Admin */}
+            {user?.roles?.some(r => r.toLowerCase() === 'admin') && (
+              <Link
+                to="/roles"
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+              >
+                Gerenciar Cargos
+              </Link>
+            )}
+          </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">
-              {user?.fullName} ({user?.roles?.[0] || 'N/A'})
+              {user?.fullName} ({getHighestRole(user?.roles || [])})
             </span>
             <Button
               variant="secondary"
@@ -294,8 +333,8 @@ export const EmployeesPage = () => {
               <div>
                 <Select
                   options={roleOptions}
-                  value={filterRole}
-                  onChange={(e) => setFilterRole(e.target.value as Role | '')}
+                  value={filterRoleId}
+                  onChange={(e) => setFilterRoleId(e.target.value)}
                 />
               </div>
             </div>
@@ -349,7 +388,7 @@ export const EmployeesPage = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Filtrar por Gerente
+                    Filtrar por Superior
                   </label>
                   <Select
                     options={managerOptions}
@@ -435,7 +474,7 @@ export const EmployeesPage = () => {
                               employee.role
                             )}`}
                           >
-                            {getRoleLabel(employee.role)}
+                            {employee.roleDisplayName || getRoleLabel(employee.role)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

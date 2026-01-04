@@ -30,6 +30,9 @@ public class IdentitySeeder
     {
         await SeedRolesAsync();
         await SeedAdminUserAsync();
+        await SeedDirectorUserAsync();
+        await SeedLeaderUserAsync();
+        await SeedEmployeeUserAsync();
     }
 
     private async Task SeedRolesAsync()
@@ -112,6 +115,135 @@ public class IdentitySeeder
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating admin user");
+            throw;
+        }
+    }
+
+    private async Task SeedDirectorUserAsync()
+    {
+        const string directorEmail = "director@empresa.com";
+        const string directorPassword = "Director@123";
+
+        try
+        {
+            var existingUser = await _userManager.FindByEmailAsync(directorEmail);
+            if (existingUser != null)
+            {
+                _logger.LogInformation("Director user already exists");
+                return;
+            }
+
+            var director = new ApplicationUser
+            {
+                Email = directorEmail,
+                UserName = directorEmail,
+                FirstName = "Maria",
+                LastName = "Diretora",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+
+            var result = await _userManager.CreateAsync(director, directorPassword);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(director, ApplicationRoles.Director);
+                _logger.LogInformation("Director user created: {Email}", directorEmail);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to create director user: {Errors}", 
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating director user");
+            throw;
+        }
+    }
+
+    private async Task SeedLeaderUserAsync()
+    {
+        const string leaderEmail = "leader@empresa.com";
+        const string leaderPassword = "Leader@123";
+
+        try
+        {
+            var existingUser = await _userManager.FindByEmailAsync(leaderEmail);
+            if (existingUser != null)
+            {
+                _logger.LogInformation("Leader user already exists");
+                return;
+            }
+
+            var leader = new ApplicationUser
+            {
+                Email = leaderEmail,
+                UserName = leaderEmail,
+                FirstName = "João",
+                LastName = "Líder",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+
+            var result = await _userManager.CreateAsync(leader, leaderPassword);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(leader, ApplicationRoles.Leader);
+                _logger.LogInformation("Leader user created: {Email}", leaderEmail);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to create leader user: {Errors}", 
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating leader user");
+            throw;
+        }
+    }
+
+    private async Task SeedEmployeeUserAsync()
+    {
+        const string employeeEmail = "employee@empresa.com";
+        const string employeePassword = "Employee@123";
+
+        try
+        {
+            var existingUser = await _userManager.FindByEmailAsync(employeeEmail);
+            if (existingUser != null)
+            {
+                _logger.LogInformation("Employee user already exists");
+                return;
+            }
+
+            var employee = new ApplicationUser
+            {
+                Email = employeeEmail,
+                UserName = employeeEmail,
+                FirstName = "Carlos",
+                LastName = "Funcionário",
+                EmailConfirmed = true,
+                IsActive = true
+            };
+
+            var result = await _userManager.CreateAsync(employee, employeePassword);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(employee, ApplicationRoles.Employee);
+                _logger.LogInformation("Employee user created: {Email}", employeeEmail);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to create employee user: {Errors}", 
+                    string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating employee user");
             throw;
         }
     }

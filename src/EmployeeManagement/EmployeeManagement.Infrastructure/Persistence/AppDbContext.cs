@@ -4,6 +4,7 @@ using EmployeeManagement.Domain.Entities;
 using EmployeeManagement.Domain.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EmployeeManagement.Infrastructure.Persistence;
 
@@ -11,15 +12,18 @@ public class AppDbContext : DbContext, IUnitOfWork
 {
     private readonly IPublisher _publisher;
     private readonly ICurrentUserService? _currentUserService;
+    private readonly ILogger<AppDbContext>? _logger;
 
     public AppDbContext(
         DbContextOptions<AppDbContext> options, 
         IPublisher publisher,
-        ICurrentUserService? currentUserService = null)
+        ICurrentUserService? currentUserService = null,
+        ILogger<AppDbContext>? logger = null)
         : base(options)
     {
         _publisher = publisher;
         _currentUserService = currentUserService;
+        _logger = logger;
     }
 
     public DbSet<Employee> Employees => Set<Employee>();
@@ -33,6 +37,7 @@ public class AppDbContext : DbContext, IUnitOfWork
 
         // Global Query Filter para Soft Delete
         modelBuilder.Entity<Employee>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<CustomRole>().HasQueryFilter(r => !r.IsDeleted);
 
         base.OnModelCreating(modelBuilder);
     }
@@ -77,9 +82,20 @@ public class AppDbContext : DbContext, IUnitOfWork
         var result = await base.SaveChangesAsync(cancellationToken);
 
         // Publicar eventos após salvar com sucesso
+        // CORREÇÃO: Não falhar a operação principal se a publicação de evento falhar
         foreach (var domainEvent in domainEvents)
         {
-            await _publisher.Publish(domainEvent, cancellationToken);
+            try
+            {
+                await _publisher.Publish(domainEvent, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // Log o erro mas não falhar - os dados já foram salvos
+                _logger?.LogWarning(ex, 
+                    "Failed to publish domain event {EventType}. Data was saved successfully.", 
+                    domainEvent.GetType().Name);
+            }
         }
 
         return result;

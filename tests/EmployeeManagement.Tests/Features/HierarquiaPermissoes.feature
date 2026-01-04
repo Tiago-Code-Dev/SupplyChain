@@ -91,10 +91,10 @@ Funcionalidade: Hierarquia de Permissões
     Então o sistema deve retornar status 204
     E o funcionário deve ser marcado como excluído
 
-  @hierarquia @excluir @sucesso
-  Cenário: Director pode excluir qualquer funcionário
-    Dado que o usuário está autenticado como "Director"
-    E que existe um funcionário com permissão "Director" para exclusão
-    Quando o usuário exclui o funcionário
-    Então o sistema deve retornar status 204
-    E o funcionário deve ser marcado como excluído
+@hierarquia @excluir @falha
+Cenário: Director não pode excluir outro Director
+  Dado que o usuário está autenticado como "Director"
+  E que existe um funcionário com permissão "Director" para exclusão
+  Quando o usuário tenta excluir o funcionário
+  Então o sistema deve retornar status 400
+  E o sistema deve retornar mensagem "Você não tem permissão para excluir funcionários"

@@ -10,7 +10,7 @@ public static class CorsConfiguration
     {
         var allowedOrigins = configuration
             .GetSection("Cors:AllowedOrigins")
-            .Get<string[]>() ?? ["http://localhost:3000", "http://localhost:4200"];
+            .Get<string[]>() ?? ["http://localhost:3000", "http://localhost:4200", "http://localhost:5173"];
 
         services.AddCors(options =>
         {

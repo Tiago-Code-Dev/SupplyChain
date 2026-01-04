@@ -19,11 +19,16 @@ namespace EmployeeManagement.Api.V1.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IIdentityService _identityService;
+    private readonly IEmailService _emailService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IIdentityService identityService, ILogger<AuthController> logger)
+    public AuthController(
+        IIdentityService identityService, 
+        IEmailService emailService,
+        ILogger<AuthController> logger)
     {
         _identityService = identityService;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -158,36 +163,52 @@ public class AuthController : ControllerBase
         var ipAddress = GetIpAddress();
         await _identityService.RevokeAllUserTokensAsync(userId.Value, ipAddress, "User revoked all sessions", cancellationToken);
 
-        return NoContent();
-    }
-
-    /// <summary>
-    /// Solicita reset de senha
-    /// </summary>
-    /// <remarks>
-    /// Gera um token para reset de senha.
-    /// Em produção, esse token deve ser enviado por email.
-    /// Por segurança, sempre retorna sucesso mesmo se o email não existir.
-    /// </remarks>
-    [HttpPost("forgot-password")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
-    {
-        var result = await _identityService.GeneratePasswordResetTokenAsync(request.Email, cancellationToken);
-
-        if (result.IsSuccess && !string.IsNullOrEmpty(result.Value))
-        {
-            _logger.LogInformation("Password reset token generated for {Email}", request.Email);
-            // TODO: Enviar email com o token
+            return NoContent();
         }
 
-        return Ok(new { message = "If the email exists, a password reset link will be sent." });
-    }
+        /// <summary>
+        /// Solicita reset de senha
+        /// </summary>
+        /// <remarks>
+        /// Gera um token para reset de senha e envia por email.
+        /// Por segurança, sempre retorna sucesso mesmo se o email não existir.
+        /// </remarks>
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _identityService.GeneratePasswordResetTokenAsync(request.Email, cancellationToken);
 
-    /// <summary>
-    /// Reseta a senha usando token
-    /// </summary>
+            if (result.IsSuccess && !string.IsNullOrEmpty(result.Value))
+            {
+                // Obter nome do usuário para personalizar o email
+                var user = await _identityService.GetUserByEmailAsync(request.Email, cancellationToken);
+                var userName = user?.FullName ?? request.Email;
+
+                // Enviar email com o token
+                var emailSent = await _emailService.SendPasswordResetEmailAsync(
+                    request.Email, 
+                    userName, 
+                    result.Value, 
+                    cancellationToken: cancellationToken);
+
+                if (emailSent)
+                {
+                    _logger.LogInformation("Password reset email sent to {Email}", request.Email);
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to send password reset email to {Email}", request.Email);
+                }
+            }
+
+            return Ok(new { message = "Se o email existir em nossa base, você receberá um link para redefinir sua senha." });
+        }
+
+        /// <summary>
+        /// Reseta a senha usando token
+        /// </summary>
     [HttpPost("reset-password")]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

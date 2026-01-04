@@ -15,6 +15,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
         return await DbSet
             .Include(e => e.PhoneNumbers)
             .Include(e => e.Manager)
+            .Include(e => e.CustomRole)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
@@ -23,6 +24,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
         return await DbSet
             .Include(e => e.PhoneNumbers)
             .Include(e => e.Manager)
+            .Include(e => e.CustomRole)
             .FirstOrDefaultAsync(e => e.Email.ToLower() == email.ToLower(), cancellationToken);
     }
 
@@ -76,7 +78,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
             pageSize, 
             filter, 
             orderBy, 
-            "PhoneNumbers,Manager", 
+            "PhoneNumbers,Manager,CustomRole", 
             cancellationToken);
 
         return (result.Items, result.TotalCount);
@@ -116,6 +118,22 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
     public async Task<bool> HasSubordinatesAsync(Guid managerId, CancellationToken cancellationToken = default)
     {
         return await DbSet.AnyAsync(e => e.ManagerId == managerId && !e.IsDeleted, cancellationToken);
+    }
+
+    public async Task<Employee?> GetByIdForDeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        // Busca sem Include para evitar problemas de tracking com PhoneNumbers
+        return await DbSet.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+    }
+
+    public async Task SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await DbSet
+            .Where(e => e.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(e => e.IsDeleted, true)
+                .SetProperty(e => e.DeletedAt, DateTime.UtcNow),
+            cancellationToken);
     }
 
     #region Private Methods
