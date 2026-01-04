@@ -67,6 +67,7 @@ public class DeleteEmployeeCommandHandlerTests
         employee.IsDeleted.Should().BeTrue();
         employee.DeletedAt.Should().NotBeNull();
 
+        // Verifica que SoftDeleteAsync foi chamado
         _repositoryMock.Verify(
             x => x.SoftDeleteAsync(employee.Id, It.IsAny<CancellationToken>()),
             Times.Once);
@@ -85,7 +86,6 @@ public class DeleteEmployeeCommandHandlerTests
         // Act
         await _handler.Handle(command, CancellationToken.None);
 
-        // Assert 
         _cacheServiceMock.Verify(
             x => x.RemoveAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.AtLeast(2));
@@ -111,7 +111,7 @@ public class DeleteEmployeeCommandHandlerTests
 
     #endregion
 
-    #region Failure Cases
+    #region Failure Cases - Not Found
 
     [Fact]
     [Trait("Category", "Application")]
@@ -158,6 +158,200 @@ public class DeleteEmployeeCommandHandlerTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Code.Should().Contain("NotFound");
+    }
+
+    #endregion
+
+    #region Permission Cases - Initial Role Check (Role < Leader)
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_ComRoleEmployee_DeveRetornarForbidden()
+    {
+        // Arrange
+        var targetEmployee = TestHelper.CreateValidEmployee(role: Role.Employee);
+        var command = new DeleteEmployeeCommand(targetEmployee.Id, Role.Employee);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+
+        _repositoryMock.Verify(
+            x => x.GetByIdForDeleteAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    #endregion
+
+    #region Permission Cases - Hierarchy (Leader)
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_LeaderDeletandoEmployee_DeveRetornarSucesso()
+    {
+        // Arrange
+        var employee = TestHelper.CreateValidEmployee(role: Role.Employee);
+        SetupSuccessfulDeletion(employee);
+
+        var command = new DeleteEmployeeCommand(employee.Id, Role.Leader);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        employee.IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_LeaderDeletandoLeader_DeveRetornarForbidden()
+    {
+        // Arrange
+        var targetLeader = TestHelper.CreateValidEmployee(role: Role.Leader);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(targetLeader.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(targetLeader);
+
+        var command = new DeleteEmployeeCommand(targetLeader.Id, Role.Leader);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+
+        _repositoryMock.Verify(
+            x => x.SoftDeleteAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_LeaderDeletandoDirector_DeveRetornarForbidden()
+    {
+        // Arrange
+        var targetDirector = TestHelper.CreateValidEmployee(role: Role.Director);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(targetDirector.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(targetDirector);
+
+        var command = new DeleteEmployeeCommand(targetDirector.Id, Role.Leader);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+
+        _repositoryMock.Verify(
+            x => x.SoftDeleteAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    #endregion
+
+    #region Permission Cases - Hierarchy (Director)
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DirectorDeletandoEmployee_DeveRetornarSucesso()
+    {
+        // Arrange
+        var employee = TestHelper.CreateValidEmployee(role: Role.Employee);
+        SetupSuccessfulDeletion(employee);
+
+        var command = new DeleteEmployeeCommand(employee.Id, Role.Director);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        employee.IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DirectorDeletandoLeader_DeveRetornarSucesso()
+    {
+        // Arrange
+        var leader = TestHelper.CreateValidEmployee(role: Role.Leader);
+        SetupSuccessfulDeletion(leader);
+
+        var command = new DeleteEmployeeCommand(leader.Id, Role.Director);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        leader.IsDeleted.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_DirectorDeletandoDirector_DeveRetornarForbidden()
+    {
+        // Arrange
+        var targetDirector = TestHelper.CreateValidEmployee(role: Role.Director);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(targetDirector.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(targetDirector);
+
+        var command = new DeleteEmployeeCommand(targetDirector.Id, Role.Director);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Forbidden");
+
+        _repositoryMock.Verify(
+            x => x.SoftDeleteAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    #endregion
+
+    #region Business Rules - Subordinates
+
+    [Fact]
+    [Trait("Category", "Application")]
+    public async Task Handle_FuncionarioComSubordinados_DeveRetornarErroDeValidacao()
+    {
+        // Arrange
+        var manager = TestHelper.CreateValidEmployee(role: Role.Leader);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(manager.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(manager);
+
+        _repositoryMock
+            .Setup(x => x.HasSubordinatesAsync(manager.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var command = new DeleteEmployeeCommand(manager.Id, Role.Admin);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Code.Should().Contain("Validation");
+
+        _repositoryMock.Verify(
+            x => x.SoftDeleteAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     #endregion
