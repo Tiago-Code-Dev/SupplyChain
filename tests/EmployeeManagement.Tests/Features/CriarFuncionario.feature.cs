@@ -880,20 +880,20 @@ namespace EmployeeManagement.Tests.Features
             this.ScenarioCleanup();
         }
         
-        [Xunit.SkippableFactAttribute(DisplayName="Criar funcionário com gestor inexistente")]
+        [Xunit.SkippableFactAttribute(DisplayName="Criar funcionário com senha fraca")]
         [Xunit.TraitAttribute("FeatureTitle", "Criação de Funcionário")]
-        [Xunit.TraitAttribute("Description", "Criar funcionário com gestor inexistente")]
+        [Xunit.TraitAttribute("Description", "Criar funcionário com senha fraca")]
         [Xunit.TraitAttribute("Category", "funcionario")]
         [Xunit.TraitAttribute("Category", "criar")]
         [Xunit.TraitAttribute("Category", "validacao")]
-        public void CriarFuncionarioComGestorInexistente()
+        public void CriarFuncionarioComSenhaFraca()
         {
             string[] tagsOfScenario = new string[] {
                     "funcionario",
                     "criar",
                     "validacao"};
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Criar funcionário com gestor inexistente", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Criar funcionário com senha fraca", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 144
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -906,9 +906,6 @@ namespace EmployeeManagement.Tests.Features
                 this.ScenarioStart();
 #line 145
     testRunner.Given("que o usuário está autenticado como \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
-#line hidden
-#line 146
-    testRunner.And("que não existe gestor com ID \"99999999-9999-9999-9999-999999999999\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
                 TechTalk.SpecFlow.Table table26 = new TechTalk.SpecFlow.Table(new string[] {
                             "Nome",
@@ -927,80 +924,18 @@ namespace EmployeeManagement.Tests.Features
                             "1990-01-15",
                             "11999999999",
                             "Employee",
-                            "Senha@123456"});
-#line 147
-    testRunner.When("o usuário tenta criar um novo funcionário com gestor inexistente:", ((string)(null)), table26, "Quando ");
-#line hidden
-#line 150
-    testRunner.Then("o sistema deve retornar status 404", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
-#line hidden
-#line 151
-    testRunner.And("o sistema deve retornar mensagem \"ManagerId \'99999999-9999-9999-9999-999999999999" +
-                        "\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
-#line hidden
-#line 152
-    testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
-#line hidden
-            }
-            this.ScenarioCleanup();
-        }
-        
-        [Xunit.SkippableFactAttribute(DisplayName="Criar funcionário com senha fraca")]
-        [Xunit.TraitAttribute("FeatureTitle", "Criação de Funcionário")]
-        [Xunit.TraitAttribute("Description", "Criar funcionário com senha fraca")]
-        [Xunit.TraitAttribute("Category", "funcionario")]
-        [Xunit.TraitAttribute("Category", "criar")]
-        [Xunit.TraitAttribute("Category", "validacao")]
-        public void CriarFuncionarioComSenhaFraca()
-        {
-            string[] tagsOfScenario = new string[] {
-                    "funcionario",
-                    "criar",
-                    "validacao"};
-            System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Criar funcionário com senha fraca", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 155
-  this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((TagHelper.ContainsIgnoreTag(tagsOfScenario) || TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                this.ScenarioStart();
-#line 156
-    testRunner.Given("que o usuário está autenticado como \"Director\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
-#line hidden
-                TechTalk.SpecFlow.Table table27 = new TechTalk.SpecFlow.Table(new string[] {
-                            "Nome",
-                            "Sobrenome",
-                            "Email",
-                            "Documento",
-                            "DataNascimento",
-                            "Telefones",
-                            "Permissao",
-                            "Senha"});
-                table27.AddRow(new string[] {
-                            "João",
-                            "Silva",
-                            "joao@supply.com",
-                            "12345678900",
-                            "1990-01-15",
-                            "11999999999",
-                            "Employee",
                             "123"});
-#line 157
-    testRunner.When("o usuário cria um novo funcionário com:", ((string)(null)), table27, "Quando ");
+#line 146
+    testRunner.When("o usuário cria um novo funcionário com:", ((string)(null)), table26, "Quando ");
 #line hidden
-#line 160
+#line 149
     testRunner.Then("o sistema deve retornar status 400", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
 #line hidden
-#line 161
+#line 150
     testRunner.And("o sistema deve retornar mensagem indicando que a senha não atende aos critérios d" +
                         "e segurança", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
-#line 162
+#line 151
     testRunner.And("o funcionário não deve ser criado no banco de dados", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
             }

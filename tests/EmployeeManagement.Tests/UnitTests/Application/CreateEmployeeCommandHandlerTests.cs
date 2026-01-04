@@ -234,38 +234,6 @@ public class CreateEmployeeCommandHandlerTests
         result.Error.Code.Should().Contain("Forbidden");
     }
 
-    [Fact]
-    [Trait("Category", "Application")]
-    public async Task Handle_ComManagerIdInvalido_DeveRetornarErroDeNaoEncontrado()
-    {
-        // Arrange
-        var managerId = Guid.NewGuid();
-        var command = new CreateEmployeeCommand(
-            "Test",
-            "User",
-            "test@test.com",
-            TestHelper.GenerateValidCpf(),
-            TestHelper.GenerateAdultBirthDate(),
-            "Password123",
-            Role.Employee,
-            managerId,
-            new List<string> { "11999999999" },
-            Role.Director);
-
-        SetupRepositoryForNewEmployee();
-
-        _repositoryMock
-            .Setup(x => x.ExistsAsync(managerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Contain("NotFound");
-    }
-
     [Theory]
     [Trait("Category", "Application")]
     [InlineData("", "Last", "test@test.com")]

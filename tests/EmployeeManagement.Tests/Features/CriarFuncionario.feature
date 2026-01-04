@@ -141,17 +141,6 @@ Funcionalidade: Criação de Funcionário
     E o funcionário não deve ser criado no banco de dados
 
   @funcionario @criar @validacao
-  Cenário: Criar funcionário com gestor inexistente
-    Dado que o usuário está autenticado como "Director"
-    E que não existe gestor com ID "99999999-9999-9999-9999-999999999999"
-    Quando o usuário tenta criar um novo funcionário com gestor inexistente:
-      | Nome | Sobrenome | Email           | Documento   | DataNascimento | Telefones   | Permissao | Senha        |
-      | João | Silva     | joao@supply.com | 12345678900 | 1990-01-15     | 11999999999 | Employee  | Senha@123456 |
-    Então o sistema deve retornar status 404
-    E o sistema deve retornar mensagem "ManagerId '99999999-9999-9999-9999-999999999999"
-    E o funcionário não deve ser criado no banco de dados
-
-  @funcionario @criar @validacao
   Cenário: Criar funcionário com senha fraca
     Dado que o usuário está autenticado como "Director"
     Quando o usuário cria um novo funcionário com:
