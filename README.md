@@ -44,13 +44,12 @@ O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo comple
 
 | Módulo | Status | Cobertura |
 |--------|--------|-----------|
-| Autenticação | ✅ Completo | 92% |
-| CRUD Employees | ✅ Completo | 88% |
-| Hierarquia/Permissões | ✅ Completo | 95% |
-| Soft Delete | ✅ Completo | 100% |
-| Cache & Invalidação | ✅ Completo | 85% |
-| Frontend React | 🚧 Em desenvolvimento | - |
-| Relatórios | 📋 Planejado | - |
+| Autenticação | ✅ Completo |
+| CRUD Employees | ✅ Completo |
+| Hierarquia/Permissões | ✅ Completo |
+| Soft Delete | ✅ Completo | 
+| Cache & Invalidação | ✅ Completo |
+| Frontend React | ✅ Completo| 
 
 ---
 
