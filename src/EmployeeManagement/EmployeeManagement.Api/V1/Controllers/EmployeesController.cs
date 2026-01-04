@@ -156,6 +156,7 @@ public class EmployeesController : MainController
             request.ManagerId,
             request.PhoneNumbers,
             GetCurrentUserRole<Role>(),
+            CurrentUserId,  // Quem cria se torna o superior hierárquico automaticamente
             request.CustomRoleId);
 
         var result = await Sender.Send(command, cancellationToken);

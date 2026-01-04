@@ -82,32 +82,38 @@ public sealed class CreateEmployeeCommandHandler
         {
             _logger.LogWarning("Document {Document} already exists", request.DocumentNumber);
             return Result<EmployeeResponse>.Failure(
-                Error.Conflict("DocumentNumber", ValidationMessages.DocumentAlreadyExists));
-        }
+                        Error.Conflict("DocumentNumber", ValidationMessages.DocumentAlreadyExists));
+                }
 
-        if (request.ManagerId.HasValue)
-        {
-            var managerExists = await _repository.ExistsAsync(request.ManagerId.Value, cancellationToken);
-            if (!managerExists)
-            {
-                _logger.LogWarning("Manager {ManagerId} not found", request.ManagerId.Value);
-                return Result<EmployeeResponse>.Failure(
-                    Error.NotFound("ManagerId", request.ManagerId.Value.ToString()));
-            }
-        }
+                // Determinar o ManagerId: se não foi especificado, usar o ID do usuário que está criando
+                // Isso estabelece automaticamente a hierarquia: quem cria é o superior
+                var effectiveManagerId = request.ManagerId ?? request.CreatedByUserId;
 
-        var passwordHash = _passwordHasher.Hash(request.Password);
-        var employeeResult = Employee.Create(
-            request.FirstName,
-            request.LastName,
-            request.Email,
-            request.DocumentNumber,
-            request.BirthDate,
-            passwordHash,
-            request.Role,
-            request.ManagerId,
-            request.PhoneNumbers,
-            request.CustomRoleId);
+                if (effectiveManagerId.HasValue)
+                {
+                    // Verificar se o manager existe (pode ser um Employee ou um User do Identity)
+                    var managerExists = await _repository.ExistsAsync(effectiveManagerId.Value, cancellationToken);
+                    if (!managerExists)
+                    {
+                        // Se não existe como Employee, pode ser que o usuário seja apenas do Identity (ex: Admin)
+                        // Nesse caso, não definimos manager
+                        _logger.LogInformation("Manager {ManagerId} not found as employee, setting manager to null", effectiveManagerId.Value);
+                        effectiveManagerId = null;
+                    }
+                }
+
+                var passwordHash = _passwordHasher.Hash(request.Password);
+                var employeeResult = Employee.Create(
+                    request.FirstName,
+                    request.LastName,
+                    request.Email,
+                    request.DocumentNumber,
+                    request.BirthDate,
+                    passwordHash,
+                    request.Role,
+                    effectiveManagerId,
+                    request.PhoneNumbers,
+                    request.CustomRoleId);
 
         if (employeeResult.IsFailure)
         {

@@ -17,17 +17,20 @@ public sealed class UpdateEmployeeCommandHandler
     private readonly IEmployeeRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cache;
+    private readonly IIdentityService _identityService;
     private readonly ILogger<UpdateEmployeeCommandHandler> _logger;
 
     public UpdateEmployeeCommandHandler(
         IEmployeeRepository repository,
         IUnitOfWork unitOfWork,
         ICacheService cache,
+        IIdentityService identityService,
         ILogger<UpdateEmployeeCommandHandler> logger)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
         _cache = cache;
+        _identityService = identityService;
         _logger = logger;
     }
 
@@ -45,6 +48,7 @@ public sealed class UpdateEmployeeCommandHandler
         }
 
         var oldEmail = employee.Email;
+        var oldRole = employee.Role;
 
         if (request.NewRole.HasValue && request.NewRole.Value != employee.Role)
         {
@@ -137,19 +141,53 @@ public sealed class UpdateEmployeeCommandHandler
             employee.AddPhone(new PhoneNumber(phone, employee.Id));
         }
 
-        await _repository.UpdateAsync(employee, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+                await _repository.UpdateAsync(employee, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
-        if (!oldEmail.Equals(employee.Email, StringComparison.OrdinalIgnoreCase))
-        {
-            await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(oldEmail), cancellationToken);
+                // Sincronizar mudança de role com o Identity se houver alteração
+                if (employee.Role != oldRole)
+                {
+                    var identityUser = await _identityService.GetUserByEmailAsync(employee.Email, cancellationToken);
+                    if (identityUser != null)
+                    {
+                        // Remover a role antiga
+                        var removeResult = await _identityService.RemoveFromRoleAsync(identityUser.Id, oldRole.ToString(), cancellationToken);
+                        if (removeResult.IsFailure)
+                        {
+                            _logger.LogWarning("Failed to remove old role {OldRole} from user {UserId}: {Error}",
+                                oldRole, identityUser.Id, removeResult.Error.Description);
+                        }
+
+                        // Adicionar a nova role
+                        var addResult = await _identityService.AddToRoleAsync(identityUser.Id, employee.Role.ToString(), cancellationToken);
+                        if (addResult.IsFailure)
+                        {
+                            _logger.LogWarning("Failed to add new role {NewRole} to user {UserId}: {Error}",
+                                employee.Role, identityUser.Id, addResult.Error.Description);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Identity role updated for user {UserId}: {OldRole} -> {NewRole}",
+                                identityUser.Id, oldRole, employee.Role);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Identity user not found for employee {EmployeeId} with email {Email}",
+                            employee.Id, employee.Email);
+                    }
+                }
+
+                await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
+                if (!oldEmail.Equals(employee.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(oldEmail), cancellationToken);
+                }
+                await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
+                await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
+
+                _logger.LogInformation("Employee updated successfully: {Id}", employee.Id);
+
+                return Result<EmployeeResponse>.Success(EmployeeResponse.FromEntity(employee));
+            }
         }
-        await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
-        await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);
-
-        _logger.LogInformation("Employee updated successfully: {Id}", employee.Id);
-
-        return Result<EmployeeResponse>.Success(EmployeeResponse.FromEntity(employee));
-    }
-}

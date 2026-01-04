@@ -60,8 +60,40 @@ export const formatPhoneList = (value: string): string => {
 // Remove formatação de múltiplos telefones
 export const unformatPhoneList = (value: string): string[] => {
   if (!value) return [];
-  
+
   const phones = value.split(',').map(phone => unformatPhone(phone.trim()));
   return phones.filter(phone => phone.length > 0);
+};
+
+// Corrige caracteres com encoding quebrado (UTF-8 mal interpretado)
+// Mapeia caracteres comuns que aparecem como "�" ou outros símbolos
+const encodingFixMap: Record<string, string> = {
+  // Vogais acentuadas
+  'Funcion�rio': 'Funcionário',
+  'L�der': 'Líder',
+  'funcion�rio': 'funcionário',
+  'l�der': 'líder',
+  // Casos genéricos com caractere de substituição
+  '�': 'í', // Fallback para casos não mapeados
+};
+
+export const fixBrokenEncoding = (text: string): string => {
+  if (!text) return text;
+
+  let result = text;
+
+  // Primeiro tenta substituições exatas
+  for (const [broken, fixed] of Object.entries(encodingFixMap)) {
+    if (broken !== '�') {
+      result = result.replace(new RegExp(broken, 'g'), fixed);
+    }
+  }
+
+  return result;
+};
+
+// Corrige uma lista de strings com encoding quebrado
+export const fixBrokenEncodingList = (items: string[]): string[] => {
+  return items.map(item => fixBrokenEncoding(item));
 };
 

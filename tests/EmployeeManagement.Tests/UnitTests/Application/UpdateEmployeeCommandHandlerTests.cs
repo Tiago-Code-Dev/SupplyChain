@@ -12,6 +12,7 @@ public class UpdateEmployeeCommandHandlerTests
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _loggerMock;
     private readonly Mock<ICacheService> _cacheMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly UpdateEmployeeCommandHandler _handler;
 
     public UpdateEmployeeCommandHandlerTests()
@@ -19,12 +20,14 @@ public class UpdateEmployeeCommandHandlerTests
         _repositoryMock = Fixtures.MockFactory.CreateEmployeeRepositoryMock();
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _cacheMock = new Mock<ICacheService>();
+        _identityServiceMock = new Mock<IIdentityService>();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<UpdateEmployeeCommandHandler>();
 
         _handler = new UpdateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _cacheMock.Object,
+            _identityServiceMock.Object,
             _loggerMock.Object);
     }
 

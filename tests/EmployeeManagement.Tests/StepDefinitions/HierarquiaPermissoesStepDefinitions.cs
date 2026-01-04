@@ -14,6 +14,7 @@ public class HierarquiaPermissoesStepDefinitions
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _createLoggerMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _updateLoggerMock;
     private readonly Mock<ILogger<DeleteEmployeeCommandHandler>> _deleteLoggerMock;
@@ -32,6 +33,7 @@ public class HierarquiaPermissoesStepDefinitions
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _cacheServiceMock = Fixtures.MockFactory.CreateCacheServiceMock();
+        _identityServiceMock = new Mock<IIdentityService>();
         _createLoggerMock = Fixtures.MockFactory.CreateLoggerMock<CreateEmployeeCommandHandler>();
         _updateLoggerMock = Fixtures.MockFactory.CreateLoggerMock<UpdateEmployeeCommandHandler>();
         _deleteLoggerMock = Fixtures.MockFactory.CreateLoggerMock<DeleteEmployeeCommandHandler>();
@@ -267,22 +269,23 @@ public class HierarquiaPermissoesStepDefinitions
                 targetRole,
                 _currentUserRole);
 
-            var handler = new UpdateEmployeeCommandHandler(
-                _repositoryMock.Object,
-                _unitOfWorkMock.Object,
-                _cacheServiceMock.Object,
-                _updateLoggerMock.Object);
+                    var handler = new UpdateEmployeeCommandHandler(
+                        _repositoryMock.Object,
+                        _unitOfWorkMock.Object,
+                        _cacheServiceMock.Object,
+                        _identityServiceMock.Object,
+                        _updateLoggerMock.Object);
 
-            _repositoryMock
-                .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+                    _repositoryMock
+                        .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
+                        .Returns(Task.CompletedTask);
 
-            _updateResult = await handler.Handle(command, CancellationToken.None);
-            _httpStatus = _updateResult.IsSuccess ? 200 : 400;
-        }
-    }
+                    _updateResult = await handler.Handle(command, CancellationToken.None);
+                    _httpStatus = _updateResult.IsSuccess ? 200 : 400;
+                }
+            }
 
-    private async Task ExecutarExclusao()
+            private async Task ExecutarExclusao()
     {
         if (_currentUserRole == Role.Employee)
         {

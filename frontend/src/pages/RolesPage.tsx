@@ -5,6 +5,7 @@ import { CustomRole, CreateCustomRoleRequest, UpdateCustomRoleRequest, Hierarchy
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { ErrorAlert } from '../shared/components/ErrorAlert';
 import { TrashIcon, PencilIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { fixBrokenEncoding, fixBrokenEncodingList } from '../shared/utils/format.utils';
 
 export const RolesPage = () => {
   const [roles, setRoles] = useState<CustomRole[]>([]);
@@ -489,7 +490,7 @@ export const RolesPage = () => {
                         {role.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {role.displayName}
+                        {fixBrokenEncoding(role.displayName)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -557,7 +558,7 @@ export const RolesPage = () => {
                     </div>
                     <div className="flex-grow">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-900">{item.displayName}</span>
+                        <span className="font-medium text-gray-900">{fixBrokenEncoding(item.displayName)}</span>
                         {item.isSystemRole && (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
                             Sistema
@@ -566,7 +567,7 @@ export const RolesPage = () => {
                       </div>
                       {item.canManage.length > 0 && (
                         <div className="text-sm text-gray-500 mt-1">
-                          Gerencia: {item.canManage.join(', ')}
+                          Gerencia: {fixBrokenEncodingList(item.canManage).join(', ')}
                         </div>
                       )}
                     </div>

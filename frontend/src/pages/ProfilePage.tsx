@@ -213,7 +213,7 @@ export const ProfilePage = () => {
 
                 <div className="flex-grow">
                   <div className="grid grid-cols-2 gap-4">
-                    <Button variant="primary" onClick={() => navigate('/change-password')}>
+                    <Button variant="primary" onClick={() => navigate('/profile/change-password')}>
                       Alterar Senha
                     </Button>
                     <Button variant="secondary" onClick={() => navigate('/logout')}>

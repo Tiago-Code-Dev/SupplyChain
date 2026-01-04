@@ -54,7 +54,8 @@ export const canDeleteEmployee = (userRole: Role): boolean => {
   return userRole >= Role.Leader;
 };
 
-export const getHighestRole = (roles: string[]): string => {
+// Retorna o nome original da role (em inglês) para uso em lógica de negócio
+export const getHighestRoleKey = (roles: string[]): string => {
   const roleHierarchy: Record<string, number> = {
     'Admin': 4,
     'Director': 3,
@@ -63,13 +64,30 @@ export const getHighestRole = (roles: string[]): string => {
   };
 
   if (!roles || roles.length === 0) return 'N/A';
-  
-  // Retorna a role com maior prioridade
+
+  // Encontra a role com maior prioridade
   return roles.reduce((highest, current) => {
     const currentPriority = roleHierarchy[current] || 0;
     const highestPriority = roleHierarchy[highest] || 0;
     return currentPriority > highestPriority ? current : highest;
   }, roles[0]);
+};
+
+// Retorna o nome traduzido da role (em português) para exibição
+export const getHighestRole = (roles: string[]): string => {
+  const roleTranslations: Record<string, string> = {
+    'Admin': 'Administrador',
+    'Director': 'Diretor',
+    'Leader': 'Líder',
+    'Employee': 'Funcionário',
+  };
+
+  const highestRole = getHighestRoleKey(roles);
+
+  if (highestRole === 'N/A') return 'N/A';
+
+  // Retorna o nome traduzido
+  return roleTranslations[highestRole] || highestRole;
 };
 
 

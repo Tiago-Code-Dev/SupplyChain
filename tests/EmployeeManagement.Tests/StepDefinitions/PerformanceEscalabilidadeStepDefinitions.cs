@@ -20,6 +20,7 @@ public class PerformanceEscalabilidadeStepDefinitions
     private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<IJwtService> _jwtServiceMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _createLoggerMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _updateLoggerMock;
     private readonly Mock<ILogger<DeleteEmployeeCommandHandler>> _deleteLoggerMock;
@@ -50,6 +51,7 @@ public class PerformanceEscalabilidadeStepDefinitions
         _cacheServiceMock = Fixtures.MockFactory.CreateCacheServiceMock();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _jwtServiceMock = Fixtures.MockFactory.CreateJwtServiceMock();
+        _identityServiceMock = new Mock<IIdentityService>();
         _createLoggerMock = Fixtures.MockFactory.CreateLoggerMock<CreateEmployeeCommandHandler>();
         _updateLoggerMock = Fixtures.MockFactory.CreateLoggerMock<UpdateEmployeeCommandHandler>();
         _deleteLoggerMock = Fixtures.MockFactory.CreateLoggerMock<DeleteEmployeeCommandHandler>();
@@ -307,6 +309,7 @@ public class PerformanceEscalabilidadeStepDefinitions
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
+            _identityServiceMock.Object,
             _updateLoggerMock.Object);
 
         _updateResult = await handler.Handle(command, CancellationToken.None);

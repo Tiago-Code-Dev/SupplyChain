@@ -3,10 +3,11 @@
     "EmployeeManagement.Api": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:59687;http://localhost:59688"
+      "applicationUrl": "http://localhost:5000"
     }
   }
 }

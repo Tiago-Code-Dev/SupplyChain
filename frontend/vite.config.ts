@@ -7,4 +7,8 @@ export default defineConfig({
   optimizeDeps: {
     include: ['axios'],
   },
+  server: {
+    port: 5173,
+    host: 'localhost',
+  },
 })

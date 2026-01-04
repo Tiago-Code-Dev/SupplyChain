@@ -17,6 +17,7 @@ public class LoggingAuditoriaStepDefinitions
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<IJwtService> _jwtServiceMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
 
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _createLoggerMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _updateLoggerMock;
@@ -36,6 +37,7 @@ public class LoggingAuditoriaStepDefinitions
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _jwtServiceMock = Fixtures.MockFactory.CreateJwtServiceMock();
         _cacheServiceMock = Fixtures.MockFactory.CreateCacheServiceMock();
+        _identityServiceMock = new Mock<IIdentityService>();
 
         _createLoggerMock = CreateLoggingMock<CreateEmployeeCommandHandler>();
         _updateLoggerMock = CreateLoggingMock<UpdateEmployeeCommandHandler>();
@@ -165,17 +167,18 @@ public class LoggingAuditoriaStepDefinitions
             Role.Director 
         );
 
-        var handler = new UpdateEmployeeCommandHandler(
-            _repositoryMock.Object,
-            _unitOfWorkMock.Object,
-            _cacheServiceMock.Object,
-            _updateLoggerMock.Object);
+            var handler = new UpdateEmployeeCommandHandler(
+                _repositoryMock.Object,
+                _unitOfWorkMock.Object,
+                _cacheServiceMock.Object,
+                _identityServiceMock.Object,
+                _updateLoggerMock.Object);
 
-        var result = await handler.Handle(command, CancellationToken.None);
-        _scenarioContext.Set(result, "Result");
-    }
+            var result = await handler.Handle(command, CancellationToken.None);
+            _scenarioContext.Set(result, "Result");
+        }
 
-    [When(@"o usuário exclui o funcionário com sucesso")]
+        [When(@"o usuário exclui o funcionário com sucesso")]
     public async Task QuandOUsuarioExcluiOFuncionarioComSucesso()
     {
         var command = new DeleteEmployeeCommand(_employee!.Id, Role.Director);
@@ -276,16 +279,17 @@ public class LoggingAuditoriaStepDefinitions
             Role.Director 
         );
 
-        var handler = new UpdateEmployeeCommandHandler(
-            _repositoryMock.Object,
-            _unitOfWorkMock.Object,
-            _cacheServiceMock.Object,
-            _updateLoggerMock.Object);
+            var handler = new UpdateEmployeeCommandHandler(
+                _repositoryMock.Object,
+                _unitOfWorkMock.Object,
+                _cacheServiceMock.Object,
+                _identityServiceMock.Object,
+                _updateLoggerMock.Object);
 
-        await handler.Handle(command, CancellationToken.None);
-        _scenarioContext.Set(nomeAntigo, "OldName");
-        _scenarioContext.Set(nomeNovo, "NewName");
-    }
+            await handler.Handle(command, CancellationToken.None);
+            _scenarioContext.Set(nomeAntigo, "OldName");
+            _scenarioContext.Set(nomeNovo, "NewName");
+        }
 
     [Then(@"o sistema deve registrar um log com nível ""(.*)""")]
     public void EntaoOSistemaDeveRegistrarUmLogComNivel(string nivel)

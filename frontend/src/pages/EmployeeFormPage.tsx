@@ -15,7 +15,7 @@ import { SuccessAlert } from '../shared/components/SuccessAlert';
 import { LoadingSpinner } from '../shared/components/LoadingSpinner';
 import { unformatCPF, formatPhone, unformatPhoneList } from '../shared/utils/format.utils';
 import { useAuthStore } from '../features/auth/store/auth.store';
-import { getHighestRole } from '../shared/utils/role.utils';
+import { getHighestRoleKey } from '../shared/utils/role.utils';
 
 const createEmployeeSchema = z.object({
   firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -78,6 +78,8 @@ export const EmployeeFormPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [customRoles, setCustomRoles] = useState<CustomRole[]>([]);
+  const [allEmployees, setAllEmployees] = useState<{ id: string; fullName: string; roleDisplayName: string; role: Role }[]>([]);
+  const [currentEmployeeRole, setCurrentEmployeeRole] = useState<Role | null>(null);
 
   const {
     register,
@@ -88,22 +90,32 @@ export const EmployeeFormPage = () => {
     resolver: zodResolver(isEdit ? updateEmployeeSchema : createEmployeeSchema) as any,
     defaultValues: {
       customRoleId: '',
+      managerId: '',
     },
   });
 
-  const { user } = useAuthStore();
+  const { user, checkAuth } = useAuthStore();
 
-  // Carregar roles customizados
+    // Carregar roles customizados e lista de funcionários para superior
   useEffect(() => {
-    const loadRoles = async () => {
+    const loadInitialData = async () => {
       try {
-        const roles = await rolesService.getAllRoles();
+        const [roles, employees] = await Promise.all([
+          rolesService.getAllRoles(),
+          employeesService.getEmployees({ pageSize: 1000 })
+        ]);
         setCustomRoles(roles);
+        setAllEmployees(employees.items.map(e => ({ 
+          id: e.id, 
+          fullName: e.fullName, 
+          roleDisplayName: e.roleDisplayName,
+          role: e.role
+        })));
       } catch (err) {
-        console.error('Erro ao carregar roles:', err);
+        console.error('Erro ao carregar dados:', err);
       }
     };
-    loadRoles();
+    loadInitialData();
   }, []);
 
   useEffect(() => {
@@ -122,6 +134,8 @@ export const EmployeeFormPage = () => {
       setValue('birthDate', employee.birthDate.split('T')[0]);
       setValue('customRoleId', employee.customRoleId || '');
       setValue('managerId', employee.managerId || '');
+      // Guardar o role do funcionário para filtrar superiores válidos
+      setCurrentEmployeeRole(employee.role);
       // Formatar telefones ao carregar
       if (employee.phoneNumbers && employee.phoneNumbers.length > 0) {
         const formattedPhones = employee.phoneNumbers
@@ -146,6 +160,25 @@ export const EmployeeFormPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Filtrar funcionários que podem ser superiores hierárquicos
+  // Só mostra quem tem role MAIOR que o funcionário sendo editado
+  const getValidManagers = () => {
+    if (!currentEmployeeRole) return [];
+
+    return allEmployees
+      .filter(emp => {
+        // Não pode ser superior de si mesmo
+        if (emp.id === id) return false;
+        // Só pode ter como superior quem tem role MAIOR
+        // Role: Employee=1, Leader=2, Director=3, Admin=4
+        return emp.role > currentEmployeeRole;
+      })
+      .map(emp => ({ 
+        value: emp.id, 
+        label: `${emp.fullName} (${emp.roleDisplayName})` 
+      }));
   };
 
   // Converter hierarchyLevel para o enum Role correspondente
@@ -189,6 +222,11 @@ export const EmployeeFormPage = () => {
           customRoleId: data.customRoleId,
         };
         await employeesService.updateEmployee(id, updateData);
+
+        // Se o funcionário editado é o próprio usuário logado, atualizar o estado de autenticação
+        if (user?.employeeId === id) {
+          await checkAuth();
+        }
       } else {
         const createData = data as CreateEmployeeFormData;
         // Remover formatação do CPF
@@ -248,7 +286,7 @@ export const EmployeeFormPage = () => {
       return [];
     }
 
-    const userRoleString = getHighestRole(user?.roles || []);
+    const userRoleString = getHighestRoleKey(user?.roles || []);
 
     // Admin pode criar qualquer role
     if (userRoleString === 'Admin') {
@@ -360,6 +398,25 @@ export const EmployeeFormPage = () => {
               options={roleOptions}
               error={(errors as any).customRoleId?.message}
             />
+
+            {/* Campo Superior Hierárquico - só aparece no edit */}
+            {isEdit && (
+              <div>
+                <Select
+                  {...register('managerId')}
+                  label="Superior Hierárquico"
+                  options={[
+                    { value: '', label: 'Nenhum (sem superior)' },
+                    ...getValidManagers()
+                  ]}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {getValidManagers().length > 0 
+                    ? 'Selecione quem será o superior hierárquico deste funcionário'
+                    : 'Não há funcionários com cargo superior disponíveis'}
+                </p>
+              </div>
+            )}
 
             <div>
               <MaskedInput
