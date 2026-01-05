@@ -36,6 +36,22 @@
       - Jwt__Audience=EmployeeManagement.Client
       - Jwt__AccessTokenExpirationMinutes=15
       - Jwt__RefreshTokenExpirationDays=7
+      - Cors__AllowedOrigins__0=http://localhost:3000
+      - Cors__AllowedOrigins__1=http://localhost:4200
+      - Cors__AllowedOrigins__2=http://localhost:5000
+      - Cors__AllowedOrigins__3=http://localhost:5173
+      - Cors__AllowedOrigins__4=https://localhost:5001
+      # ===== EMAIL CONFIGURATION =====
+      # Configuração centralizada no servidor - usuário final não precisa configurar nada
+      - Email__SmtpServer=${EMAIL_SMTP_SERVER}
+      - Email__SmtpPort=${EMAIL_SMTP_PORT}
+      - Email__SenderEmail=${EMAIL_SENDER}
+      - Email__SenderName=Employee Management System
+      - Email__Username=${EMAIL_USERNAME}
+      - Email__Password=${EMAIL_PASSWORD}
+      - Email__UseSsl=${EMAIL_USE_SSL:-true}
+      - Email__FrontendBaseUrl=http://localhost:5173
+      - Email__EnableSending=${EMAIL_ENABLE_SENDING:-true}
     ports:
       - "5000:8080"
       - "5001:8081"

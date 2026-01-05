@@ -11,6 +11,7 @@ public class AtualizarFuncionarioStepDefinitions
     private readonly Mock<IEmployeeRepository> _repositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _loggerMock;
 
     private Employee? _existingEmployee;
@@ -25,6 +26,7 @@ public class AtualizarFuncionarioStepDefinitions
         _repositoryMock = Fixtures.MockFactory.CreateEmployeeRepositoryMock();
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _cacheServiceMock = Fixtures.MockFactory.CreateCacheServiceMock();
+        _identityServiceMock = new Mock<IIdentityService>();
         _loggerMock = Fixtures.MockFactory.CreateLoggerMock<UpdateEmployeeCommandHandler>();
 
         _cacheServiceMock
@@ -468,6 +470,7 @@ public class AtualizarFuncionarioStepDefinitions
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
+            _identityServiceMock.Object,
             _loggerMock.Object);
 
         _result = await handler.Handle(command, CancellationToken.None);

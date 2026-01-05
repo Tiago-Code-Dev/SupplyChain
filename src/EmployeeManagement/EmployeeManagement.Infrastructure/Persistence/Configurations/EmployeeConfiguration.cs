@@ -53,5 +53,11 @@ public class EmployeeConfiguration : EntityBaseConfiguration<Employee>
             .WithOne(p => p.Employee)
             .HasForeignKey(p => p.EmployeeId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Relacionamento com CustomRole
+        builder.HasOne(e => e.CustomRole)
+            .WithMany()
+            .HasForeignKey(e => e.CustomRoleId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

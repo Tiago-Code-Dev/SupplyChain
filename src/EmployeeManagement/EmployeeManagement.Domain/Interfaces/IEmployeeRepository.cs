@@ -54,4 +54,14 @@ public interface IEmployeeRepository
     /// Verifica se o funcionário possui subordinados (funcionários que o têm como gestor)
     /// </summary>
     Task<bool> HasSubordinatesAsync(Guid managerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Obtém um funcionário pelo ID, incluindo dados necessários para a exclusão lógica
+    /// </summary>
+    Task<Employee?> GetByIdForDeleteAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Realiza soft delete do funcionário diretamente no banco
+    /// </summary>
+    Task SoftDeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }

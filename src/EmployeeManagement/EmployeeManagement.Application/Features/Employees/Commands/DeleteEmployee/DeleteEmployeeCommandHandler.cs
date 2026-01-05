@@ -12,18 +12,15 @@ namespace EmployeeManagement.Application.Features.Employees.Commands.DeleteEmplo
 public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeCommand>
 {
     private readonly IEmployeeRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cache;
     private readonly ILogger<DeleteEmployeeCommandHandler> _logger;
 
     public DeleteEmployeeCommandHandler(
         IEmployeeRepository repository,
-        IUnitOfWork unitOfWork,
         ICacheService cache,
         ILogger<DeleteEmployeeCommandHandler> logger)
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
         _cache = cache;
         _logger = logger;
     }
@@ -35,6 +32,7 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
         _logger.LogInformation("Deleting employee: {Id} by user with role: {Role}", 
             request.Id, request.CurrentUserRole);
 
+        // Employee não pode deletar ninguém
         if (request.CurrentUserRole < Role.Leader)
         {
             _logger.LogWarning("User with role {Role} tried to delete employee {Id} without permission", 
@@ -43,10 +41,31 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
                 Error.Forbidden(ValidationMessages.NoPermissionToDelete));
         }
 
-        var employee = await _repository.GetByIdAsync(request.Id, cancellationToken);
+        // Buscar para validações
+        var employee = await _repository.GetByIdForDeleteAsync(request.Id, cancellationToken);
         if (employee is null)
         {
             return Result.Failure(Error.NotFound("Employee", ValidationMessages.EmployeeNotFound));
+        }
+
+        // Validação de permissões para exclusão baseada na hierarquia
+        // Leader (2): Só pode deletar Employee (1)
+        // Director (3): Pode deletar Leader (2), Employee (1) - NÃO pode deletar Director
+        // Admin (4): Pode deletar qualquer role
+        var canDelete = request.CurrentUserRole switch
+        {
+            Role.Admin => true, // Admin pode deletar qualquer role
+            Role.Director => employee.Role < Role.Director, // Director pode deletar Leader e Employee
+            Role.Leader => employee.Role == Role.Employee, // Leader só pode deletar Employee
+            _ => false // Employee não pode deletar ninguém
+        };
+
+        if (!canDelete)
+        {
+            _logger.LogWarning("User with role {UserRole} tried to delete employee with role {TargetRole}", 
+                request.CurrentUserRole, employee.Role);
+            return Result.Failure(
+                Error.Forbidden(ValidationMessages.NoPermissionToDelete));
         }
 
         var hasSubordinates = await _repository.HasSubordinatesAsync(request.Id, cancellationToken);
@@ -57,11 +76,10 @@ public class DeleteEmployeeCommandHandler : ICommandHandler<DeleteEmployeeComman
                 Error.Validation("Employee", ValidationMessages.CannotDeleteWithSubordinates));
         }
 
-        employee.Delete();
+        // Soft delete direto no banco - evita problemas de tracking
+        await _repository.SoftDeleteAsync(request.Id, cancellationToken);
 
-        await _repository.UpdateAsync(employee, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-
+        // Limpar cache
         await _cache.RemoveAsync(CacheKeys.Employee(request.Id), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.EmployeeByEmail(employee.Email), cancellationToken);
         await _cache.RemoveAsync(CacheKeys.AllEmployees, cancellationToken);

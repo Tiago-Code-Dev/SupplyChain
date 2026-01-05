@@ -19,7 +19,6 @@ namespace EmployeeManagement.Api.V1.Controllers;
 /// Controller para gerenciamento de funcionários
 /// </summary>
 [Route("api/v{version:apiVersion}/[controller]")]
-[Route("api/[controller]")]
 [ApiVersion("1.0")]
 [Authorize]
 [Tags("Employees")]
@@ -156,7 +155,9 @@ public class EmployeesController : MainController
             request.Role,
             request.ManagerId,
             request.PhoneNumbers,
-            GetCurrentUserRole<Role>());
+            GetCurrentUserRole<Role>(),
+            CurrentUserId,  // Quem cria se torna o superior hierárquico automaticamente
+            request.CustomRoleId);
 
         var result = await Sender.Send(command, cancellationToken);
 
@@ -210,7 +211,8 @@ public class EmployeesController : MainController
             request.ManagerId,
             request.PhoneNumbers,
             request.Role,
-            GetCurrentUserRole<Role>());
+            GetCurrentUserRole<Role>(),
+            request.CustomRoleId);
 
         var result = await Sender.Send(command, cancellationToken);
 

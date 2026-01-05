@@ -162,14 +162,14 @@ namespace EmployeeManagement.Tests.Features
 #line 20
     testRunner.And("que existem 25 funcionários cadastrados no sistema", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
-                TechTalk.SpecFlow.Table table28 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table27 = new TechTalk.SpecFlow.Table(new string[] {
                             "Page",
                             "PageSize"});
-                table28.AddRow(new string[] {
+                table27.AddRow(new string[] {
                             "1",
                             "10"});
 #line 21
-    testRunner.When("o usuário solicita a listagem de funcionários com:", ((string)(null)), table28, "Quando ");
+    testRunner.When("o usuário solicita a listagem de funcionários com:", ((string)(null)), table27, "Quando ");
 #line hidden
 #line 24
     testRunner.Then("o sistema deve retornar status 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
@@ -214,14 +214,14 @@ namespace EmployeeManagement.Tests.Features
 #line 31
     testRunner.And("que existem 25 funcionários cadastrados no sistema", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "E ");
 #line hidden
-                TechTalk.SpecFlow.Table table29 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table28 = new TechTalk.SpecFlow.Table(new string[] {
                             "Page",
                             "PageSize"});
-                table29.AddRow(new string[] {
+                table28.AddRow(new string[] {
                             "2",
                             "10"});
 #line 32
-    testRunner.When("o usuário solicita a listagem de funcionários com:", ((string)(null)), table29, "Quando ");
+    testRunner.When("o usuário solicita a listagem de funcionários com:", ((string)(null)), table28, "Quando ");
 #line hidden
 #line 35
     testRunner.Then("o sistema deve retornar status 200", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Então ");
@@ -263,20 +263,20 @@ namespace EmployeeManagement.Tests.Features
 #line 41
     testRunner.Given("que o usuário está autenticado como \"Employee\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
-                TechTalk.SpecFlow.Table table30 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table29 = new TechTalk.SpecFlow.Table(new string[] {
                             "Nome",
                             "Sobrenome"});
-                table30.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "João",
                             "Silva"});
-                table30.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "Maria",
                             "Santos"});
-                table30.AddRow(new string[] {
+                table29.AddRow(new string[] {
                             "João",
                             "Costa"});
 #line 42
-    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table30, "E ");
+    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table29, "E ");
 #line hidden
 #line 47
     testRunner.When("o usuário solicita a listagem de funcionários com filtro por nome \"João\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
@@ -321,16 +321,16 @@ namespace EmployeeManagement.Tests.Features
 #line 54
     testRunner.Given("que o usuário está autenticado como \"Employee\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
-                TechTalk.SpecFlow.Table table31 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table30 = new TechTalk.SpecFlow.Table(new string[] {
                             "Email"});
-                table31.AddRow(new string[] {
+                table30.AddRow(new string[] {
                             "joao@supply.com"});
-                table31.AddRow(new string[] {
+                table30.AddRow(new string[] {
                             "maria@supply.com"});
-                table31.AddRow(new string[] {
+                table30.AddRow(new string[] {
                             "pedro@supply.com"});
 #line 55
-    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table31, "E ");
+    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table30, "E ");
 #line hidden
 #line 60
     testRunner.When("o usuário solicita a listagem de funcionários com filtro por email \"joao@supply.c" +
@@ -376,20 +376,20 @@ namespace EmployeeManagement.Tests.Features
 #line 67
     testRunner.Given("que o usuário está autenticado como \"Employee\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
-                TechTalk.SpecFlow.Table table32 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table31 = new TechTalk.SpecFlow.Table(new string[] {
                             "Nome",
                             "Permissao"});
-                table32.AddRow(new string[] {
+                table31.AddRow(new string[] {
                             "João",
                             "Employee"});
-                table32.AddRow(new string[] {
+                table31.AddRow(new string[] {
                             "Maria",
                             "Leader"});
-                table32.AddRow(new string[] {
+                table31.AddRow(new string[] {
                             "Pedro",
                             "Director"});
 #line 68
-    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table32, "E ");
+    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table31, "E ");
 #line hidden
 #line 73
     testRunner.When("o usuário solicita a listagem de funcionários com filtro por permissão \"Leader\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");
@@ -616,16 +616,16 @@ namespace EmployeeManagement.Tests.Features
 #line 114
     testRunner.Given("que o usuário está autenticado como \"Employee\"", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Dado ");
 #line hidden
-                TechTalk.SpecFlow.Table table33 = new TechTalk.SpecFlow.Table(new string[] {
+                TechTalk.SpecFlow.Table table32 = new TechTalk.SpecFlow.Table(new string[] {
                             "Nome"});
-                table33.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "Carlos"});
-                table33.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "Ana"});
-                table33.AddRow(new string[] {
+                table32.AddRow(new string[] {
                             "Bruno"});
 #line 115
-    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table33, "E ");
+    testRunner.And("que existem funcionários cadastrados:", ((string)(null)), table32, "E ");
 #line hidden
 #line 120
     testRunner.When("o usuário solicita a listagem de funcionários ordenada por nome ascendente", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Quando ");

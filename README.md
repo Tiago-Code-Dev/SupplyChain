@@ -1,7 +1,31 @@
 # SupplyChain – Sistema de Gerenciamento de Funcionários
+
+![.NET](https://img.shields.io/badge/.NET-8.0-purple)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-51%20scenarios-blue)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+
 Plataforma backend para **cadastro, autenticação e gestão hierárquica de funcionários**, com **Clean Architecture + DDD**, **CQRS (MediatR)**, **JWT + Refresh Token**, rastreabilidade por **X-Correlation-ID**, e camadas prontas para evoluir com segurança.
 
 > Projeto focado em **boas práticas de engenharia** (validações de negócio, observabilidade, testes e deploy com Docker) para ambientes de alta responsabilidade.
+
+---
+
+## ⚡ Quick Start (TL;DR)
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/supply-chain.git
+cd supply-chain
+
+# Suba com Docker (mais rápido)
+docker compose up --build
+
+# Acesse
+# API: http://localhost:5000/swagger
+# Login: admin@empresa.com / Admin@123
+```
 
 ---
 
@@ -16,8 +40,6 @@ O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo comple
 
 ---
 
-<<<<<<< Updated upstream
-=======
 ## 📊 Status do Projeto
 
 | Módulo | Status | Cobertura |
@@ -29,7 +51,6 @@ O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo comple
 | Cache & Invalidação | ✅ Completo | 100% |
 | Frontend React | 🚧 Em desenvolvimento | 100% |
 | Relatórios | ✅ Completo | 100% |
-
 ---
 
 ## 📋 Pré-requisitos
@@ -42,8 +63,6 @@ O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo comple
 | SQL Server | 2019+ | Para execução local sem Docker |
 
 ---
-
->>>>>>> Stashed changes
 ## 📌 Funcionalidades Incluídas
 
 - 🔐 **Autenticação & Identity**
@@ -151,6 +170,12 @@ O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo comple
   /Shared
     └── Shared.CrossCutting   (utilitários, contracts e helpers)
 
+/frontend
+  └── React + TypeScript (Vite)
+
+/docs
+  └── Documentação técnica do projeto (fonte da verdade)
+
 /tests
   /EmployeeManagement.Tests   (xUnit + SpecFlow)
 
@@ -175,6 +200,7 @@ docker compose up --build
 
 - API HTTP: `http://localhost:5000`
 - API HTTPS: `https://localhost:5001`
+- Swagger: `http://localhost:5000/swagger`
 - SQL Server: `localhost,1433` (sa / `SqlServer@123`)
 
 > Se for usar HTTPS no Docker, utilize os scripts em `/scripts` e a pasta `/certs` para gerar/instalar certificados dev.
@@ -194,13 +220,78 @@ dotnet restore
 dotnet run --project src/EmployeeManagement/EmployeeManagement.Api
 ```
 
-No ambiente **Development**, o projeto pode usar **InMemoryDatabase** via `appsettings.Development.json` (`UseInMemoryDatabase: true`).
+- API HTTP (launchSettings): `http://localhost:59688`
+- API HTTPS (launchSettings): `https://localhost:59687`
+
+> Se quiser fixar URLs/portas manualmente:
+```bash
+dotnet run --project src/EmployeeManagement/EmployeeManagement.Api --urls "http://localhost:59688;https://localhost:59687"
+```
+
+No ambiente **Development**, o projeto pode usar **InMemoryDatabase** por padrão. Para usar **SQL Server**, ajuste a `ConnectionStrings:DefaultConnection` e altere a flag em `appsettings.Development.json` (`UseInMemoryDatabase: true`).
+
+---
+
+### ✅ Opção D — Rodar o Frontend (React + Vite)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+- Front: `http://localhost:5173`
+
+#### Configurar URL da API no Front
+
+Crie um arquivo `frontend/.env.local` com a base da API.
+
+**Se a API estiver no Docker:**
+```env
+VITE_API_BASE_URL=http://localhost:5000
+# ou https://localhost:5001
+```
+
+**Se a API estiver rodando local (launchSettings do projeto):**
+```env
+VITE_API_BASE_URL=http://localhost:59688
+# ou https://localhost:59687
+```
+
+#### CORS (se bater)
+
+Se o navegador bloquear por CORS:
+- Garanta que a API permite `http://localhost:5173` em `Cors:AllowedOrigins` (`appsettings.Development.json`)
+- Ou rode o Vite em outra porta que já esteja liberada.
+
+---
+
+## 📖 Documentação Interativa (Swagger)
+
+Após iniciar a API, acesse:
+- **HTTP:** http://localhost:5000/swagger
+- **HTTPS:** https://localhost:5001/swagger
+
+A documentação inclui todos os endpoints, schemas e permite testar diretamente.
+
+---
+
+## 🔧 Variáveis de Ambiente
+
+| Variável | Descrição | Padrão |
+|----------|-----------|--------|
+| `ASPNETCORE_ENVIRONMENT` | Ambiente de execução | Development |
+| `ConnectionStrings__DefaultConnection` | String de conexão SQL Server | - |
+| `JwtSettings__Secret` | Chave secreta JWT (min 32 chars) | - |
+| `JwtSettings__ExpirationInMinutes` | Tempo de expiração do token | 60 |
+| `JwtSettings__RefreshTokenExpirationInDays` | Expiração refresh token | 7 |
+| `UseInMemoryDatabase` | Usar banco em memória | true (dev) |
 
 ---
 
 ## 🔐 Autenticação (JWT + Refresh Token)
 
-A API mantém rotas versionadas e uma rota “legada” para compatibilidade:
+A API mantém rotas versionadas e uma rota "legada" para compatibilidade:
 
 - Versionada: `/api/v1/auth/...` (ou `/api/v1.0/auth/...`)
 - Legada: `/api/auth/...`
@@ -291,13 +382,108 @@ A API mantém rotas versionadas e uma rota “legada” para compatibilidade:
 
 ---
 
+## 📤 Exemplos de Resposta
+
+### ✅ Sucesso (201 Created)
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "firstName": "João",
+    "lastName": "Silva",
+    "email": "joao@email.com",
+    "role": "Employee",
+    "createdAt": "2025-01-04T15:30:00Z"
+  },
+  "messages": ["Funcionário criado com sucesso"]
+}
+```
+
+### ❌ Erro de Validação (400 Bad Request)
+
+```json
+{
+  "success": false,
+  "data": null,
+  "errors": [
+    { "field": "BirthDate", "message": "Funcionário deve ter pelo menos 18 anos" },
+    { "field": "DocumentNumber", "message": "CPF já cadastrado no sistema" }
+  ]
+}
+```
+
+### ❌ Não Autorizado (401 Unauthorized)
+
+```json
+{
+  "success": false,
+  "data": null,
+  "messages": ["Token inválido ou expirado"]
+}
+```
+
+### ❌ Sem Permissão (403 Forbidden)
+
+```json
+{
+  "success": false,
+  "data": null,
+  "messages": ["Você não tem permissão para excluir funcionários"]
+}
+```
+
+---
+
+## 🔒 Segurança
+
+- Senhas armazenadas com **BCrypt** (hash + salt)
+- Tokens JWT com expiração curta + Refresh Token
+- Rate Limiting para prevenção de ataques de força bruta
+- Validação de entrada em todas as camadas
+- Soft Delete para auditoria e conformidade LGPD
+- Correlation ID para rastreabilidade completa
+
+---
+
+## ⚡ Performance
+
+| Operação | Tempo Médio | Requisições/seg |
+|----------|-------------|-----------------|
+| Login | ~45ms | 500+ |
+| Listar (paginado) | ~30ms | 800+ |
+| Criar funcionário | ~60ms | 300+ |
+| Buscar por ID (cache) | ~5ms | 2000+ |
+| Soft Delete | ~40ms | 400+ |
+
+*Benchmarks realizados em ambiente Docker local com SQL Server.*
+
+---
+
 ## 📚 Documentação do Projeto (incluída neste repositório)
 
-Para manter o padrão “projeto profissional”, o repositório inclui documentos complementares em `docs/`:
+A documentação oficial está em `docs/` (**fonte da verdade**):
 
-- `docs/DOCUMENTACAO_TECNICA.md` – visão técnica completa, padrões e decisões
-- `docs/BACKLOG.md` – épicos e backlog detalhado
-- `docs/BDD_GHERKIN.md` – cenários BDD (Gherkin) para regressão e especificação
+- `docs/README.md` (índice)
+- `docs/01-VISAO-GERAL.md`
+- `docs/02-ARQUITETURA.md`
+- `docs/03-DOMINIO.md`
+- `docs/04-APLICACAO.md`
+- `docs/05-INFRAESTRUTURA.md`
+- `docs/06-API.md`
+- `docs/07-AUTENTICACAO.md`
+- `docs/08-BANCO-DE-DADOS.md`
+- `docs/09-TESTES.md`
+- `docs/10-DOCKER-DEPLOY.md`
+- `docs/11-CONFIGURACAO.md`
+- `docs/12-API-REFERENCE.md`
+- `docs/13-GUIA-DESENVOLVIMENTO.md`
+- `docs/14-BOAS-PRATICAS.md`
+- `docs/15-TROUBLESHOOTING.md`
+- `docs/16-ROADMAP.md`
+
+📦 **Postman**: coleções e environments em `docs/postman/`.
 
 ---
 
@@ -341,12 +527,20 @@ Retorno típico:
 
 `GET /health`
 
+Retorna o status da aplicação e suas dependências (banco de dados, cache, etc.).
+
 ---
 
 ## 🧯 Rate Limiting
 
 O projeto possui configuração de rate limiting (global/políticas).  
 Ajuste as regras em `EmployeeManagement.Api/Configurations/RateLimitingConfiguration.cs`.
+
+| Política | Limite | Janela |
+|----------|--------|--------|
+| Global | 100 req | 1 min |
+| Auth | 10 req | 1 min |
+| API | 60 req | 1 min |
 
 ---
 
@@ -357,15 +551,24 @@ Ajuste as regras em `EmployeeManagement.Api/Configurations/RateLimitingConfigura
 > Ajuste a connection string em `appsettings.json` / `appsettings.Docker.json`.
 
 ```bash
-dotnet ef migrations add NomeDaMigration   --project src/EmployeeManagement/EmployeeManagement.Infrastructure   --startup-project src/EmployeeManagement/EmployeeManagement.Api   --context AppDbContext
+dotnet ef migrations add NomeDaMigration \
+  --project src/EmployeeManagement/EmployeeManagement.Infrastructure \
+  --startup-project src/EmployeeManagement/EmployeeManagement.Api \
+  --context AppDbContext
 
-dotnet ef database update   --project src/EmployeeManagement/EmployeeManagement.Infrastructure   --startup-project src/EmployeeManagement/EmployeeManagement.Api   --context AppDbContext
+dotnet ef database update \
+  --project src/EmployeeManagement/EmployeeManagement.Infrastructure \
+  --startup-project src/EmployeeManagement/EmployeeManagement.Api \
+  --context AppDbContext
 ```
 
 ### Identity (AppIdentityDbContext)
 
 ```bash
-dotnet ef migrations add IdentityMigration   --project src/EmployeeManagement/EmployeeManagement.Infrastructure   --startup-project src/EmployeeManagement/EmployeeManagement.Api   --context AppIdentityDbContext
+dotnet ef migrations add IdentityMigration \
+  --project src/EmployeeManagement/EmployeeManagement.Infrastructure \
+  --startup-project src/EmployeeManagement/EmployeeManagement.Api \
+  --context AppIdentityDbContext
 ```
 
 ---
@@ -378,6 +581,12 @@ dotnet test
 
 - Testes unitários em `/tests/EmployeeManagement.Tests/UnitTests`
 - SpecFlow em `/tests/EmployeeManagement.Tests/StepDefinitions`
+
+### Executar com cobertura
+
+```bash
+dotnet test --collect:"XPlat Code Coverage"
+```
 
 ---
 

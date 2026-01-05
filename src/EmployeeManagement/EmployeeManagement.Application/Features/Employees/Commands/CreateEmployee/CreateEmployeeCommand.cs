@@ -14,4 +14,6 @@ public sealed record CreateEmployeeCommand(
     Role Role,
     Guid? ManagerId,
     List<string> PhoneNumbers,
-    Role CurrentUserRole) : ICommand<EmployeeResponse>;
+    Role CurrentUserRole,
+    Guid? CreatedByUserId = null,
+    Guid? CustomRoleId = null) : ICommand<EmployeeResponse>;

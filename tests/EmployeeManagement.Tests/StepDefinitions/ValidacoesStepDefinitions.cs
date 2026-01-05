@@ -258,12 +258,20 @@ public class ValidacoesStepDefinitions
         }
 
         var cacheServiceMock = new Mock<ICacheService>();
+        var identityServiceMock = new Mock<IIdentityService>();
+        
+        identityServiceMock
+            .Setup(x => x.CreateUserAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
 
         var handler = new CreateEmployeeCommandHandler(
             _repositoryMock.Object,
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
             cacheServiceMock.Object,
+            identityServiceMock.Object,
             _loggerMock.Object);
 
         _result = await handler.Handle(command, CancellationToken.None);
