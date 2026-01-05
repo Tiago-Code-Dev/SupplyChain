@@ -103,6 +103,182 @@ Retorna dados do usuário autenticado.
 }
 ```
 
+## Endpoints de Roles
+
+### GET /api/v1/roles
+
+Lista todos os roles (sistema + customizados).
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Autorização**: Requer `Admin`
+
+**Response** (200 OK):
+```json
+[
+  {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "name": "Employee",
+    "displayName": "Funcionário",
+    "hierarchyLevel": 10,
+    "isSystemRole": true
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "name": "Leader",
+    "displayName": "Líder",
+    "hierarchyLevel": 20,
+    "isSystemRole": true
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333333",
+    "name": "Director",
+    "displayName": "Diretor",
+    "hierarchyLevel": 30,
+    "isSystemRole": true
+  },
+  {
+    "id": "44444444-4444-4444-4444-444444444444",
+    "name": "Admin",
+    "displayName": "Administrador",
+    "hierarchyLevel": 100,
+    "isSystemRole": true
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "Supervisor",
+    "displayName": "Supervisor de Área",
+    "hierarchyLevel": 15,
+    "isSystemRole": false
+  }
+]
+```
+
+**Erros**:
+- `401 Unauthorized`: Token inválido
+- `403 Forbidden`: Usuário não é Admin
+
+### GET /api/v1/roles/{id}
+
+Obtém um role específico por ID.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Autorização**: Requer `Admin`
+
+**Response** (200 OK):
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Supervisor",
+  "displayName": "Supervisor de Área",
+  "hierarchyLevel": 15,
+  "isSystemRole": false
+}
+```
+
+**Erros**:
+- `404 Not Found`: Role não encontrado
+- `403 Forbidden`: Usuário não é Admin
+
+### POST /api/v1/roles
+
+Cria um novo role customizado.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Autorização**: Requer `Admin`
+
+**Request**:
+```json
+{
+  "name": "Supervisor",
+  "displayName": "Supervisor de Área",
+  "hierarchyLevel": 15
+}
+```
+
+**Validações**:
+- `name`: Obrigatório, único, apenas letras e números
+- `displayName`: Obrigatório, mínimo 2 caracteres
+- `hierarchyLevel`: Entre 1 e 100
+
+**Response** (201 Created):
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Supervisor",
+  "displayName": "Supervisor de Área",
+  "hierarchyLevel": 15,
+  "isSystemRole": false
+}
+```
+
+**Headers de Response**:
+```
+Location: /api/v1/roles/550e8400-e29b-41d4-a716-446655440000
+```
+
+**Erros**:
+- `400 Bad Request`: Dados inválidos
+- `403 Forbidden`: Usuário não é Admin
+- `409 Conflict`: Nome já existe
+
+**Exemplo de Erro** (409):
+```json
+{
+  "error": "CustomRole.Conflict",
+  "message": "Role with name 'Supervisor' already exists"
+}
+```
+
+### PUT /api/v1/roles/{id}
+
+Atualiza um role customizado (apenas `displayName` e `hierarchyLevel`).
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Autorização**: Requer `Admin`
+
+**Request**:
+```json
+{
+  "displayName": "Supervisor Sênior",
+  "hierarchyLevel": 18
+}
+```
+
+**Response**: `204 No Content`
+
+**Erros**:
+- `400 Bad Request`: Dados inválidos
+- `403 Forbidden`: Tentativa de editar role do sistema ou usuário não é Admin
+- `404 Not Found`: Role não encontrado
+
+**Exemplo de Erro** (403):
+```json
+{
+  "error": "SystemRole.Validation",
+  "message": "Cannot modify system roles"
+}
+```
+
+### DELETE /api/v1/roles/{id}
+
+Remove um role customizado.
+
+**Headers**: `Authorization: Bearer {token}`
+
+**Autorização**: Requer `Admin`
+
+**Response**: `204 No Content`
+
+**Erros**:
+- `403 Forbidden`: Tentativa de deletar role do sistema ou usuário não é Admin
+- `404 Not Found`: Role não encontrado
+
+> ⚠️ **Atenção**: Não há validação se o role está sendo usado por funcionários. Verifique antes de deletar.
+
 ## Endpoints de Funcionários
 
 ### GET /api/employees
@@ -323,6 +499,45 @@ Versão padrão: `v1`
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@empresa.com","password":"Admin@123"}'
+```
+
+### Listar Roles
+
+```bash
+curl -X GET http://localhost:5000/api/v1/roles \
+  -H "Authorization: Bearer {token}"
+```
+
+### Criar Role Customizado
+
+```bash
+curl -X POST http://localhost:5000/api/v1/roles \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Supervisor",
+    "displayName": "Supervisor de Área",
+    "hierarchyLevel": 15
+  }'
+```
+
+### Atualizar Role
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/roles/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "displayName": "Supervisor Sênior",
+    "hierarchyLevel": 18
+  }'
+```
+
+### Deletar Role
+
+```bash
+curl -X DELETE http://localhost:5000/api/v1/roles/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Authorization: Bearer {token}"
 ```
 
 ### Listar Funcionários
