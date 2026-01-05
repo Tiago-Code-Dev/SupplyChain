@@ -16,6 +16,34 @@ O **SupplyChain** (Employee Management) é uma API que centraliza o ciclo comple
 
 ---
 
+<<<<<<< Updated upstream
+=======
+## 📊 Status do Projeto
+
+| Módulo | Status | Cobertura |
+|--------|--------|-----------|
+| Autenticação | ✅ Completo | 100% |
+| CRUD Employees | ✅ Completo | 100% |
+| Hierarquia/Permissões | ✅ Completo | 100% |
+| Soft Delete | ✅ Completo | 100% |
+| Cache & Invalidação | ✅ Completo | 100% |
+| Frontend React | 🚧 Em desenvolvimento | 100% |
+| Relatórios | ✅ Completo | 100% |
+
+---
+
+## 📋 Pré-requisitos
+
+| Ferramenta | Versão Mínima | Obrigatório |
+|------------|---------------|-------------|
+| .NET SDK | 8.0+ | ✅ |
+| Docker Desktop | 24.0+ | Para execução via container |
+| Node.js | 18+ | Para o frontend |
+| SQL Server | 2019+ | Para execução local sem Docker |
+
+---
+
+>>>>>>> Stashed changes
 ## 📌 Funcionalidades Incluídas
 
 - 🔐 **Autenticação & Identity**
