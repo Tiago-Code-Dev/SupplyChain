@@ -67,6 +67,7 @@ export const ResetPasswordPage = () => {
         email: data.email,
         token: data.token,
         newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
       });
       setSuccess(true);
       setTimeout(() => {

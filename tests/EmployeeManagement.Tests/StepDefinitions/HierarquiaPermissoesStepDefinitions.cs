@@ -14,6 +14,7 @@ public class HierarquiaPermissoesStepDefinitions
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
     private readonly Mock<ICacheService> _cacheServiceMock;
+    private readonly Mock<IIdentityService> _identityServiceMock;
     private readonly Mock<ILogger<CreateEmployeeCommandHandler>> _createLoggerMock;
     private readonly Mock<ILogger<UpdateEmployeeCommandHandler>> _updateLoggerMock;
     private readonly Mock<ILogger<DeleteEmployeeCommandHandler>> _deleteLoggerMock;
@@ -32,6 +33,7 @@ public class HierarquiaPermissoesStepDefinitions
         _unitOfWorkMock = Fixtures.MockFactory.CreateUnitOfWorkMock();
         _passwordHasherMock = new Mock<IPasswordHasher>();
         _cacheServiceMock = Fixtures.MockFactory.CreateCacheServiceMock();
+        _identityServiceMock = new Mock<IIdentityService>();
         _createLoggerMock = Fixtures.MockFactory.CreateLoggerMock<CreateEmployeeCommandHandler>();
         _updateLoggerMock = Fixtures.MockFactory.CreateLoggerMock<UpdateEmployeeCommandHandler>();
         _deleteLoggerMock = Fixtures.MockFactory.CreateLoggerMock<DeleteEmployeeCommandHandler>();
@@ -84,6 +86,22 @@ public class HierarquiaPermissoesStepDefinitions
         _repositoryMock
             .Setup(x => x.GetByIdAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(_targetEmployee);
+
+        _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_targetEmployee);
+
+        _repositoryMock
+            .Setup(x => x.HasSubordinatesAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        _repositoryMock
+            .Setup(x => x.SoftDeleteAsync(_targetEmployee.Id, It.IsAny<CancellationToken>()))
+            .Callback(() =>
+            {
+                _targetEmployee.Delete();
+            })
+            .Returns(Task.CompletedTask);
 
         _scenarioContext.Set(_targetEmployee, "TargetEmployee");
     }
@@ -197,6 +215,13 @@ public class HierarquiaPermissoesStepDefinitions
 
     private async Task ExecutarCriacao(Role targetRole)
     {
+        var identityServiceMock = new Mock<IIdentityService>();
+        identityServiceMock
+            .Setup(x => x.CreateUserAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+
         var command = new CreateEmployeeCommand(
             "Test",
             "User",
@@ -214,6 +239,7 @@ public class HierarquiaPermissoesStepDefinitions
             _unitOfWorkMock.Object,
             _passwordHasherMock.Object,
             _cacheServiceMock.Object,
+            identityServiceMock.Object,
             _createLoggerMock.Object);
 
         _createResult = await handler.Handle(command, CancellationToken.None);
@@ -243,22 +269,23 @@ public class HierarquiaPermissoesStepDefinitions
                 targetRole,
                 _currentUserRole);
 
-            var handler = new UpdateEmployeeCommandHandler(
-                _repositoryMock.Object,
-                _unitOfWorkMock.Object,
-                _cacheServiceMock.Object,
-                _updateLoggerMock.Object);
+                    var handler = new UpdateEmployeeCommandHandler(
+                        _repositoryMock.Object,
+                        _unitOfWorkMock.Object,
+                        _cacheServiceMock.Object,
+                        _identityServiceMock.Object,
+                        _updateLoggerMock.Object);
 
-            _repositoryMock
-                .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
+                    _repositoryMock
+                        .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
+                        .Returns(Task.CompletedTask);
 
-            _updateResult = await handler.Handle(command, CancellationToken.None);
-            _httpStatus = _updateResult.IsSuccess ? 200 : 400;
-        }
-    }
+                    _updateResult = await handler.Handle(command, CancellationToken.None);
+                    _httpStatus = _updateResult.IsSuccess ? 200 : 400;
+                }
+            }
 
-    private async Task ExecutarExclusao()
+            private async Task ExecutarExclusao()
     {
         if (_currentUserRole == Role.Employee)
         {
@@ -272,7 +299,6 @@ public class HierarquiaPermissoesStepDefinitions
 
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
-            _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
             _deleteLoggerMock.Object);
 

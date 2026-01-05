@@ -1,4 +1,4 @@
-import apiClient from '../../../shared/services/api-client';
+import { apiClient } from '../../../shared/services/api-client';
 import { API_ENDPOINTS } from '../../../shared/config/api';
 import {
   LoginRequest,
@@ -12,7 +12,7 @@ import {
 
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>(
+    const response = await apiClient.instance.post<AuthResponse>(
       API_ENDPOINTS.auth.login,
       credentials
     );
@@ -20,7 +20,7 @@ export const authService = {
   },
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>(
+    const response = await apiClient.instance.post<AuthResponse>(
       API_ENDPOINTS.auth.refreshToken,
       { refreshToken } as RefreshTokenRequest
     );
@@ -28,28 +28,28 @@ export const authService = {
   },
 
   async getCurrentUser(): Promise<UserInfo> {
-    const response = await apiClient.get<UserInfo>(API_ENDPOINTS.auth.me);
+    const response = await apiClient.instance.get<UserInfo>(API_ENDPOINTS.auth.me);
     return response.data;
   },
 
   async changePassword(data: ChangePasswordRequest): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.auth.changePassword, data);
+    await apiClient.instance.post(API_ENDPOINTS.auth.changePassword, data);
   },
 
   async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.auth.forgotPassword, data);
+    await apiClient.instance.post(API_ENDPOINTS.auth.forgotPassword, data);
   },
 
   async resetPassword(data: ResetPasswordRequest): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.auth.resetPassword, data);
+    await apiClient.instance.post(API_ENDPOINTS.auth.resetPassword, data);
   },
 
   async revokeToken(refreshToken: string): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.auth.revokeToken, { refreshToken });
+    await apiClient.instance.post(API_ENDPOINTS.auth.revokeToken, { refreshToken });
   },
 
   async revokeAllTokens(): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.auth.revokeAllTokens);
+    await apiClient.instance.post(API_ENDPOINTS.auth.revokeAllTokens);
   },
 
   async logout(): Promise<void> {

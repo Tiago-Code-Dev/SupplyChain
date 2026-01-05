@@ -121,7 +121,6 @@ public class ExcluirFuncionarioStepDefinitions
         var command = new DeleteEmployeeCommand(nonExistentId, currentRole);
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
-            _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
             _loggerMock.Object);
 
@@ -270,11 +269,23 @@ public class ExcluirFuncionarioStepDefinitions
             .ReturnsAsync(_employeeToDelete);
 
         _repositoryMock
+            .Setup(x => x.GetByIdForDeleteAsync(_employeeToDelete!.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_employeeToDelete);
+
+        _repositoryMock
             .Setup(x => x.HasSubordinatesAsync(_employeeToDelete!.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         _repositoryMock
             .Setup(x => x.UpdateAsync(It.IsAny<Employee>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _repositoryMock
+            .Setup(x => x.SoftDeleteAsync(_employeeToDelete!.Id, It.IsAny<CancellationToken>()))
+            .Callback(() =>
+            {
+                _employeeToDelete!.Delete();
+            })
             .Returns(Task.CompletedTask);
 
         _repositoryMock
@@ -291,7 +302,6 @@ public class ExcluirFuncionarioStepDefinitions
         var command = new DeleteEmployeeCommand(_employeeToDelete!.Id, currentRole);
         var handler = new DeleteEmployeeCommandHandler(
             _repositoryMock.Object,
-            _unitOfWorkMock.Object,
             _cacheServiceMock.Object,
             _loggerMock.Object);
 

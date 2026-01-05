@@ -13,4 +13,5 @@ public sealed record UpdateEmployeeCommand(
     Guid? ManagerId,
     List<string> PhoneNumbers,
     Role? NewRole,
-    Role CurrentUserRole) : ICommand<EmployeeResponse>;
+    Role CurrentUserRole,
+    Guid? CustomRoleId = null) : ICommand<EmployeeResponse>;

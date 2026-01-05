@@ -34,8 +34,8 @@ public class CustomRole : Entity
 
         return Result<CustomRole>.Success(new CustomRole
         {
-            Name = name,
-            DisplayName = displayName,
+            Name = name.Trim(),
+            DisplayName = displayName.Trim(),
             HierarchyLevel = hierarchyLevel,
             IsSystemRole = isSystemRole,
             LegacyRole = legacyRole

@@ -2,6 +2,7 @@ using Asp.Versioning;
 using EmployeeManagement.Api.Contracts;
 using EmployeeManagement.Api.Infrastructure;
 using EmployeeManagement.Domain.Common;
+using EmployeeManagement.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -40,8 +41,34 @@ public abstract class MainController : ControllerBase
 
     protected TRole GetCurrentUserRole<TRole>() where TRole : struct, Enum
     {
-        var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
-        return Enum.TryParse<TRole>(roleClaim, out var role) ? role : default;
+        // Obter todas as roles do usuário
+        var roleClaims = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+        
+        if (roleClaims.Count == 0)
+            return default;
+
+        // Se for Role do domínio, retornar a de maior hierarquia
+        if (typeof(TRole) == typeof(Role))
+        {
+            var highestRole = Role.Employee;
+            foreach (var roleName in roleClaims)
+            {
+                if (Enum.TryParse<Role>(roleName, out var role) && role > highestRole)
+                {
+                    highestRole = role;
+                }
+            }
+            return (TRole)(object)highestRole;
+        }
+
+        // Para outros enums, retornar a primeira válida
+        foreach (var roleName in roleClaims)
+        {
+            if (Enum.TryParse<TRole>(roleName, out var role))
+                return role;
+        }
+
+        return default;
     }
 
     protected bool IsAuthenticated => User.Identity?.IsAuthenticated ?? false;

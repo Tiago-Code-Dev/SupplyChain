@@ -369,7 +369,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"Employee\",\n  \"email\": \"{{randomEmail}}\",\n  \"documentNumber\": \"{{randomDoc}}\",\n  \"birthDate\": \"1990-01-15\",\n  \"password\": \"Test@123\",\n  \"role\": 1,\n  \"managerId\": null,\n  \"phoneNumbers\": [\"11999998888\"]\n}"
+              "raw": "{\n  \"firstName\": \"Test\",\n  \"lastName\": \"Employee\",\n  \"email\": \"{{randomEmail}}\",\n  \"documentNumber\": \"{{randomDoc}}\",\n  \"birthDate\": \"1990-01-15\",\n  \"password\": \"Test@123\",\n  \"role\": 1,\n  \"customRoleId\": null,\n  \"managerId\": null,\n  \"phoneNumbers\": [\"11999998888\"]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/employees",
@@ -407,7 +407,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Name\",\n  \"email\": \"{{newEmployeeEmail}}\",\n  \"birthDate\": \"1990-01-15\",\n  \"phoneNumbers\": [\"11999997777\"]\n}"
+              "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"Name\",\n  \"email\": \"{{newEmployeeEmail}}\",\n  \"birthDate\": \"1990-01-15\",\n  \"customRoleId\": null,\n  \"phoneNumbers\": [\"11999997777\"]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/employees/{{newEmployeeId}}",
@@ -514,6 +514,289 @@
               "raw": "{{baseUrl}}/api/v2/employees/{{employeeId}}",
               "host": [ "{{baseUrl}}" ],
               "path": [ "api", "v2", "employees", "{{employeeId}}" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles (Cargos)",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json && json.length > 0) {",
+                  "    pm.environment.set('roleId', json[0].id);",
+                  "    console.log('Primeiro role salvo:', json[0].name);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "roles" ]
+            }
+          }
+        },
+        {
+          "name": "Get Role by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Has role data', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "    pm.expect(json).to.have.property('name');",
+                  "    pm.expect(json).to.have.property('displayName');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/{{roleId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "roles", "{{roleId}}" ]
+            }
+          }
+        },
+        {
+          "name": "Get Parent Options (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is array', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.be.an('array');",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json && json.length > 0) {",
+                  "    pm.environment.set('parentRoleId', json[0].id);",
+                  "    console.log('Parent role disponivel:', json[0].displayName);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/parents",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "roles", "parents" ]
+            }
+          }
+        },
+        {
+          "name": "Create Role (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response contains id', function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('newRoleId', json.id);",
+                  "    console.log('Novo cargo criado:', json.displayName);",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "pm.environment.set('randomRoleName', 'TestRole' + timestamp);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{randomRoleName}}\",\n  \"displayName\": \"Cargo de Teste\",\n  \"hierarchyLevel\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "roles" ]
+            }
+          }
+        },
+        {
+          "name": "Create Role with Parent (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.environment.set('childRoleId', json.id);",
+                  "    console.log('Cargo filho criado:', json.displayName);",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "pm.environment.set('randomChildRoleName', 'ChildRole' + timestamp);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{randomChildRoleName}}\",\n  \"displayName\": \"Cargo Subordinado\",\n  \"parentRoleId\": \"{{parentRoleId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "roles" ]
+            }
+          }
+        },
+        {
+          "name": "Update Role (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    console.log('Cargo atualizado com sucesso!');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UpdatedRole\",\n  \"displayName\": \"Cargo Atualizado\",\n  \"hierarchyLevel\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/{{newRoleId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "roles", "{{newRoleId}}" ]
+            }
+          }
+        },
+        {
+          "name": "Delete Role (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204 or 404', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 204) {",
+                  "    console.log('Cargo deletado com sucesso (204)');",
+                  "    pm.environment.unset('newRoleId');",
+                  "} else if (pm.response.code === 404) {",
+                  "    console.log('Cargo nao encontrado (404)');",
+                  "} else if (pm.response.code === 400) {",
+                  "    const json = pm.response.json();",
+                  "    console.log('Erro de validacao:', json.detail || json.title);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/roles/{{newRoleId}}",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "roles", "{{newRoleId}}" ]
             }
           }
         }

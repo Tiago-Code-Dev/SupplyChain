@@ -42,9 +42,11 @@ Domain/
 ├── Entities/
 │   ├── Entity.cs                # Classe base
 │   ├── Employee.cs              # Agregado raiz
-│   └── PhoneNumber.cs           # Entidade dependente
+│   ├── PhoneNumber.cs           # Entidade dependente
+│   ├── CustomRole.cs            # Roles dinâmicas
+│   └── RolePermission.cs        # Permissões por role
 ├── Enums/
-│   └── Role.cs                  # Enum de permissões
+│   └── Role.cs                  # Enum de permissões (legado)
 ├── Events/
 │   ├── EmployeeCreatedEvent.cs
 │   ├── EmployeeUpdatedEvent.cs
@@ -53,6 +55,7 @@ Domain/
 │   └── PasswordChangedEvent.cs
 ├── Interfaces/
 │   ├── IEmployeeRepository.cs   # Contrato do repositório
+│   ├── ICustomRoleRepository.cs # Contrato do repositório de roles
 │   └── IUnitOfWork.cs           # Contrato de transação
 └── Exceptions/
     └── DomainException.cs       # Exceções de domínio
@@ -313,6 +316,207 @@ public class PhoneNumber : Entity
 - Não é um agregado raiz
 - Parte do agregado `Employee`
 
+### CustomRole (Agregado Raiz - Sistema de Roles Dinâmicas)
+
+O `CustomRole` representa roles do sistema e roles customizadas criadas dinamicamente.
+
+**Propriedades**:
+
+```csharp
+public class CustomRole : Entity
+{
+    // Identificação
+    public string Name { get; private set; }              // Nome interno (único, imutável)
+    public string DisplayName { get; private set; }       // Nome de exibição (editável)
+    
+    // Hierarquia
+    public int HierarchyLevel { get; private set; }       // Nível hierárquico (1-100)
+    
+    // Tipo
+    public bool IsSystemRole { get; private set; }        // Flag de role do sistema
+    public Role? LegacyRole { get; private set; }         // Mapeamento para enum legado
+    
+    // Permissões
+    private readonly List<RolePermission> _permissions = new();
+    public IReadOnlyCollection<RolePermission> Permissions => _permissions.AsReadOnly();
+}
+```
+
+**Factory Method - Criação**:
+
+```csharp
+public static Result<CustomRole> Create(
+    string name,
+    string displayName,
+    int hierarchyLevel,
+    bool isSystemRole = false,
+    Role? legacyRole = null)
+{
+    // Validação: Nome obrigatório
+    if (string.IsNullOrWhiteSpace(name))
+        return Result<CustomRole>.Failure(
+            Error.Validation("Name", "Name is required"));
+    
+    // Validação: DisplayName obrigatório
+    if (string.IsNullOrWhiteSpace(displayName))
+        return Result<CustomRole>.Failure(
+            Error.Validation("DisplayName", "Display name is required"));
+    
+    // Validação: Nível hierárquico entre 1 e 100
+    if (hierarchyLevel < 1 || hierarchyLevel > 100)
+        return Result<CustomRole>.Failure(
+            Error.Validation("HierarchyLevel", 
+                "Hierarchy level must be between 1 and 100"));
+    
+    return Result<CustomRole>.Success(new CustomRole
+    {
+        Name = name,
+        DisplayName = displayName,
+        HierarchyLevel = hierarchyLevel,
+        IsSystemRole = isSystemRole,
+        LegacyRole = legacyRole
+    });
+}
+```
+
+**Factory Method - Seed (Roles do Sistema)**:
+
+```csharp
+public static CustomRole CreateForSeed(
+    Guid id,
+    string name,
+    string displayName,
+    int hierarchyLevel,
+    Role legacyRole)
+{
+    return new CustomRole
+    {
+        Id = id,
+        Name = name,
+        DisplayName = displayName,
+        HierarchyLevel = hierarchyLevel,
+        IsSystemRole = true,
+        LegacyRole = legacyRole
+    };
+}
+```
+
+**Método de Negócio - Atualização**:
+
+```csharp
+public Result Update(string displayName, int hierarchyLevel)
+{
+    // Regra: Roles do sistema não podem ser modificadas
+    if (IsSystemRole)
+        return Result.Failure(
+            Error.Validation("SystemRole", "Cannot modify system roles"));
+    
+    // Validação: DisplayName obrigatório
+    if (string.IsNullOrWhiteSpace(displayName))
+        return Result.Failure(
+            Error.Validation("DisplayName", "Display name is required"));
+    
+    // Validação: Nível hierárquico
+    if (hierarchyLevel < 1 || hierarchyLevel > 100)
+        return Result.Failure(
+            Error.Validation("HierarchyLevel", 
+                "Hierarchy level must be between 1 and 100"));
+    
+    DisplayName = displayName;
+    HierarchyLevel = hierarchyLevel;
+    
+    return Result.Success();
+}
+```
+
+**Método de Negócio - Verificação de Hierarquia**:
+
+```csharp
+public bool CanManageRole(CustomRole targetRole)
+{
+    // Regra: Nível maior pode gerenciar nível menor
+    return HierarchyLevel > targetRole.HierarchyLevel;
+}
+```
+
+**Regras de Negócio**:
+
+| Regra | Descrição |
+|-------|-----------|
+| **Nome único** | Cada role deve ter um nome único no sistema |
+| **Hierarquia numérica** | Níveis de 1 a 100, onde maior gerencia menor |
+| **Roles do sistema imutáveis** | Roles com `IsSystemRole = true` não podem ser editadas/deletadas |
+| **DisplayName editável** | Apenas o nome de exibição pode ser alterado em roles customizadas |
+| **Seed automático** | 4 roles do sistema são criadas automaticamente no banco |
+
+**Roles do Sistema (Seed)**:
+
+| ID | Name | DisplayName | HierarchyLevel | LegacyRole |
+|----|------|-------------|----------------|------------|
+| 11111111-1111-1111-1111-111111111111 | Employee | Funcionário | 10 | Role.Employee |
+| 22222222-2222-2222-2222-222222222222 | Leader | Líder | 20 | Role.Leader |
+| 33333333-3333-3333-3333-333333333333 | Director | Diretor | 30 | Role.Director |
+| 44444444-4444-4444-4444-444444444444 | Admin | Administrador | 100 | Role.Admin |
+
+### RolePermission (Entidade Dependente)
+
+Representa permissões granulares associadas a uma role.
+
+**Propriedades**:
+
+```csharp
+public class RolePermission : Entity
+{
+    public Guid CustomRoleId { get; private set; }
+    public string Permission { get; private set; } = default!;
+    public string? Resource { get; private set; }
+    
+    public CustomRole CustomRole { get; private set; } = default!;
+}
+```
+
+**Factory Method**:
+
+```csharp
+public static RolePermission Create(
+    Guid customRoleId, 
+    string permission, 
+    string? resource = null)
+{
+    return new RolePermission
+    {
+        CustomRoleId = customRoleId,
+        Permission = permission,
+        Resource = resource
+    };
+}
+```
+
+**Exemplos de Permissões**:
+
+```csharp
+// Permissões de funcionários
+RolePermission.Create(roleId, "employees.create", "employees")
+RolePermission.Create(roleId, "employees.read", "employees")
+RolePermission.Create(roleId, "employees.update", "employees")
+RolePermission.Create(roleId, "employees.delete", "employees")
+
+// Permissões de relatórios
+RolePermission.Create(roleId, "reports.view", "reports")
+RolePermission.Create(roleId, "reports.export", "reports")
+
+// Permissões de configurações
+RolePermission.Create(roleId, "settings.manage", "settings")
+```
+
+**Características**:
+- Não pode existir sem um `CustomRole`
+- Parte do agregado `CustomRole`
+- Suporta permissões granulares por recurso
+- Preparado para futuro sistema de autorização baseado em permissões
+
+> ⚠️ **Nota**: Sistema de permissões granulares está preparado mas não totalmente implementado. Atualmente o sistema usa apenas hierarquia de níveis para autorização.
+
 ## Enums
 
 ### Role (Hierarquia de Permissões)
@@ -500,6 +704,22 @@ public interface IEmployeeRepository
 }
 ```
 
+### ICustomRoleRepository
+
+```csharp
+public interface ICustomRoleRepository
+{
+    Task<CustomRole?> GetByIdAsync(Guid id, CancellationToken ct);
+    Task<CustomRole?> GetByNameAsync(string name, CancellationToken ct);
+    Task<CustomRole?> GetByLegacyRoleAsync(Role role, CancellationToken ct);
+    Task<IReadOnlyList<CustomRole>> GetAllAsync(CancellationToken ct);
+    Task<bool> NameExistsAsync(string name, Guid? excludeId, CancellationToken ct);
+    Task AddAsync(CustomRole role, CancellationToken ct);
+    Task UpdateAsync(CustomRole role, CancellationToken ct);
+    Task DeleteAsync(Guid id, CancellationToken ct);
+}
+```
+
 ### IUnitOfWork
 
 ```csharp
@@ -607,6 +827,25 @@ classDiagram
         +Guid EmployeeId
     }
     
+    class CustomRole {
+        +string Name
+        +string DisplayName
+        +int HierarchyLevel
+        +bool IsSystemRole
+        +Role? LegacyRole
+        +Create()$
+        +CreateForSeed()$
+        +Update()
+        +CanManageRole()
+    }
+    
+    class RolePermission {
+        +Guid CustomRoleId
+        +string Permission
+        +string? Resource
+        +Create()$
+    }
+    
     class Role {
         <<enumeration>>
         Employee
@@ -617,9 +856,13 @@ classDiagram
     
     Entity <|-- Employee
     Entity <|-- PhoneNumber
+    Entity <|-- CustomRole
+    Entity <|-- RolePermission
     Employee "1" --> "0..*" PhoneNumber : has
     Employee "0..1" --> "0..*" Employee : manages
     Employee --> Role : has
+    CustomRole "1" --> "0..*" RolePermission : has
+    CustomRole --> Role : maps to (optional)
 ```
 
 ## Boas Práticas Implementadas
