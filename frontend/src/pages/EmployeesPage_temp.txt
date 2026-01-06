@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../features/auth/store/auth.store';
 import { employeesService } from '../features/employees/services/employees.service';
 import { rolesService } from '../features/roles/services/roles.service';
-import { Employee, EmployeeQueryParams, CustomRole } from '../shared/types/api';
+import { Employee, EmployeeQueryParams, Role, CustomRole } from '../shared/types/api';
 import { PagedResult } from '../shared/types/api';
 import { Button } from '../shared/components/Button';
 import { Input } from '../shared/components/Input';
@@ -38,7 +38,7 @@ export const EmployeesPage = () => {
   const [isExporting, setIsExporting] = useState(false);
   const pageSize = 10;
 
-  // Carregar lista de funcionários para filtro de gerente e roles customizados
+  // Carregar lista de funcionÃ¡rios para filtro de gerente e roles customizados
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -55,45 +55,15 @@ export const EmployeesPage = () => {
     loadInitialData();
   }, []);
 
-  // Função auxiliar para normalizar strings para comparação (remove acentos e lowercase)
-  const normalizeString = (str: string | null | undefined): string => {
-    if (!str) return '';
-    return str
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-      .replace(/[^a-z0-9]/g, ''); // Remove caracteres especiais
-  };
-
-  // Mapeamento de nomes equivalentes (para casos como Admin/Administrador)
-  const roleNameAliases: Record<string, string[]> = {
-    'administrador': ['admin', 'administrator'],
-    'admin': ['administrador', 'administrator'],
-    'funcionario': ['employee'],
-    'employee': ['funcionario'],
-    'lider': ['leader'],
-    'leader': ['lider'],
-    'diretor': ['director'],
-    'director': ['diretor'],
-  };
-
-  const matchesRole = (empRole: string | null | undefined, selectedRoleName: string | null | undefined): boolean => {
-    if (!empRole || !selectedRoleName) return false;
-
-    const normalizedEmp = normalizeString(empRole);
-    const normalizedSelected = normalizeString(selectedRoleName);
-
-    // Match direto
-    if (normalizedEmp === normalizedSelected) return true;
-
-    // Match por alias
-    const aliases = roleNameAliases[normalizedSelected] || [];
-    if (aliases.includes(normalizedEmp)) return true;
-
-    // Match parcial (se um contém o outro)
-    if (normalizedEmp.includes(normalizedSelected) || normalizedSelected.includes(normalizedEmp)) return true;
-
-    return false;
+  // Converter customRoleId para Role enum baseado no hierarchyLevel
+  const getFilterRole = (): Role | undefined => {
+    if (!filterRoleId) return undefined;
+    const selectedRole = customRoles.find(r => r.id === filterRoleId);
+    if (!selectedRole) return undefined;
+    if (selectedRole.hierarchyLevel >= 100) return Role.Admin;
+    if (selectedRole.hierarchyLevel >= 30) return Role.Director;
+    if (selectedRole.hierarchyLevel >= 20) return Role.Leader;
+    return Role.Employee;
   };
 
   const loadEmployees = async () => {
@@ -102,67 +72,19 @@ export const EmployeesPage = () => {
     try {
       const params: EmployeeQueryParams = {
         pageNumber: currentPage,
-        pageSize: filterRoleId ? 1000 : pageSize, // Busca mais se tiver filtro de role para filtrar no front
+        pageSize,
         searchTerm: searchTerm || undefined,
         filterByName: filterName || undefined,
         filterByEmail: filterEmail || undefined,
+        filterByRole: getFilterRole(),
         filterByManagerId: filterManagerId || undefined,
         sortBy: sortBy || undefined,
         sortDescending: sortDescending || undefined,
       };
-      let data = await employeesService.getEmployees(params);
-
-      // Filtrar por customRoleId no front-end se selecionado
-      if (filterRoleId && data.items.length > 0) {
-        // Encontrar o role selecionado para comparar por nome também
-        const selectedRole = customRoles.find(r => r.id === filterRoleId);
-
-        // Debug log
-        console.log('Filtro selecionado:', {
-          filterRoleId,
-          selectedRole,
-          selectedRoleDisplayName: selectedRole?.displayName,
-          selectedRoleName: selectedRole?.name,
-        });
-        console.log('Funcionários:', data.items.map(e => ({
-          name: e.fullName,
-          customRoleId: e.customRoleId,
-          roleDisplayName: e.roleDisplayName,
-          roleName: e.roleName,
-        })));
-
-        const filteredItems = data.items.filter(emp => {
-          // Comparar por customRoleId se existir
-          if (emp.customRoleId === filterRoleId) return true;
-
-          // Comparar por displayName/roleName usando a função de match
-          if (selectedRole) {
-            if (matchesRole(emp.roleDisplayName, selectedRole.displayName)) return true;
-            if (matchesRole(emp.roleDisplayName, selectedRole.name)) return true;
-            if (matchesRole(emp.roleName, selectedRole.displayName)) return true;
-            if (matchesRole(emp.roleName, selectedRole.name)) return true;
-          }
-          return false;
-        });
-
-        const startIndex = (currentPage - 1) * pageSize;
-        const paginatedItems = filteredItems.slice(startIndex, startIndex + pageSize);
-
-        data = {
-          ...data,
-          items: paginatedItems,
-          totalCount: filteredItems.length,
-          totalPages: Math.ceil(filteredItems.length / pageSize),
-          hasPreviousPage: currentPage > 1,
-          hasNextPage: startIndex + pageSize < filteredItems.length,
-          firstItemIndex: filteredItems.length > 0 ? startIndex + 1 : 0,
-          lastItemIndex: Math.min(startIndex + pageSize, filteredItems.length),
-        };
-      }
-
+      const data = await employeesService.getEmployees(params);
       setEmployees(data);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar funcionários');
+      setError(err.response?.data?.error || 'Erro ao carregar funcionÃ¡rios');
     } finally {
       setIsLoading(false);
     }
@@ -206,19 +128,19 @@ export const EmployeesPage = () => {
   }, [sortBy, sortDescending]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este funcionário?')) return;
+    if (!confirm('Tem certeza que deseja excluir este funcionÃ¡rio?')) return;
     
     try {
       await employeesService.deleteEmployee(id);
       loadEmployees();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao excluir funcionário');
+      alert(err.response?.data?.error || 'Erro ao excluir funcionÃ¡rio');
     }
   };
 
-  // Gerar opções de roles dinamicamente a partir dos CustomRoles usando ID único
+  // Gerar opÃ§Ãµes de roles dinamicamente a partir dos CustomRoles usando ID Ãºnico
   const roleOptions = [
-    { value: '', label: 'Todas as funções' },
+    { value: '', label: 'Todas as funÃ§Ãµes' },
     ...customRoles
       .sort((a, b) => b.hierarchyLevel - a.hierarchyLevel)
       .map(role => ({
@@ -228,22 +150,22 @@ export const EmployeesPage = () => {
   ];
 
   const sortOptions = [
-    { value: '', label: 'Sem ordenação' },
+    { value: '', label: 'Sem ordenaÃ§Ã£o' },
     { value: 'firstname', label: 'Nome' },
     { value: 'lastname', label: 'Sobrenome' },
     { value: 'email', label: 'Email' },
-    { value: 'role', label: 'Função' },
-    { value: 'createdat', label: 'Data de criação' },
+    { value: 'role', label: 'FunÃ§Ã£o' },
+    { value: 'createdat', label: 'Data de criaÃ§Ã£o' },
   ];
 
-  // Coletar IDs únicos de gerentes que existem como managerId de outros funcionários
+  // Coletar IDs Ãºnicos de gerentes que existem como managerId de outros funcionÃ¡rios
   const uniqueManagerIds = [...new Set(
     allEmployees
       .filter(emp => emp.managerId !== null)
       .map(emp => emp.managerId)
   )];
 
-  // Filtrar apenas funcionários que são gerentes de alguém E que existem na lista (não deletados)
+  // Filtrar apenas funcionÃ¡rios que sÃ£o gerentes de alguÃ©m E que existem na lista (nÃ£o deletados)
   const managerOptions = [
     { value: '', label: 'Todos os superiores' },
     ...allEmployees
@@ -268,27 +190,14 @@ export const EmployeesPage = () => {
         searchTerm: searchTerm || undefined,
         filterByName: filterName || undefined,
         filterByEmail: filterEmail || undefined,
+        filterByRole: getFilterRole(),
         filterByManagerId: filterManagerId || undefined,
         sortBy: sortBy || undefined,
         sortDescending: sortDescending || undefined,
       };
 
-      let allEmployeesData = await fetchAllEmployeesForExport(employeesService, params);
-
-      // Filtrar por customRoleId no front-end se selecionado
-      if (filterRoleId) {
-        const selectedRole = customRoles.find(r => r.id === filterRoleId);
-        allEmployeesData = allEmployeesData.filter(emp => {
-          if (emp.customRoleId === filterRoleId) return true;
-          if (selectedRole && !emp.customRoleId) {
-            return emp.roleDisplayName === selectedRole.displayName || 
-                   emp.roleName === selectedRole.name;
-          }
-          return false;
-        });
-      }
-
-      exportToCSV(allEmployeesData, 'funcionarios');
+      const allEmployees = await fetchAllEmployeesForExport(employeesService, params);
+      exportToCSV(allEmployees, 'funcionarios');
     } catch (err: any) {
       alert(err.response?.data?.error || 'Erro ao exportar dados');
     } finally {
@@ -304,27 +213,14 @@ export const EmployeesPage = () => {
         searchTerm: searchTerm || undefined,
         filterByName: filterName || undefined,
         filterByEmail: filterEmail || undefined,
+        filterByRole: getFilterRole(),
         filterByManagerId: filterManagerId || undefined,
         sortBy: sortBy || undefined,
         sortDescending: sortDescending || undefined,
       };
 
-      let allEmployeesData = await fetchAllEmployeesForExport(employeesService, params);
-
-      // Filtrar por customRoleId no front-end se selecionado
-      if (filterRoleId) {
-        const selectedRole = customRoles.find(r => r.id === filterRoleId);
-        allEmployeesData = allEmployeesData.filter(emp => {
-          if (emp.customRoleId === filterRoleId) return true;
-          if (selectedRole && !emp.customRoleId) {
-            return emp.roleDisplayName === selectedRole.displayName || 
-                   emp.roleName === selectedRole.name;
-          }
-          return false;
-        });
-      }
-
-      exportToExcel(allEmployeesData, 'funcionarios');
+      const allEmployees = await fetchAllEmployeesForExport(employeesService, params);
+      exportToExcel(allEmployees, 'funcionarios');
     } catch (err: any) {
       alert(err.response?.data?.error || 'Erro ao exportar dados');
     } finally {
@@ -338,7 +234,7 @@ export const EmployeesPage = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-6">
-            <h1 className="text-2xl font-bold text-gray-900">Funcionários</h1>
+            <h1 className="text-2xl font-bold text-gray-900">FuncionÃ¡rios</h1>
             {/* Link para Cargos - apenas para Admin */}
             {user?.roles?.some(r => r.toLowerCase() === 'admin') && (
               <Link
@@ -367,11 +263,11 @@ export const EmployeesPage = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header com botão de adicionar e exportação */}
+        {/* Header com botÃ£o de adicionar e exportaÃ§Ã£o */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Lista de Funcionários</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Lista de FuncionÃ¡rios</h2>
           <div className="flex items-center gap-3">
-            {/* Botões de Exportação */}
+            {/* BotÃµes de ExportaÃ§Ã£o */}
             {employees && employees.items.length > 0 && (
               <div className="flex items-center gap-2">
                 <Button
@@ -397,7 +293,7 @@ export const EmployeesPage = () => {
               </div>
             )}
             
-            {/* Botão Adicionar */}
+            {/* BotÃ£o Adicionar */}
             {user?.roles && user.roles.length > 0 && (() => {
               const userRoleString = user.roles[0]?.toLowerCase();
               const allowedRoles = ['leader', 'director', 'admin'];
@@ -412,7 +308,7 @@ export const EmployeesPage = () => {
                     className="flex items-center gap-2 whitespace-nowrap"
                   >
                     <PlusIcon className="h-5 w-5" />
-                    <span>Adicionar Funcionário</span>
+                    <span>Adicionar FuncionÃ¡rio</span>
                   </Button>
                 );
               }
@@ -424,7 +320,7 @@ export const EmployeesPage = () => {
         {/* Filters */}
         <div className="card mb-6">
           <form onSubmit={handleSearch} className="space-y-4">
-            {/* Filtros básicos */}
+            {/* Filtros bÃ¡sicos */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <Input
@@ -443,7 +339,7 @@ export const EmployeesPage = () => {
               </div>
             </div>
 
-            {/* Botão para mostrar filtros avançados */}
+            {/* BotÃ£o para mostrar filtros avanÃ§ados */}
             <div className="flex items-center justify-between">
               <Button
                 type="button"
@@ -452,7 +348,7 @@ export const EmployeesPage = () => {
                 className="flex items-center gap-2"
               >
                 <FunnelIcon className="h-4 w-4" />
-                {showAdvancedFilters ? 'Ocultar' : 'Mostrar'} Filtros Avançados
+                {showAdvancedFilters ? 'Ocultar' : 'Mostrar'} Filtros AvanÃ§ados
               </Button>
               <div className="flex gap-2">
                 <Button type="button" variant="secondary" onClick={handleClearFilters}>
@@ -465,7 +361,7 @@ export const EmployeesPage = () => {
               </div>
             </div>
 
-            {/* Filtros avançados */}
+            {/* Filtros avanÃ§ados */}
             {showAdvancedFilters && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
                 <div>
@@ -474,7 +370,7 @@ export const EmployeesPage = () => {
                   </label>
                   <Input
                     type="text"
-                    placeholder="Nome específico..."
+                    placeholder="Nome especÃ­fico..."
                     value={filterName}
                     onChange={(e) => setFilterName(e.target.value)}
                   />
@@ -485,7 +381,7 @@ export const EmployeesPage = () => {
                   </label>
                   <Input
                     type="email"
-                    placeholder="Email específico..."
+                    placeholder="Email especÃ­fico..."
                     value={filterEmail}
                     onChange={(e) => setFilterEmail(e.target.value)}
                   />
@@ -545,7 +441,7 @@ export const EmployeesPage = () => {
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                         onClick={() => handleSort('role')}
                       >
-                        Função {getSortIcon('role')}
+                        FunÃ§Ã£o {getSortIcon('role')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Idade
@@ -554,7 +450,7 @@ export const EmployeesPage = () => {
                         Gerente
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ações
+                        AÃ§Ãµes
                       </th>
                     </tr>
                   </thead>
@@ -632,14 +528,14 @@ export const EmployeesPage = () => {
                     Anterior
                   </Button>
                   <span className="px-4 py-2 text-sm">
-                    Página {employees.pageNumber} de {employees.totalPages}
+                    PÃ¡gina {employees.pageNumber} de {employees.totalPages}
                   </span>
                   <Button
                     variant="secondary"
                     onClick={() => setCurrentPage((p) => p + 1)}
                     disabled={!employees.hasNextPage}
                   >
-                    Próxima
+                    PrÃ³xima
                   </Button>
                 </div>
               </div>
@@ -647,10 +543,11 @@ export const EmployeesPage = () => {
           </>
         ) : (
           <div className="card text-center py-12">
-            <p className="text-gray-500">Nenhum funcionário encontrado</p>
+            <p className="text-gray-500">Nenhum funcionÃ¡rio encontrado</p>
           </div>
         )}
       </main>
     </div>
   );
 };
+

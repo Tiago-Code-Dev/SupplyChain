@@ -1,5 +1,6 @@
 import apiClient from '../../../shared/services/api-client';
 import { API_ENDPOINTS } from '../../../shared/config/api';
+import { fixEncodingInObject } from '../../../shared/utils/encoding.utils';
 import {
   Employee,
   PagedResult,
@@ -14,12 +15,12 @@ export const employeesService = {
       API_ENDPOINTS.employees.list,
       { params }
     );
-    return response.data;
+    return fixEncodingInObject(response.data);
   },
 
   async getEmployeeById(id: string): Promise<Employee> {
     const response = await apiClient.get<Employee>(API_ENDPOINTS.employees.detail(id));
-    return response.data;
+    return fixEncodingInObject(response.data);
   },
 
   async createEmployee(data: CreateEmployeeRequest): Promise<Employee> {
@@ -27,7 +28,7 @@ export const employeesService = {
       API_ENDPOINTS.employees.create,
       data
     );
-    return response.data;
+    return fixEncodingInObject(response.data);
   },
 
   async updateEmployee(id: string, data: UpdateEmployeeRequest): Promise<Employee> {
@@ -35,7 +36,7 @@ export const employeesService = {
       API_ENDPOINTS.employees.update(id),
       data
     );
-    return response.data;
+    return fixEncodingInObject(response.data);
   },
 
   async deleteEmployee(id: string): Promise<void> {
